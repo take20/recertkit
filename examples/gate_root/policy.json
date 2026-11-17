@@ -1,0 +1,31 @@
+{
+ "name": "gate-root-release-1",
+ "description": "Release policy for the gate-root example: complete evidence, digest-level bindings of every role and of the inventory, machine-linked references, a gate-issued root.",
+ "require_all_evidence": true,
+ "coverage_by_judgement": "forbid",
+ "residual_rebuilt": "forbid",
+ "unrecorded": "forbid",
+ "reference_kinds": [
+  "parent_artifact",
+  "parent_link"
+ ],
+ "binding_levels": [
+  "digest"
+ ],
+ "transcript_mapping": "forbid",
+ "accepted_judgements": [
+  "boundary",
+  "residual_path"
+ ],
+ "accepted_assumptions": [
+  "interpreter"
+ ],
+ "require_prospective": true,
+ "reference_by_declaration": "forbid",
+ "root_adapters": [
+  "gate-2.0"
+ ],
+ "enumeration_domains": {
+  "kernel.py": 65536
+ }
+}

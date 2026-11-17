@@ -1,0 +1,502 @@
+{
+ "record_valid": true,
+ "valid": true,
+ "failed_checks": [],
+ "checks": [
+  {
+   "check": "signature.root",
+   "ok": true,
+   "detail": "key gate-example"
+  },
+  {
+   "check": "root.decision",
+   "ok": true,
+   "detail": "certified"
+  },
+  {
+   "check": "certificate.version",
+   "ok": true,
+   "detail": "'recertkit-3'; this tool verifies 'recertkit-3'"
+  },
+  {
+   "check": "certificate.profile",
+   "ok": true,
+   "detail": "issued under 'recertkit-default-1'; verifier applies 'recertkit-default-1'"
+  },
+  {
+   "check": "signature.certificate",
+   "ok": true,
+   "detail": "key gate-example"
+  },
+  {
+   "check": "signature.parent",
+   "ok": true,
+   "detail": "key gate-example"
+  },
+  {
+   "check": "parent.digest",
+   "ok": true,
+   "detail": "6abf5e1964f6c1e3"
+  },
+  {
+   "check": "parent.id",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "claim.fields",
+   "ok": true,
+   "detail": "exactly ['degradation_direction', 'margin', 'metric_definition', 'risk_level', 'sampling_regime']"
+  },
+  {
+   "check": "claim.constraints",
+   "ok": true,
+   "detail": "all fields satisfy the profile"
+  },
+  {
+   "check": "parent.decision",
+   "ok": true,
+   "detail": "certified"
+  },
+  {
+   "check": "claim.invariance",
+   "ok": true,
+   "detail": "every claim field equals the parent's"
+  },
+  {
+   "check": "inventory.digest.parent",
+   "ok": true,
+   "detail": "inventory_c0.txt"
+  },
+  {
+   "check": "inventory.unique.parent",
+   "ok": true,
+   "detail": "4 artifacts"
+  },
+  {
+   "check": "inventory.digest.derived",
+   "ok": true,
+   "detail": "inventory_c1.txt"
+  },
+  {
+   "check": "inventory.unique.derived",
+   "ok": true,
+   "detail": "4 artifacts"
+  },
+  {
+   "check": "block.complete",
+   "ok": true,
+   "detail": "every inventory artifact is declared in exactly one category"
+  },
+  {
+   "check": "block.changed.kernel.py",
+   "ok": true,
+   "detail": "added, removed or digest differs"
+  },
+  {
+   "check": "block.unchanged.frame.jsonl",
+   "ok": true,
+   "detail": "equal digest in both inventories"
+  },
+  {
+   "check": "block.unchanged.model.json",
+   "ok": true,
+   "detail": "equal digest in both inventories"
+  },
+  {
+   "check": "block.unchanged.system.py",
+   "ok": true,
+   "detail": "equal digest in both inventories"
+  },
+  {
+   "check": "roles.declared",
+   "ok": true,
+   "detail": "exactly ['frame', 'model', 'server']"
+  },
+  {
+   "check": "role.server.present",
+   "ok": true,
+   "detail": "system.py is in both inventories"
+  },
+  {
+   "check": "role.model.present",
+   "ok": true,
+   "detail": "model.json is in both inventories"
+  },
+  {
+   "check": "role.model.fixed",
+   "ok": true,
+   "detail": "model.json is a fixed role: it must be unchanged"
+  },
+  {
+   "check": "role.frame.present",
+   "ok": true,
+   "detail": "frame.jsonl is in both inventories"
+  },
+  {
+   "check": "role.frame.fixed",
+   "ok": true,
+   "detail": "frame.jsonl is a fixed role: it must be unchanged"
+  },
+  {
+   "check": "roles.binding_level.server",
+   "ok": true,
+   "detail": "declared 'digest'; this root provides 'digest'"
+  },
+  {
+   "check": "roles.root_binding.server",
+   "ok": true,
+   "detail": "root digest for role server == parent inventory[system.py]"
+  },
+  {
+   "check": "roles.binding_level.model",
+   "ok": true,
+   "detail": "declared 'digest'; this root provides 'digest'"
+  },
+  {
+   "check": "roles.root_binding.model",
+   "ok": true,
+   "detail": "root digest for role model == parent inventory[model.json]"
+  },
+  {
+   "check": "roles.root_filename.model",
+   "ok": true,
+   "detail": "root names model.json"
+  },
+  {
+   "check": "roles.binding_level.frame",
+   "ok": true,
+   "detail": "declared 'digest'; this root provides 'digest'"
+  },
+  {
+   "check": "roles.root_binding.frame",
+   "ok": true,
+   "detail": "root digest for role frame == parent inventory[frame.jsonl]"
+  },
+  {
+   "check": "roles.distinct",
+   "ok": true,
+   "detail": "role artifacts have pairwise distinct digests"
+  },
+  {
+   "check": "root.inventory_level",
+   "ok": true,
+   "detail": "declared 'digest'; this root provides 'digest'"
+  },
+  {
+   "check": "root.inventory_binding",
+   "ok": true,
+   "detail": "the root binds the digest of the parent inventory"
+  },
+  {
+   "check": "root.commitment",
+   "ok": true,
+   "detail": "commitment file digest == root.commitment_digest_sha256 (687d4e9a33508ace)"
+  },
+  {
+   "check": "root.frame_file",
+   "ok": true,
+   "detail": "frame file present and equal to the parent inventory digest"
+  },
+  {
+   "check": "root.frame_ids",
+   "ok": true,
+   "detail": "commitment.sampling_frame_hash recomputes from the frame's 200 item identifiers"
+  },
+  {
+   "check": "root.task_manifest",
+   "ok": true,
+   "detail": "the root and its commitment bind the SHA-256 of the frame file"
+  },
+  {
+   "check": "root.commitment_params",
+   "ok": true,
+   "detail": "commitment regime/epsilon/delta equal the claim (r2, 0.050000, 0.050000)"
+  },
+  {
+   "check": "judgements.required",
+   "ok": true,
+   "detail": "present: ['boundary', 'residual_path']"
+  },
+  {
+   "check": "evidence.enumeration",
+   "ok": true,
+   "detail": "enumeration_c1.json (925be2f4a8be773f)"
+  },
+  {
+   "check": "evidence.frame",
+   "ok": true,
+   "detail": "frame.jsonl (ddb70f16f0a9951b)"
+  },
+  {
+   "check": "equivalence.ids",
+   "ok": true,
+   "detail": "equivalence entries have distinct identifiers ['kernel']"
+  },
+  {
+   "check": "coverage.derived_side",
+   "ok": true,
+   "detail": "each of the 1 changed artifacts of the derived inventory is a subject of exactly one equivalence entry or covered by one named judgement"
+  },
+  {
+   "check": "coverage.parent_side",
+   "ok": true,
+   "detail": "each of the 1 changed artifacts of the parent inventory is replaced by exactly one equivalence entry or covered by one named judgement"
+  },
+  {
+   "check": "coverage.declared",
+   "ok": true,
+   "detail": "nothing is listed as covered on a side where it is not a changed artifact"
+  },
+  {
+   "check": "coverage.equivalence_present",
+   "ok": true,
+   "detail": "1 equivalence entry"
+  },
+  {
+   "check": "equivalence.kernel.method",
+   "ok": true,
+   "detail": "'exhaustive_enumeration'; this profile accepts ['exhaustive_enumeration']"
+  },
+  {
+   "check": "equivalence.kernel.subjects",
+   "ok": true,
+   "detail": "['kernel.py'] are distinct changed artifacts of the derived configuration"
+  },
+  {
+   "check": "equivalence.kernel.replaces",
+   "ok": true,
+   "detail": "['kernel.py'] are distinct changed artifacts of the parent configuration"
+  },
+  {
+   "check": "equivalence.kernel.reference_kind",
+   "ok": true,
+   "detail": "'parent_artifact'; this profile accepts ['parent_artifact', 'parent_link', 'specification']"
+  },
+  {
+   "check": "equivalence.kernel.transcript",
+   "ok": true,
+   "detail": "transcript 'enumeration' is a bound, present evidence file"
+  },
+  {
+   "check": "equivalence.kernel.transcript_layout",
+   "ok": true,
+   "detail": "standard layout recertkit-enumeration-1"
+  },
+  {
+   "check": "equivalence.kernel.subject_digest",
+   "ok": true,
+   "detail": "the transcript's subject digests equal the derived inventory for ['kernel.py']"
+  },
+  {
+   "check": "equivalence.kernel.reference_block",
+   "ok": true,
+   "detail": "the reference consists of exactly the parent artifacts this entry replaces: reference ['kernel.py'], replaces ['kernel.py']"
+  },
+  {
+   "check": "equivalence.kernel.reference_digest",
+   "ok": true,
+   "detail": "the transcript's reference (3724a958b937836f) must be ['kernel.py'] of the PARENT inventory (3724a958b937836f)"
+  },
+  {
+   "check": "equivalence.kernel.reference_field",
+   "ok": true,
+   "detail": "the certificate's reference.sha256 is exactly the digest the reference was verified against"
+  },
+  {
+   "check": "equivalence.kernel.domain_enumerated",
+   "ok": true,
+   "detail": "enumerated 65536 of the declared domain of 65536 inputs"
+  },
+  {
+   "check": "equivalence.kernel.zero_mismatches",
+   "ok": true,
+   "detail": "mismatches = 0"
+  },
+  {
+   "check": "risk.decimals",
+   "ok": true,
+   "detail": "alpha, delta_parent, delta_derived are decimal strings in plain notation"
+  },
+  {
+   "check": "risk.alpha_zero",
+   "ok": true,
+   "detail": "alpha = 0 (deterministic transfer only; a positive alpha is unsupported, not unverified)"
+  },
+  {
+   "check": "risk.composition",
+   "ok": true,
+   "detail": "delta_derived equals delta_parent as exact decimal values (nothing is added: alpha must be zero)"
+  },
+  {
+   "check": "risk.parent",
+   "ok": true,
+   "detail": "delta_parent equals the parent's risk (0.050000)"
+  },
+  {
+   "check": "risk.claim",
+   "ok": true,
+   "detail": "delta_parent equals the claim's risk level"
+  }
+ ],
+ "not_checked": [
+  {
+   "kind": "root protocol",
+   "text": "the root's own evidence (ordered records, sequential-test replay) is verified by the release gate's verifier, not by RecertKit; here the root's signature, decision and bindings are checked"
+  },
+  {
+   "kind": "enumeration domain",
+   "text": "equivalence kernel: 65536 inputs were enumerated; that these are ALL inputs on which ['kernel.py'] can be invoked in the deployed configuration is not checked \u2014 it is the written judgement 'boundary', which must be read against this number"
+  },
+  {
+   "kind": "transcript provenance",
+   "text": "equivalence kernel: the transcript is a record written by the issuer's comparison tool; the verifier checks what it states and what it is bound to, not that the comparison was run as recorded"
+  },
+  {
+   "kind": "inventory completeness",
+   "text": "that inventory_c1.txt lists every artifact that can affect the outputs of the derived configuration is the issuer's statement; an artifact absent from both inventories is outside every check"
+  },
+  {
+   "kind": "judgement boundary",
+   "text": "system.py calls the block only as q(x, w) with x a frame feature and w a model weight, both integers in [-128, 127]; the enumerated domain therefore covers every input the block can receive, and the block has no state."
+  },
+  {
+   "kind": "judgement residual_path",
+   "text": "system.py, model.json and frame.jsonl are byte-identical (hash identity)."
+  },
+  {
+   "kind": "trust assumption interpreter",
+   "text": "the Python interpreter evaluates both kernels as written"
+  }
+ ],
+ "links": [
+  {
+   "link": "derived_c1.json",
+   "parent_kind": "root",
+   "chain_verified": false,
+   "root_adapter": "gate-2.0",
+   "binding_levels": {
+    "server": "digest",
+    "model": "digest",
+    "frame": "digest",
+    "(inventory)": "digest"
+   },
+   "entries": {
+    "kernel": {
+     "subjects": [
+      "kernel.py"
+     ],
+     "replaces": [
+      "kernel.py"
+     ],
+     "method": "exhaustive_enumeration",
+     "reference_kind": "parent_artifact",
+     "reference_binding": "digest",
+     "reference_digest": "3724a958b937836fba76483747f6d1e4aa7ec55ea8eb8488ef9d234b4275ad6a",
+     "mapped": false,
+     "domain_size": 65536
+    }
+   },
+   "judgement_covered": [],
+   "categories": {
+    "changed": [
+     "kernel.py"
+    ],
+    "unchanged": [
+     "frame.jsonl",
+     "model.json",
+     "system.py"
+    ],
+    "residual_rebuilt": [],
+    "unrecorded": []
+   },
+   "evidence_absent": [],
+   "judgements": {
+    "boundary": "30fdd4626ef70265a163cc01a007f98880616f017519967bb681211a3e3009e9",
+    "residual_path": "a53d25ce438e984c6dfba17ea44d49210dad6767f6f24543dcc0bd51341e3214"
+   },
+   "trust_assumptions": {
+    "interpreter": "c06b31d1935668e0208cb478dfa72bb4448753a088eff561070a59dd18b6ec85"
+   },
+   "issuance_status": "prospective"
+  }
+ ],
+ "policy": {
+  "name": "gate-root-release-1",
+  "verdict": "ACCEPTED",
+  "accepted": true,
+  "failed_checks": [],
+  "not_evaluated": [],
+  "checks": [
+   {
+    "check": "policy.require_all_evidence[derived_c1.json]",
+    "ok": true,
+    "detail": "every evidence file is present"
+   },
+   {
+    "check": "policy.coverage_by_judgement[derived_c1.json]",
+    "ok": true,
+    "detail": "no changed artifact rests on a judgement outside the policy"
+   },
+   {
+    "check": "policy.residual_rebuilt[derived_c1.json]",
+    "ok": true,
+    "detail": "no residual_rebuilt artifacts"
+   },
+   {
+    "check": "policy.unrecorded[derived_c1.json]",
+    "ok": true,
+    "detail": "no unrecorded artifacts"
+   },
+   {
+    "check": "policy.reference_kinds[derived_c1.json]",
+    "ok": true,
+    "detail": "references are of kinds ['parent_artifact', 'parent_link']"
+   },
+   {
+    "check": "policy.reference_by_declaration[derived_c1.json]",
+    "ok": true,
+    "detail": "for every comparison the verifier matched the transcript's reference digest"
+   },
+   {
+    "check": "policy.binding_levels[derived_c1.json]",
+    "ok": true,
+    "detail": "root bindings are at levels ['digest']"
+   },
+   {
+    "check": "policy.transcript_mapping[derived_c1.json]",
+    "ok": true,
+    "detail": "all transcripts use the standard layout"
+   },
+   {
+    "check": "policy.enumeration_domains[derived_c1.json]",
+    "ok": true,
+    "detail": "every enumerated domain has the size the policy requires for its subjects"
+   },
+   {
+    "check": "policy.accepted_judgements[derived_c1.json]",
+    "ok": true,
+    "detail": "every one of the judgements is accepted by the policy (by NAME only, text not pinned: ['boundary', 'residual_path'])"
+   },
+   {
+    "check": "policy.accepted_assumptions[derived_c1.json]",
+    "ok": true,
+    "detail": "every one of the trust_assumptions is accepted by the policy (by NAME only, text not pinned: ['interpreter'])"
+   },
+   {
+    "check": "policy.root_adapters[derived_c1.json]",
+    "ok": true,
+    "detail": "root format 'gate-2.0'"
+   },
+   {
+    "check": "policy.require_prospective[derived_c1.json]",
+    "ok": true,
+    "detail": "declared issuance_status: 'prospective'"
+   }
+  ]
+ },
+ "accepted": true,
+ "verdict": "VALID",
+ "policy_verdict": "ACCEPTED",
+ "semantics": "A VALID record is a CONDITIONAL statement: signatures, parent linkage, change coverage, evidence linkage and profile consistency were checked; the written judgements, trust assumptions and whatever established the root claim were not, and are printed. It is not a release decision; apply an acceptance policy for that."
+}

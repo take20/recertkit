@@ -1,0 +1,13 @@
+{
+ "reference": {
+  "configuration_id": "toy-reference"
+ },
+ "count": 1,
+ "candidates": [
+  {
+   "configuration_id": "toy-c0-coarse-weights",
+   "artifact": "model.json",
+   "artifact_sha256": "7657e50c663e80fd1f297574c1056b4c7474e270574d7e9b5d6dd3b4bbd1b39b"
+  }
+ ]
+}

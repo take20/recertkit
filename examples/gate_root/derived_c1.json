@@ -1,0 +1,111 @@
+{
+ "certificate_version": "recertkit-3",
+ "tool": "recertkit 1.0.0",
+ "profile": {
+  "name": "recertkit-default-1",
+  "sha256": "4e89be1f32cc49144eaa776d7d51ae3b6d47792b3c422639aa77dca32cf2c114"
+ },
+ "certificate_id": "f335d730-b034-4d30-a4bb-bebb00e1615b",
+ "issued_at": "2026-11-16T06:24:45.991283+00:00",
+ "parent": {
+  "certificate_id": "d4007830-7066-4cc3-9994-4a2fe2f8ecd1",
+  "certificate_sha256": "6abf5e1964f6c1e341e3dfabdf23c79bdff8e8f3fcc5a16fc8713f6affc6db5d",
+  "kind": "root",
+  "decision": "certified"
+ },
+ "claim": {
+  "metric_definition": "exact_match_accuracy",
+  "degradation_direction": "reference_minus_candidate",
+  "margin": "0.050000",
+  "risk_level": "0.050000",
+  "sampling_regime": "r2"
+ },
+ "claim_scope": "the parent's claim on the fixed 200-item frame; no claim about other inputs",
+ "change": {
+  "summary": "kernel.py: arithmetic -> table lookup"
+ },
+ "block": {
+  "changed": [
+   "kernel.py"
+  ],
+  "unchanged": [
+   "frame.jsonl",
+   "model.json",
+   "system.py"
+  ],
+  "residual_rebuilt": [],
+  "unrecorded": []
+ },
+ "roles": {
+  "server": "system.py",
+  "model": "model.json",
+  "frame": "frame.jsonl"
+ },
+ "root_binding": {
+  "roles": {
+   "server": "digest",
+   "model": "digest",
+   "frame": "digest"
+  },
+  "inventory": "digest",
+  "commitment_file": "gate_commitment.json"
+ },
+ "parent_inventory": {
+  "file": "inventory_c0.txt",
+  "sha256": "e3dfdc0a7464803aab206088c4e9285b9765998a1b8d6f2cb98bb87bf019acc0"
+ },
+ "derived_inventory": {
+  "file": "inventory_c1.txt",
+  "sha256": "29e71f07d9fb494abb28ec2a18d953ebe9df79b787e85ecb6ad602cb2aa68a5a"
+ },
+ "equivalence": [
+  {
+   "id": "kernel",
+   "method_code": "exhaustive_enumeration",
+   "subjects": [
+    "kernel.py"
+   ],
+   "replaces": [
+    "kernel.py"
+   ],
+   "reference": {
+    "kind": "parent_artifact",
+    "artifact": "kernel.py",
+    "sha256": "3724a958b937836fba76483747f6d1e4aa7ec55ea8eb8488ef9d234b4275ad6a"
+   },
+   "transcript": "enumeration",
+   "domain_size": 65536,
+   "domain": "all signed 8-bit operand pairs (a, b)"
+  }
+ ],
+ "judgement_coverage": [],
+ "judgements": {
+  "boundary": "system.py calls the block only as q(x, w) with x a frame feature and w a model weight, both integers in [-128, 127]; the enumerated domain therefore covers every input the block can receive, and the block has no state.",
+  "residual_path": "system.py, model.json and frame.jsonl are byte-identical (hash identity)."
+ },
+ "evidence_files": {
+  "enumeration": {
+   "file": "enumeration_c1.json",
+   "sha256": "925be2f4a8be773f2e2bab8c4232b358a377b15976288702f6856e65ab021299"
+  },
+  "frame": {
+   "file": "frame.jsonl",
+   "sha256": "ddb70f16f0a9951b92a5b37dd647d326338bfa9cf0be867d6203df969c779e47"
+  }
+ },
+ "risk_budget": {
+  "delta_parent": "0.050000",
+  "alpha": "0",
+  "delta_derived": "0.050000"
+ },
+ "trust_assumptions": {
+  "interpreter": "the Python interpreter evaluates both kernels as written"
+ },
+ "issuance_status": "prospective",
+ "signature": {
+  "algorithm": "ed25519",
+  "value": "908942f00325152fdefe382d4514e6e203471083795974291bf562115a1dd753fc6a9e36c54e4e49eda5b467045095dfc7b232354cd69b619c1696d9fe7c990f",
+  "public_key_id": "gate-example",
+  "canonicalization": "rfc8785_jcs_sorted_utf8_decimal_strings"
+ }
+}

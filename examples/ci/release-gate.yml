@@ -1,0 +1,26 @@
+# Template: verify a certificate chain as a release gate. See README.md in this directory.
+name: release-gate
+on:
+  push:
+    tags: ["v*"]
+jobs:
+  recertification-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: pip install git+https://github.com/take20/recertkit@v1.0.0
+      - name: verify the whole chain with the relying party's key and policy
+        run: |
+          recertkit verify-chain --root certs/root.json --links $(ls certs/derived_*.json | sort) \
+            --trust release=release/trusted.pub --policy release/policy.json \
+            --json-report chain_report.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: {name: recertification-report, path: chain_report.json}
+  release:
+    needs: recertification-gate
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "publish the release here; this job runs only when the record is VALID and the policy ACCEPTED"

@@ -1,0 +1,169 @@
+{
+ "certificate_version": "recertkit-3",
+ "tool": "recertkit 1.0.0",
+ "profile": {
+  "name": "recertkit-default-1",
+  "sha256": "4e89be1f32cc49144eaa776d7d51ae3b6d47792b3c422639aa77dca32cf2c114"
+ },
+ "certificate_id": "ed9ad15a-117f-4e89-8566-feb8062c784f",
+ "issued_at": "2026-11-16T06:39:20.865846+00:00",
+ "parent": {
+  "certificate_id": "84e1052a-7ec8-44c3-aae4-1435adcde6cb",
+  "certificate_sha256": "6db519015c059566712fff61bf5ba34a58fa6ed72f5b5c02386207a648d96bc5",
+  "kind": "root",
+  "decision": "certified"
+ },
+ "claim": {
+  "metric_definition": "exact_match_accuracy",
+  "degradation_direction": "reference_minus_candidate",
+  "margin": "0.050000",
+  "risk_level": "0.050000",
+  "sampling_regime": "r2"
+ },
+ "claim_scope": "The parent's fixed-frame (R2) claim on the 500-item frame F only. No population claim is derived: the equivalence argument covers the inputs the block can receive, and the residual path is argued for this deployment.",
+ "change": {
+  "summary": "Offload of the Q4_K x Q8_K integer dot product of the 16 attn_k.weight tensors from the CPU (NEON) to a programmable-logic kernel on the same board",
+  "from": "V0: integer dot product executed by ggml_vec_dot_q4_K_q8_K in libggml-cpu.so (llama.cpp commit 6c5de1cc)",
+  "to": "V1: the same integer function executed by PL kernel q4k_dot (bitstream p5_v2tile.bit); the floating-point tail executed on the CPU by an appended function",
+  "block": "p5_v2tile.bit and, inside libggml-cpu.so, the hook in ggml_compute_forward_mul_mat plus seven added functions (patch v1pl.patch, purely additive)"
+ },
+ "block": {
+  "changed": [
+   "libggml-cpu.so",
+   "p5_v2tile.bit",
+   "v1pl.patch"
+  ],
+  "unchanged": [
+   "Llama-3.2-1B-Instruct-Q4_K_M.gguf",
+   "eval_mmlu500.jsonl"
+  ],
+  "residual_rebuilt": [
+   "libggml-base.so",
+   "libllama.so",
+   "llama-server"
+  ],
+  "unrecorded": []
+ },
+ "roles": {
+  "server": "llama-server",
+  "model": "Llama-3.2-1B-Instruct-Q4_K_M.gguf",
+  "frame": "eval_mmlu500.jsonl"
+ },
+ "root_binding": {
+  "roles": {
+   "server": "digest",
+   "model": "digest",
+   "frame": "identifiers-only"
+  },
+  "inventory": "unbound",
+  "commitment_file": "root_commitment.json"
+ },
+ "parent_inventory": {
+  "file": "inventory_v0.txt",
+  "sha256": "2d20c5edcd27236a5d1cf05094c7e7e1da8c9d87dba4b2a48372ea860e515239"
+ },
+ "derived_inventory": {
+  "file": "inventory_v1.txt",
+  "sha256": "9638241ea850b89fe6d046e1a242a8efc01817cf2fe3ade40d871159498ae3b6"
+ },
+ "equivalence": [
+  {
+   "id": "pl_kernel",
+   "method_code": "exhaustive_enumeration",
+   "subjects": [
+    "p5_v2tile.bit"
+   ],
+   "replaces": [],
+   "reference": {
+    "kind": "specification",
+    "id": "exact integer products nibble x q8 x scale of the Q4_K x Q8_K dot product (integer path of ggml_vec_dot_q4_K_q8_K, llama.cpp commit 6c5de1cc)",
+    "judgement": "reference_link"
+   },
+   "transcript": "lane_enumeration",
+   "domain_size": 1073741824,
+   "domain": "per-lane operand domain of the kernel, enumerated on the loaded bitstream: every (group, lane, nibble half) position x weight byte 0..255 x activation -128..127 x scale 0..63 = 2^30 combinations",
+   "pointers": {
+    "subjects": {
+     "p5_v2tile.bit": "/bitstreams/V1/sha256"
+    },
+    "enumerated": "/bitstreams/V1/lane_exhaustive/values_enumerated",
+    "mismatches": "/bitstreams/V1/lane_exhaustive/mismatches"
+   },
+   "require": [
+    {
+     "pointer": "/bitstreams/V1/fpga_state",
+     "equals": "operating"
+    },
+    {
+     "pointer": "/bitstreams/V1/accumulation/extreme_neg/ok",
+     "equals": true
+    },
+    {
+     "pointer": "/bitstreams/V1/accumulation/extreme_pos/ok",
+     "equals": true
+    },
+    {
+     "pointer": "/bitstreams/V1/accumulation/random_full_blocks/mismatches",
+     "equals": 0
+    }
+   ]
+  }
+ ],
+ "judgement_coverage": [
+  {
+   "artifacts": [
+    "libggml-cpu.so",
+    "v1pl.patch"
+   ],
+   "judgement": "host_integration",
+   "evidence": [
+    "float_tail_correspondence",
+    "residual_source_identity"
+   ]
+  }
+ ],
+ "judgements": {
+  "composition": "The enumeration covers each lane's operand domain, not the full 256-element block domain. That exact per-lane products compose to the exact block result is an argument (T3): int32 addition is exact because |sum| <= 8*32*15*128*63 < 2^31. Extreme-value and 373,296 random full-block checks exercise the adder tree but do not enumerate it.",
+  "boundary": "The block returns the integer sum only; the floating-point scale application stays on the CPU. The compiled floating-point tail of the appended function was matched operation by operation against the original kernel's (two fp16->fp32 conversions, two multiplies, one fused multiply-subtract, one fused multiply-add per super-block, same operand dependences); see ft2_float_tail_correspondence.json.",
+  "residual_path": "The rebuilt host binaries differ in digest because the patched tree is a separate build. Source/build correspondence was machine-checked on the board: 3,008 of 3,011 common source files are byte-identical; the 3 differing and 2 added files are exactly the additive patch (0 lines removed, no residual function body modified); the build configurations are identical up to the tree path except for the declared change (-DGGML_USE_P5_PL, pl_q4k.c.o, -lcma) on one target; LTO is off; same gcc 11.2.0 and GNU ld 2.38 binaries. That these trees produced the binaries that ran (A1) and that the build environment was the same (A2) are author attestations; that the toolchain preserves the residual functions' source semantics under the declared change (T6) is an assumption. The record is the detached evidence file residual_source_identity.",
+  "reference_link": "The transcript compares the programmable-logic kernel with the exact integer products of the Q4_K x Q8_K dot product, i.e. with a specification, not with the compiled CPU kernel of V0. That V0's kernel (the NEON branch of ggml_vec_dot_q4_K_q8_K actually compiled on the board's Cortex-A53) computes this integer function is a reading of its source; it is not machine-checked, and the transcript records no digest of the model it compared against.",
+  "host_integration": "libggml-cpu.so changes because the patch adds a hook in ggml_compute_forward_mul_mat, a driver for the kernel and an appended variant of the dot-product function that takes the integer sum from the programmable logic. These changed host functions are NOT covered by the enumeration. That they pass the operands to the kernel unaltered and apply the same floating-point tail rests on the float-tail correspondence (bound evidence), on source inspection of the driver (T2), and on 500/500 identical outputs on the frame, which is an observation and not an equivalence result. v1pl.patch is the source record of this change and is not executed.",
+  "root_configuration": "The root certificate binds the server binary and the model file by digest and the frame by its item identifiers. It does not bind the three libraries of the parent inventory (libggml-base.so, libggml-cpu.so, libllama.so). They were hashed retrospectively from the build directory that holds the root's server binary; that they are the libraries the root run loaded is attested by the authors, not bound by the root."
+ },
+ "evidence_files": {
+  "lane_enumeration": {
+   "file": "lane_exhaustive_result.json",
+   "sha256": "9aa333dfb675273dafe2b5df4e384ebe3536e811fd3569a7a6b05d903994023b"
+  },
+  "float_tail_correspondence": {
+   "file": "ft2_float_tail_correspondence.json",
+   "sha256": "4d980194a72b348c78f04a86401aa16998c0695bf8ea22a83e92665d4e1e2124"
+  },
+  "residual_source_identity": {
+   "file": "ft3s_residual_source_identity.json",
+   "sha256": "0886dc6607ef26d3d1e1ae0f070fd99df95b06a335ca10eede9a39264a150ae9",
+   "detached": true
+  }
+ },
+ "risk_budget": {
+  "delta_parent": "0.050000",
+  "alpha": "0",
+  "delta_derived": "0.050000"
+ },
+ "trust_assumptions": {
+  "T1_hls_toolchain": "Vitis HLS 2022.1 and Vivado 2022.1 compiled the kernel source into the loaded bitstream faithfully; the bitstream digest in the inventory is the one resident in the PL during the run (fpga_manager state 'operating', loaded before server start, no reload until run end).",
+  "T2_host_path": "The host-side driver (contiguous-memory allocation, byte-exact packing of operands, register writes, cache flush/invalidate, completion polling) transfers operands and results without alteration. Supported by source inspection and by 500/500 identical outputs on F (an observation, not an enumeration).",
+  "T3_compositionality": "Exact per-lane products combined by exact int32 addition yield the exact integer sum for every reachable input (overflow bound in the composition judgement).",
+  "T5_frame_content": "The frame file eval_mmlu500.jsonl (sha256 09079acb\u2026) recorded in the parent inventory is the file the root certification run consumed. The root commitment binds the frame's item identifiers but not question/choice/answer content; content identity to the root run rests on this statement.",
+  "T6_native_toolchain": "gcc 11.2.0 and GNU ld 2.38, compiling the residual functions' identical source - including the residual functions inside the two translation units the patch extends - under options that differ only by the declared change, with LTO off, produce code of identical observable behaviour for every residual function (layout, symbol placement and __FILE__/__LINE__ literals may differ).",
+  "A1_build_provenance": "Attestation: the source trees hashed on 2026-09-21 are those from which the V0 and V1 binaries were compiled. The board clock is unsynchronised, so timestamps cannot establish this (6,019 of the 6,024 source files report a modification time later than the V1 run record; the five that do not are the five files the patch touched).",
+  "A2_build_environment": "Attestation: system headers, C/C++ runtime and toolchain packages were identical at both builds (no package operations on the board; package state recorded)."
+ },
+ "issuance_status": "retrospective. Issued in the RecertKit certificate format on 2026-11-16 from evidence generated in September 2026; the V1 run (2026-09-13/14) had been observed before issuance. Earlier certificates for the same transfer were issued by a predecessor script and by a pre-release draft of this tool, in other formats.",
+ "signature": {
+  "algorithm": "ed25519",
+  "value": "e1f45b9f295e91acc26825d85168f812a786a36ebdb6af76d243649d18d0e5d97101b1605e7ea0fca0ccbc747b7641e018a0290d77a6eb0a59a7e003612af200",
+  "public_key_id": "p5-release-key-1",
+  "canonicalization": "rfc8785_jcs_sorted_utf8_decimal_strings"
+ }
+}

@@ -1,0 +1,5 @@
+RecertKit
+Copyright 2026 Palusomni Co., Ltd.
+
+examples/fpga_ultra96/eval_mmlu500.jsonl is a subset of the MMLU test set
+(Hendrycks et al., 2021), distributed under the MIT licence.

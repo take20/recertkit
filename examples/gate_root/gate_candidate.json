@@ -1,0 +1,11 @@
+{
+ "configuration_id": "toy-c0-coarse-weights",
+ "engine": "toy-integer-classifier",
+ "engine_commit": "n/a",
+ "backend": "python",
+ "hardware_id": "any",
+ "artifact_filename": "model.json",
+ "artifact_sha256": "7657e50c663e80fd1f297574c1056b4c7474e270574d7e9b5d6dd3b4bbd1b39b",
+ "server_binary_sha256": "02e1901b92042c74ac0eb62d962c998bf6b03c7857b11202289e9a50fd7f3b20",
+ "configuration_inventory_sha256": "e3dfdc0a7464803aab206088c4e9285b9765998a1b8d6f2cb98bb87bf019acc0"
+}

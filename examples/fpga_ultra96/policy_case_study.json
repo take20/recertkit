@@ -1,0 +1,50 @@
+{
+ "name": "fpga-case-study-1",
+ "description": "The conditions under which the authors of the case study accept this chain, stated explicitly: every judgement and assumption is named; one evidence file may be absent; the retrospective issuance is admitted.",
+ "require_all_evidence": false,
+ "coverage_by_judgement": [
+  "libggml-cpu.so",
+  "v1pl.patch"
+ ],
+ "residual_rebuilt": "allow",
+ "unrecorded": "allow",
+ "reference_kinds": [
+  "specification",
+  "parent_link"
+ ],
+ "binding_levels": [
+  "digest",
+  "identifiers-only",
+  "unbound"
+ ],
+ "transcript_mapping": "allow",
+ "accepted_judgements": [
+  "boundary",
+  "composition",
+  "host_integration",
+  "reference_link",
+  "residual_path",
+  "root_configuration",
+  "unrecorded_items"
+ ],
+ "accepted_assumptions": [
+  "A1_build_provenance",
+  "A2_build_environment",
+  "T1_hls_toolchain",
+  "T2_host_path",
+  "T3_compositionality",
+  "T4_deployment_identity",
+  "T5_frame_content",
+  "T6_native_toolchain",
+  "inherited"
+ ],
+ "root_adapters": [
+  "gate-2.0"
+ ],
+ "require_prospective": false,
+ "reference_by_declaration": "allow",
+ "enumeration_domains": {
+  "p5_v2tile.bit": 1073741824,
+  "p5_v2tile_v1p.bit": 1073741824
+ }
+}

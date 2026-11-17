@@ -1,0 +1,91 @@
+{
+  "certificate_version": "2.0",
+  "certificate_id": "84e1052a-7ec8-44c3-aae4-1435adcde6cb",
+  "issued_at": "2026-09-10T11:54:41.349475+00:00",
+  "protocol_commitment_id": "0b5138a6-4547-4c7b-8c12-e941e3e4abc9",
+  "commitment_digest_sha256": "6244d554f1c51eed2027f5e236973abceddd5ec7f2094cb62184716aeb105d77",
+  "stage2_digest_sha256": null,
+  "supersedes_certificate_id": null,
+  "reference_configuration": {
+    "configuration_id": "l32-1b-bf16-jetson-cuda",
+    "artifact_filename": "Llama-3.2-1B-Instruct-BF16.gguf",
+    "artifact_sha256": "f5d05e90d179fa27c01a049be1574a0201bdc09ba0b345eb85e1dbf3b87610f3",
+    "engine": "llama.cpp",
+    "engine_commit": "6c5de1cc83537bce5616ed08474f6fe119973a27",
+    "backend": "CUDA",
+    "hardware_id": "jetson-orin-nano-8gb-jp6",
+    "harness_parser_sha256": "c677966ef80ab8b1fead1c1e9a52860d93b1fb47d0ebc144d77bd1cf056048f8",
+    "generation_parameters": {
+      "temp": 0.0,
+      "seed": 20260828,
+      "n_ctx": 2048,
+      "ngl": 99
+    },
+    "record_provenance": "P2 run_l32-1b-bf16_jetson_mmlu.jsonl (sha256 351eb7d7...)"
+  },
+  "candidate_configuration": {
+    "configuration_id": "l32-1b-q4km-ultra96v2-ps",
+    "artifact_filename": "Llama-3.2-1B-Instruct-Q4_K_M.gguf",
+    "artifact_sha256": "6c1be9f06918874cb74db686a24c242a31ef4fea262bf3923ad936a83f0e368c",
+    "engine": "llama.cpp",
+    "engine_commit": "6c5de1cc83537bce5616ed08474f6fe119973a27",
+    "build_flags": "Release, LLAMA_CURL=OFF, GGML_NATIVE=ON, on-board aarch64 build",
+    "server_binary_sha256": "7a4a9f3ecdf528e8d2327c01fddd17fdcd1fe1ccc2bfb067e89d80062e3a3cfb",
+    "backend": "CPU-PS",
+    "hardware_id": "ultra96-v2-zu3eg-pynq301",
+    "harness_parser_sha256": "c677966ef80ab8b1fead1c1e9a52860d93b1fb47d0ebc144d77bd1cf056048f8",
+    "generation_parameters": {
+      "temp": 0.0,
+      "seed": 20260828,
+      "n_ctx": 2048,
+      "ngl": 0,
+      "threads": 4
+    }
+  },
+  "metric_and_parser_hash": "c677966ef80ab8b1fead1c1e9a52860d93b1fb47d0ebc144d77bd1cf056048f8",
+  "task_manifest_hash": "5f1ce42bb816334e79c00a9a0f61bd542c1767d3bfb6241e50ac87e1416e1ee0",
+  "selection_policy": "single_candidate",
+  "selection_record_digest_sha256": null,
+  "release_ledger": {
+    "release_family": "p5-parent-v0",
+    "release_index": 1,
+    "parent_commitment_id": null,
+    "parent_commitment_digest_sha256": null,
+    "delta_this_release": "0.050000",
+    "delta_lifetime": "0.100000",
+    "rule": "sum_{r>=1} delta_r <= delta_lifetime; delta_r = delta_lifetime/2^r",
+    "history_scope": "supplied-linear-chain; completeness of the release history is not provable locally \u2014 full-family accounting requires --family-history or an append-only registry"
+  },
+  "estimand": {
+    "metric_definition": "exact_match_accuracy",
+    "degradation_direction": "reference_minus_candidate",
+    "margin": "0.050000",
+    "risk_level": "0.050000",
+    "sampling_regime": "r2"
+  },
+  "evidence": {
+    "ordered_record_uri": "file://records_v0.jsonl",
+    "record_digest_sha256": "944d9e8dd95d0b65774c9fa4ddd7c07e89f4d9fa865c1aad3c163ab798d9be1a",
+    "n": 184,
+    "point_estimate": "-0.010870",
+    "upper_confidence_sequence": {
+      "50": "0.153252",
+      "100": "0.062394",
+      "184": "0.049866"
+    },
+    "log_wealth": "3.008942",
+    "stopping_time": 184
+  },
+  "secondary_endpoints": {
+    "harmful_flip_rate": "0.059783",
+    "correctness_churn_rate": "0.130435"
+  },
+  "decision": "certified",
+  "threat_model_note": "integrity+reproducibility of declared evidence under the precommitted design; NOT remote attestation of execution",
+  "signature": {
+    "algorithm": "ed25519",
+    "value": "425905ff3edac8f09f7218fb577688194036aadfd65300f327d852ec2882caee737b9973fa26d0b8cbb89a3bddda4552ae2c596b0cd8f9e481d8abf7ecfeab07",
+    "public_key_id": "p5-release-key-1",
+    "canonicalization": "rfc8785_jcs_sorted_utf8_decimal_strings"
+  }
+}

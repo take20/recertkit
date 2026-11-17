@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=77"]   # PEP 639 licence metadata (license = "<SPDX>", license-files) needs 77 or later
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "recertkit"
+version = "1.0.0"
+description = "Issue and verify derived quality certificates after a declared deployment change"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
+dependencies = ["cryptography>=41", "rfc8785>=0.1.2"]
+keywords = ["certification", "release assurance", "regression", "provenance", "edge AI", "quantized LLM"]
+classifiers = ["Programming Language :: Python :: 3", "Operating System :: OS Independent", "Intended Audience :: Science/Research", "Topic :: Software Development :: Quality Assurance"]
+
+[project.optional-dependencies]
+test = ["pytest>=7"]
+
+[project.scripts]
+recertkit = "recertkit.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

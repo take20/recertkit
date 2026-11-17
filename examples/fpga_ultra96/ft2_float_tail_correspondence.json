@@ -1,0 +1,135 @@
+{
+ "title": "FT2 evidence: float tail of the original NEON kernel vs the hook kernel \u2014 disassembly slices with variable correspondence",
+ "date": "2026-09-16",
+ "source_binaries": {
+  "V0 libggml-cpu.so": "0fc1b860500fefcd75d90829822ba0d46a94a45f0bab20992e27b24128b665af",
+  "V1 libggml-cpu.so": "b9b3dbdc479012f646175d343c1c1446b74f2f208085b2e184cb368a3a347ff5"
+ },
+ "functions": {
+  "V0": "ggml_vec_dot_q4_K_q8_K (arch/arm/quants.c, __ARM_NEON branch, 262 instructions)",
+  "V1": "ggml_vec_dot_q4_K_q8_K_plsumi (patch, 69 instructions; sumi supplied by the PL)"
+ },
+ "block_q4_K_layout_used": {
+  "d": "fp16 @ +0",
+  "dmin": "fp16 @ +2",
+  "scales": "12 B @ +4",
+  "qs": "128 B @ +16"
+ },
+ "per_block_float_operations_in_order": [
+  {
+   "step": 1,
+   "expr": "d = fp32(x[i].d) * y[i].d",
+   "V0": [
+    "0xa0d30 ldur h17,[x6,#-4]  (x6=&scales -> [x6-4]=x.d)",
+    "0xa0d70 fcvt s17,h17",
+    "0xa0d48 ldur s28,[x4,#-4] (y.d)",
+    "0xa0da0 fmul s17,s17,s28"
+   ],
+   "V1": [
+    "0xa459c ldur h2,[x2,#-0x94] (block+0 = x.d)",
+    "0xa45b0 fcvt s2,h2",
+    "0xa45a0 ldr s7,[x3] (y.d)",
+    "0xa45d0 fmul s2,s2,s7"
+   ]
+  },
+  {
+   "step": 2,
+   "expr": "dmin = fp32(x[i].dmin) * y[i].d",
+   "V0": [
+    "0xa0d10 ldur h2, [x6, #-2]",
+    "0xa0d1c fcvt s2, h2",
+    "0xa0d48 ldur s28, [x4, #-4]",
+    "0xa0d60 fmul s2, s2, s28",
+    "0xa0e18 str s2, [sp, #0x7c]",
+    "0xa1024 ldp s4, s3, [sp, #0x78]",
+    "(x6 = &x[i].scales, so [x6-2] = x[i].dmin; s28 = y[i].d loaded at 0xa0d48; the product is spilled to [sp,#0x7c] and reloaded as s3 by the ldp at 0xa1024)"
+   ],
+   "V1": [
+    "0xa4598 ldur h3,[x2,#-0x92] (block+2 = x.dmin)",
+    "0xa45ac fcvt s3,h3",
+    "0xa45c8 fmul s3,s3,s7"
+   ],
+   "correction_vs_v3_package": "the v3 record cited 'ldp w9,w2,[sp,#0xa8]' as the dmin reload; that instruction reloads INTEGER w2 (a different register file). The fp16 dmin is loaded by 'ldur h2,[x6,#-2]' and never spilled before conversion; only the fp32 product is spilled ([sp,#0x7c])."
+  },
+  {
+   "step": 3,
+   "expr": "sumi_mins = \u03a3 q8sums\u00b7mins (int32, SIMD)",
+   "V0": [
+    "... addv/int32 -> 0xa101c scvtf s0,s0"
+   ],
+   "V1": [
+    "0xa45d4 smull2 / 0xa45d8 smlal / 0xa45dc addv s0,v0.4s / 0xa45e0 scvtf s0,s0"
+   ]
+  },
+  {
+   "step": 4,
+   "expr": "sumf = sumf - float(sumi_mins) * dmin   [fused]",
+   "V0": [
+    "0xa1030 fmsub s0, s0, s3, s4   (s4 = sumf from [sp,#0x78])"
+   ],
+   "V1": [
+    "0xa45e4 fmsub s5, s0, s3, s5   (s5 = sumf, register-resident)"
+   ]
+  },
+  {
+   "step": 5,
+   "expr": "float(sumi)  (int32 -> fp32, round-to-nearest; exact for |sumi| < 2^24 \u2014 here |sumi| <= 3.1e7 < 2^25, see note)",
+   "V0": [
+    "madd chain w0 (int32 accumulation on CPU) -> 0xa102c scvtf s1,w0"
+   ],
+   "V1": [
+    "0xa45b4 ldr s6,[x4,x6,lsl #2] (int32 sumi written by the PL) -> 0xa45cc scvtf s6,s6"
+   ]
+  },
+  {
+   "step": 6,
+   "expr": "sumf = sumf + float(sumi) * d   [fused]",
+   "V0": [
+    "0xa1034 fmadd s0, s1, s17, s0"
+   ],
+   "V1": [
+    "0xa45e8 fmadd s5, s6, s2, s5"
+   ]
+  },
+  {
+   "step": 7,
+   "expr": "loop / store",
+   "V0": [
+    "0xa1038 str s0,[sp,#0x78] ; 0xa103c b.gt (next block)"
+   ],
+   "V1": [
+    "0xa45ec b.gt (next block) ; 0xa45f4 str s5,[x1] at exit"
+   ]
+  }
+ ],
+ "register_correspondence": {
+  "sumf": "V0 s0/s4 (spilled at [sp,#0x78]) <-> V1 s5",
+  "d": "V0 s17 <-> V1 s2",
+  "dmin": "V0 s3 (spilled) <-> V1 s3",
+  "float(sumi_mins)": "V0 s0 <-> V1 s0",
+  "float(sumi)": "V0 s1 <-> V1 s6",
+  "y[i].d": "V0 s28 <-> V1 s7"
+ },
+ "conclusion": "Per super-block both kernels perform exactly the same six floating-point operations on the same operands in the same order: two fp16->fp32 conversions, two fmul, one fused fmsub, one fused fmadd, with the running sum threaded through the fused ops. Operand order of the commutative fmul differs syntactically (x.d*y.d vs y.d*x.d) but not in result. Spilling of dmin/sumf to the stack in V0 vs register residency in V1 does not alter values (fp32 store/load is exact). The int32->fp32 conversion of sumi uses the same rounding mode in both (scvtf, RN) and is exact for the reachable |sumi| range.",
+ "note_on_exactness": "|sumi| bound from the manuscript is 3.1e7 (< 2^25); fp32 has 24 significand bits, so conversion may round for |sumi| in [2^24, 2^25). Both kernels apply the identical scvtf to the identical int32, so any such rounding is identical \u2014 exactness is not required for FT2, identity is.",
+ "status_of_500_500_agreement": "The system-level 500/500 identical outputs are E2 corroboration of this reading, not its basis.",
+ "sumf_accumulator_V0": {
+  "slot": "[sp,#0x78]",
+  "init": [
+   "0xa0ce0 str wzr, [sp, #0x78]"
+  ],
+  "reload": [
+   "0xa1024 ldp s4, s3, [sp, #0x78]",
+   "(s4 = sumf)"
+  ],
+  "update": [
+   "0xa101c scvtf s0, s0",
+   "0xa102c scvtf s1, w0",
+   "0xa1030 fmsub s0, s0, s3, s4",
+   "0xa1034 fmadd s0, s1, s17, s0",
+   "0xa1038 str s0, [sp, #0x78]"
+  ],
+  "reading": "fmsub s0 = s4 - s0*s3 = sumf - f(sumi_mins)*dmin ; fmadd s0 = s1*s17 + s0 = f(sumi)*d + (...) ; stored back to [sp,#0x78]"
+ },
+ "review_v3_M1": "slice completed for the dmin path (h2 load, fcvt, fmul with y.d, spill, reload) and the sumf accumulator; every cited instruction is in ft2_slices.txt with its address"
+}

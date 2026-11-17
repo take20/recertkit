@@ -1,0 +1,28 @@
+name: tests
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python: ["3.10", "3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "${{ matrix.python }}"}
+      - run: pip install ".[test]"
+      - run: python -m pytest -q
+      - run: python examples/quickstart/run.py
+      - name: gate-root example (record valid, release policy accepts)
+        run: cd examples/gate_root && recertkit verify-chain --root gate_root_certificate.json --links derived_c1.json --trust gate-example=gate_example.pub --policy policy.json
+      - name: FPGA example (record valid; case-study policy accepts; strict policy must reject)
+        run: |
+          cd examples/fpga_ultra96
+          L="--root root_certificate.json --links derived_v1.json derived_v1p.json --trust p5-release-key-1=release_key.pub"
+          recertkit verify-chain $L --policy policy_case_study.json
+          # The strict policy must REJECT a VALID record: exit status exactly 1 (2 would be a usage error), and the
+          # JSON report must say why. A bare "non-zero" test would also pass on a broken command line.
+          rc=0; recertkit verify-chain $L --policy policy_strict.json --json-report "$RUNNER_TEMP/strict.json" > /dev/null || rc=$?
+          echo "strict policy: exit status $rc"; test "$rc" -eq 1
+          python -c "import json, sys; r = json.load(open(sys.argv[1])); print('record_valid', r['record_valid'], '| policy_verdict', r['policy_verdict'], '| failed policy checks', len(r['policy']['failed_checks'])); sys.exit(0 if r['record_valid'] is True and r['policy_verdict'] == 'REJECTED' and r['policy']['failed_checks'] else 1)" "$RUNNER_TEMP/strict.json"

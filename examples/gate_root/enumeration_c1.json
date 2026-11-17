@@ -1,0 +1,15 @@
+{
+ "schema": "recertkit-enumeration-1",
+ "what": "exhaustive comparison of the block q(a, b) against a reference kernel on the full operand domain",
+ "domain": "a, b in [-128, 127] (signed 8-bit), 256 x 256 pairs",
+ "domain_size": 65536,
+ "subjects": {
+  "kernel.py": "d3f59d7be1bc2014c88187bccdf4accf8779f43d0290d6dd23a385ecc21811b6"
+ },
+ "reference": {
+  "sha256": "3724a958b937836fba76483747f6d1e4aa7ec55ea8eb8488ef9d234b4275ad6a"
+ },
+ "enumerated": 65536,
+ "mismatches": 0,
+ "first_mismatch": null
+}

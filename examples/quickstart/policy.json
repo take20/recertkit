@@ -1,0 +1,28 @@
+{
+ "name": "quickstart-release-1",
+ "description": "A relying party's release policy for the quick start: complete evidence, digest-level bindings, machine-linked references, and only the judgements and assumptions named here.",
+ "require_all_evidence": true,
+ "coverage_by_judgement": "forbid",
+ "residual_rebuilt": "forbid",
+ "unrecorded": "forbid",
+ "reference_kinds": [
+  "parent_artifact",
+  "parent_link"
+ ],
+ "binding_levels": [
+  "digest"
+ ],
+ "transcript_mapping": "forbid",
+ "accepted_judgements": [
+  "boundary",
+  "residual_path"
+ ],
+ "accepted_assumptions": [
+  "interpreter"
+ ],
+ "require_prospective": true,
+ "reference_by_declaration": "forbid",
+ "enumeration_domains": {
+  "kernel.py": 65536
+ }
+}

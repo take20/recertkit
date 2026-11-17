@@ -1,0 +1,186 @@
+== root: root_certificate.json ==
+[OK] signature.root — key p5-release-key-1
+[OK] root.decision — certified
+== link: derived_v1.json  <-  root_certificate.json ==
+[OK] certificate.version — 'recertkit-3'; this tool verifies 'recertkit-3'
+[OK] certificate.profile — issued under 'recertkit-default-1'; verifier applies 'recertkit-default-1'
+[OK] signature.certificate — key p5-release-key-1
+[OK] signature.parent — key p5-release-key-1
+[OK] parent.digest — 6db519015c059566
+[OK] parent.id
+[OK] claim.fields — exactly ['degradation_direction', 'margin', 'metric_definition', 'risk_level', 'sampling_regime']
+[OK] claim.constraints — all fields satisfy the profile
+[OK] parent.decision — certified
+[OK] claim.invariance — every claim field equals the parent's
+[OK] inventory.digest.parent — inventory_v0.txt
+[OK] inventory.unique.parent — 6 artifacts
+[OK] inventory.digest.derived — inventory_v1.txt
+[OK] inventory.unique.derived — 8 artifacts
+[OK] block.complete — every inventory artifact is declared in exactly one category
+[OK] block.changed.libggml-cpu.so — added, removed or digest differs
+[OK] block.changed.p5_v2tile.bit — added, removed or digest differs
+[OK] block.changed.v1pl.patch — added, removed or digest differs
+[OK] block.unchanged.Llama-3.2-1B-Instruct-Q4_K_M.gguf — equal digest in both inventories
+[OK] block.unchanged.eval_mmlu500.jsonl — equal digest in both inventories
+[OK] block.residual_rebuilt.libggml-base.so — present in both, digest differs (equivalence is a written judgement)
+[OK] block.residual_rebuilt.libllama.so — present in both, digest differs (equivalence is a written judgement)
+[OK] block.residual_rebuilt.llama-server — present in both, digest differs (equivalence is a written judgement)
+[OK] roles.declared — exactly ['frame', 'model', 'server']
+[OK] role.server.present — llama-server is in both inventories
+[OK] role.model.present — Llama-3.2-1B-Instruct-Q4_K_M.gguf is in both inventories
+[OK] role.model.fixed — Llama-3.2-1B-Instruct-Q4_K_M.gguf is a fixed role: it must be unchanged
+[OK] role.frame.present — eval_mmlu500.jsonl is in both inventories
+[OK] role.frame.fixed — eval_mmlu500.jsonl is a fixed role: it must be unchanged
+[OK] roles.binding_level.server — declared 'digest'; this root provides 'digest'
+[OK] roles.root_binding.server — root digest for role server == parent inventory[llama-server]
+[OK] roles.binding_level.model — declared 'digest'; this root provides 'digest'
+[OK] roles.root_binding.model — root digest for role model == parent inventory[Llama-3.2-1B-Instruct-Q4_K_M.gguf]
+[OK] roles.root_filename.model — root names Llama-3.2-1B-Instruct-Q4_K_M.gguf
+[OK] roles.binding_level.frame — declared 'identifiers-only'; this root provides 'identifiers-only'
+[OK] roles.distinct — role artifacts have pairwise distinct digests
+[OK] root.inventory_level — declared 'unbound'; this root provides 'unbound'
+[..] unbound inventory: the root binds the role artifacts only; that the other artifacts of the parent inventory (libggml-base.so, libggml-cpu.so, libllama.so) belong to the configuration the root run used is a written judgement (root_configuration)
+[OK] root.commitment — commitment file digest == root.commitment_digest_sha256 (6244d554f1c51eed)
+[OK] root.frame_file — frame file present and equal to the parent inventory digest
+[OK] root.frame_ids — commitment.sampling_frame_hash recomputes from the frame's 500 item identifiers
+[OK] root.task_manifest — root.task_manifest_hash is the hash of the identifier manifest recomputed from the frame
+[OK] root.commitment_params — commitment regime/epsilon/delta equal the claim (r2, 0.050000, 0.050000)
+[..] frame boundary: this root binds the frame's item IDENTIFIERS, not its content (limited mode: the gate was given an identifier manifest as its task file). The verifier checks the identifiers against the root commitment and the frame file's digest equality between the two inventories; it cannot detect a frame whose identifiers are unchanged but whose content differs from what the root run evaluated. Content identity to the root run is a trust assumption.
+[..] root protocol: the root's own evidence (ordered records, sequential-test replay) is verified by the release gate's verifier, not by RecertKit; here the root's signature, decision and bindings are checked
+[OK] judgements.required — present: ['boundary', 'residual_path', 'root_configuration']
+[..] residual rebuilt: libggml-base.so has different bytes in the two configurations and is NOT covered by equivalence evidence; that it behaves identically is the written judgement 'residual_path'
+[..] residual rebuilt: libllama.so has different bytes in the two configurations and is NOT covered by equivalence evidence; that it behaves identically is the written judgement 'residual_path'
+[..] residual rebuilt: llama-server has different bytes in the two configurations and is NOT covered by equivalence evidence; that it behaves identically is the written judgement 'residual_path'
+[OK] evidence.lane_enumeration — lane_exhaustive_result.json (9aa333dfb675273d)
+[OK] evidence.float_tail_correspondence — ft2_float_tail_correspondence.json (4d980194a72b348c)
+[FAIL] evidence.residual_source_identity — ft3s_residual_source_identity.json (0886dc6607ef26d3)
+[OK] equivalence.ids — equivalence entries have distinct identifiers ['pl_kernel']
+[OK] coverage.derived_side — each of the 3 changed artifacts of the derived inventory is a subject of exactly one equivalence entry or covered by one named judgement
+[OK] coverage.parent_side — each of the 1 changed artifacts of the parent inventory is replaced by exactly one equivalence entry or covered by one named judgement
+[OK] coverage.declared — nothing is listed as covered on a side where it is not a changed artifact
+[OK] coverage.equivalence_present — 1 equivalence entry
+[OK] coverage.judgement.libggml-cpu.so — covered by the written judgement 'host_integration' with supporting evidence ['float_tail_correspondence', 'residual_source_identity']
+[..] coverage by judgement: changed artifact libggml-cpu.so (derived and parent side) is NOT covered by equivalence evidence; it rests on the written judgement 'host_integration'
+[OK] coverage.judgement.v1pl.patch — covered by the written judgement 'host_integration' with supporting evidence ['float_tail_correspondence', 'residual_source_identity']
+[..] coverage by judgement: changed artifact v1pl.patch (derived side) is NOT covered by equivalence evidence; it rests on the written judgement 'host_integration'
+[OK] equivalence.pl_kernel.method — 'exhaustive_enumeration'; this profile accepts ['exhaustive_enumeration']
+[OK] equivalence.pl_kernel.subjects — ['p5_v2tile.bit'] are distinct changed artifacts of the derived configuration
+[OK] equivalence.pl_kernel.replaces — [] are distinct changed artifacts of the parent configuration
+[OK] equivalence.pl_kernel.reference_kind — 'specification'; this profile accepts ['parent_artifact', 'parent_link', 'specification']
+[OK] equivalence.pl_kernel.transcript — transcript 'lane_enumeration' is a bound, present evidence file
+[OK] equivalence.pl_kernel.transcript_layout — foreign layout mapped by declared pointers
+[..] transcript mapping: equivalence pl_kernel: the transcript is in a foreign layout; which of its fields hold the subject digests, the number of inputs compared and the mismatch count is the issuer's declaration ({"enumerated": "/bitstreams/V1/lane_exhaustive/values_enumerated", "mismatches": "/bitstreams/V1/lane_exhaustive/mismatches", "subjects": {"p5_v2tile.bit": "/bitstreams/V1/sha256"}})
+[OK] equivalence.pl_kernel.subject_digest — the transcript's subject digests equal the derived inventory for ['p5_v2tile.bit']
+[OK] equivalence.pl_kernel.reference_spec — reference is the specification 'exact integer products nibble x q8 x scale of the Q4_K x Q8_K dot product (integer path of ggml_vec_dot_q4_K_q8_K, llama.cpp commit 6c5de1cc)'; its link to the parent configuration is the written judgement 'reference_link'
+[..] reference by declaration: equivalence pl_kernel: no specification file is bound, so no digest ties the transcript to the specification 'exact integer products nibble x q8 x scale of the Q4_K x Q8_K dot product (integer path of ggml_vec_dot_q4_K_q8_K, llama.cpp commit 6c5de1cc)'; that the comparison used this specification is the issuer's declaration
+[..] reference by judgement: equivalence pl_kernel: the subjects were compared against the specification 'exact integer products nibble x q8 x scale of the Q4_K x Q8_K dot product (integer path of ggml_vec_dot_q4_K_q8_K, llama.cpp commit 6c5de1cc)', not against an artifact of the parent configuration; that the parent's block (no replaced artifact named) computes this specification is the written judgement 'reference_link'
+[OK] equivalence.pl_kernel.reference_field — the certificate carries no reference.sha256, because no digest of the reference is verified (a declared, unverified digest is not allowed)
+[OK] equivalence.pl_kernel.domain_enumerated — enumerated 1073741824 of the declared domain of 1073741824 inputs
+[OK] equivalence.pl_kernel.zero_mismatches — mismatches = 0
+[OK] equivalence.pl_kernel.require[0] — /bitstreams/V1/fpga_state == 'operating' (found 'operating')
+[OK] equivalence.pl_kernel.require[1] — /bitstreams/V1/accumulation/extreme_neg/ok == True (found True)
+[OK] equivalence.pl_kernel.require[2] — /bitstreams/V1/accumulation/extreme_pos/ok == True (found True)
+[OK] equivalence.pl_kernel.require[3] — /bitstreams/V1/accumulation/random_full_blocks/mismatches == 0 (found 0)
+[..] enumeration domain: equivalence pl_kernel: 1073741824 inputs were enumerated; that these are ALL inputs on which ['p5_v2tile.bit'] can be invoked in the deployed configuration is not checked — it is the written judgement 'boundary', which must be read against this number
+[..] transcript provenance: equivalence pl_kernel: the transcript is a record written by the issuer's comparison tool; the verifier checks what it states and what it is bound to, not that the comparison was run as recorded
+[OK] risk.decimals — alpha, delta_parent, delta_derived are decimal strings in plain notation
+[OK] risk.alpha_zero — alpha = 0 (deterministic transfer only; a positive alpha is unsupported, not unverified)
+[OK] risk.composition — delta_derived equals delta_parent as exact decimal values (nothing is added: alpha must be zero)
+[OK] risk.parent — delta_parent equals the parent's risk (0.050000)
+[OK] risk.claim — delta_parent equals the claim's risk level
+[..] inventory completeness: that inventory_v1.txt lists every artifact that can affect the outputs of the derived configuration is the issuer's statement; an artifact absent from both inventories is outside every check
+[..] judgement composition: The enumeration covers each lane's operand domain, not the full 256-element block domain. That exact per-lane products compose to the exact block result is an argument (T3): int32 addition is exact because |sum| <= 8*32*15*128*63 < 2^31. Extreme-value and 373,296 random full-block checks exercise the adder tree but do not enumerate it.
+[..] judgement boundary: The block returns the integer sum only; the floating-point scale application stays on the CPU. The compiled floating-point tail of the appended function was matched operation by operation against the original kernel's (two fp16->fp32 conversions, two multiplies, one fused multiply-subtract, one fused multiply-add per super-block, same operand dependences); see ft2_float_tail_correspondence.json.
+[..] judgement residual_path: The rebuilt host binaries differ in digest because the patched tree is a separate build. Source/build correspondence was machine-checked on the board: 3,008 of 3,011 common source files are byte-identical; the 3 differing and 2 added files are exactly the additive patch (0 lines removed, no residual function body modified); the build configurations are identical up to the tree path except for the declared change (-DGGML_USE_P5_PL, pl_q4k.c.o, -lcma) on one target; LTO is off; same gcc 11.2.0 and GNU ld 2.38 binaries. That these trees produced the binaries that ran (A1) and that the build environment was the same (A2) are author attestations; that the toolchain preserves the residual functions' source semantics under the declared change (T6) is an assumption. The record is the detached evidence file residual_source_identity.
+[..] judgement reference_link: The transcript compares the programmable-logic kernel with the exact integer products of the Q4_K x Q8_K dot product, i.e. with a specification, not with the compiled CPU kernel of V0. That V0's kernel (the NEON branch of ggml_vec_dot_q4_K_q8_K actually compiled on the board's Cortex-A53) computes this integer function is a reading of its source; it is not machine-checked, and the transcript records no digest of the model it compared against.
+[..] judgement host_integration: libggml-cpu.so changes because the patch adds a hook in ggml_compute_forward_mul_mat, a driver for the kernel and an appended variant of the dot-product function that takes the integer sum from the programmable logic. These changed host functions are NOT covered by the enumeration. That they pass the operands to the kernel unaltered and apply the same floating-point tail rests on the float-tail correspondence (bound evidence), on source inspection of the driver (T2), and on 500/500 identical outputs on the frame, which is an observation and not an equivalence result. v1pl.patch is the source record of this change and is not executed.
+[..] judgement root_configuration: The root certificate binds the server binary and the model file by digest and the frame by its item identifiers. It does not bind the three libraries of the parent inventory (libggml-base.so, libggml-cpu.so, libllama.so). They were hashed retrospectively from the build directory that holds the root's server binary; that they are the libraries the root run loaded is attested by the authors, not bound by the root.
+[..] trust assumption T1_hls_toolchain: Vitis HLS 2022.1 and Vivado 2022.1 compiled the kernel source into the loaded bitstream faithfully; the bitstream digest in the inventory is the one resident in the PL during the run (fpga_manager state 'operating', loaded before server start, no reload until run end).
+[..] trust assumption T2_host_path: The host-side driver (contiguous-memory allocation, byte-exact packing of operands, register writes, cache flush/invalidate, completion polling) transfers operands and results without alteration. Supported by source inspection and by 500/500 identical outputs on F (an observation, not an enumeration).
+[..] trust assumption T3_compositionality: Exact per-lane products combined by exact int32 addition yield the exact integer sum for every reachable input (overflow bound in the composition judgement).
+[..] trust assumption T5_frame_content: The frame file eval_mmlu500.jsonl (sha256 09079acb…) recorded in the parent inventory is the file the root certification run consumed. The root commitment binds the frame's item identifiers but not question/choice/answer content; content identity to the root run rests on this statement.
+[..] trust assumption T6_native_toolchain: gcc 11.2.0 and GNU ld 2.38, compiling the residual functions' identical source - including the residual functions inside the two translation units the patch extends - under options that differ only by the declared change, with LTO off, produce code of identical observable behaviour for every residual function (layout, symbol placement and __FILE__/__LINE__ literals may differ).
+[..] trust assumption A1_build_provenance: Attestation: the source trees hashed on 2026-09-21 are those from which the V0 and V1 binaries were compiled. The board clock is unsynchronised, so timestamps cannot establish this (6,019 of the 6,024 source files report a modification time later than the V1 run record; the five that do not are the five files the patch touched).
+[..] trust assumption A2_build_environment: Attestation: system headers, C/C++ runtime and toolchain packages were identical at both builds (no package operations on the board; package state recorded).
+== link: derived_v1p.json  <-  derived_v1.json ==
+[OK] certificate.version — 'recertkit-3'; this tool verifies 'recertkit-3'
+[OK] certificate.profile — issued under 'recertkit-default-1'; verifier applies 'recertkit-default-1'
+[OK] signature.certificate — key p5-release-key-1
+[OK] signature.parent — key p5-release-key-1
+[OK] parent.digest — 30cca07f150b982f
+[OK] parent.id
+[OK] claim.fields — exactly ['degradation_direction', 'margin', 'metric_definition', 'risk_level', 'sampling_regime']
+[OK] claim.constraints — all fields satisfy the profile
+[OK] parent.decision — transfer
+[OK] claim.invariance — every claim field equals the parent's
+[OK] inventory.digest.parent — inventory_v1.txt
+[OK] inventory.unique.parent — 8 artifacts
+[OK] inventory.digest.derived — inventory_v1p.txt
+[OK] inventory.unique.derived — 5 artifacts
+[OK] block.complete — every inventory artifact is declared in exactly one category
+[OK] block.changed.p5_v2tile.bit — added, removed or digest differs
+[OK] block.changed.p5_v2tile_v1p.bit — added, removed or digest differs
+[OK] block.unchanged.Llama-3.2-1B-Instruct-Q4_K_M.gguf — equal digest in both inventories
+[OK] block.unchanged.eval_mmlu500.jsonl — equal digest in both inventories
+[OK] block.unchanged.libggml-cpu.so — equal digest in both inventories
+[OK] block.unchanged.llama-server — equal digest in both inventories
+[OK] block.unrecorded.libggml-base.so — in the parent inventory only (identity is a trust assumption)
+[OK] block.unrecorded.libllama.so — in the parent inventory only (identity is a trust assumption)
+[OK] block.unrecorded.v1pl.patch — in the parent inventory only (identity is a trust assumption)
+[OK] roles.declared — exactly ['frame', 'model', 'server']
+[OK] role.server.present — llama-server is in both inventories
+[OK] role.model.present — Llama-3.2-1B-Instruct-Q4_K_M.gguf is in both inventories
+[OK] role.model.fixed — Llama-3.2-1B-Instruct-Q4_K_M.gguf is a fixed role: it must be unchanged
+[OK] role.frame.present — eval_mmlu500.jsonl is in both inventories
+[OK] role.frame.fixed — eval_mmlu500.jsonl is a fixed role: it must be unchanged
+[OK] chain.inventory_continuity — this link starts from the inventory the parent certificate ended with
+[OK] chain.roles — configuration roles equal the parent's
+[OK] chain.root_binding — root binding levels inherited unchanged
+[OK] chain.profile — same profile as the parent link
+[OK] judgements.required — present: ['boundary', 'residual_path', 'unrecorded_items']
+[..] unrecorded artifact: libggml-base.so was not recorded for the derived configuration; that it is unchanged is the written judgement 'unrecorded_items'
+[..] unrecorded artifact: libllama.so was not recorded for the derived configuration; that it is unchanged is the written judgement 'unrecorded_items'
+[..] unrecorded artifact: v1pl.patch was not recorded for the derived configuration; that it is unchanged is the written judgement 'unrecorded_items'
+[OK] evidence.lane_enumeration — lane_exhaustive_result.json (9aa333dfb675273d)
+[OK] equivalence.ids — equivalence entries have distinct identifiers ['pl_kernel']
+[OK] coverage.derived_side — each of the 1 changed artifacts of the derived inventory is a subject of exactly one equivalence entry or covered by one named judgement
+[OK] coverage.parent_side — each of the 1 changed artifacts of the parent inventory is replaced by exactly one equivalence entry or covered by one named judgement
+[OK] coverage.declared — nothing is listed as covered on a side where it is not a changed artifact
+[OK] coverage.equivalence_present — 1 equivalence entry
+[OK] equivalence.pl_kernel.method — 'exhaustive_enumeration'; this profile accepts ['exhaustive_enumeration']
+[OK] equivalence.pl_kernel.subjects — ['p5_v2tile_v1p.bit'] are distinct changed artifacts of the derived configuration
+[OK] equivalence.pl_kernel.replaces — ['p5_v2tile.bit'] are distinct changed artifacts of the parent configuration
+[OK] equivalence.pl_kernel.reference_kind — 'parent_link'; this profile accepts ['parent_artifact', 'parent_link', 'specification']
+[OK] equivalence.pl_kernel.transcript — transcript 'lane_enumeration' is a bound, present evidence file
+[OK] equivalence.pl_kernel.transcript_layout — foreign layout mapped by declared pointers
+[..] transcript mapping: equivalence pl_kernel: the transcript is in a foreign layout; which of its fields hold the subject digests, the number of inputs compared and the mismatch count is the issuer's declaration ({"enumerated": "/bitstreams/V1p/lane_exhaustive/values_enumerated", "mismatches": "/bitstreams/V1p/lane_exhaustive/mismatches", "subjects": {"p5_v2tile_v1p.bit": "/bitstreams/V1p/sha256"}})
+[OK] equivalence.pl_kernel.subject_digest — the transcript's subject digests equal the derived inventory for ['p5_v2tile_v1p.bit']
+[OK] equivalence.pl_kernel.reference_parent_link — the parent link's equivalence entry 'pl_kernel' has exactly ['p5_v2tile.bit'] as its subjects
+[OK] equivalence.pl_kernel.reference_id — same declared reference as the parent link: 'exact integer products nibble x q8 x scale of the Q4_K x Q8_K dot product (integer path of ggml_vec_dot_q4_K_q8_K, llama.cpp commit 6c5de1cc)'
+[..] reference by declaration: equivalence pl_kernel: the reference 'exact integer products nibble x q8 x scale of the Q4_K x Q8_K dot product (integer path of ggml_vec_dot_q4_K_q8_K, llama.cpp commit 6c5de1cc)' is inherited from the parent link by NAME; no digest of it was verified in either link, so that both comparisons used the same reference is not machine-checked
+[OK] equivalence.pl_kernel.reference_field — the certificate carries no reference.sha256, because no digest of the reference is verified (a declared, unverified digest is not allowed)
+[OK] equivalence.pl_kernel.domain_enumerated — enumerated 1073741824 of the declared domain of 1073741824 inputs
+[OK] equivalence.pl_kernel.zero_mismatches — mismatches = 0
+[OK] equivalence.pl_kernel.require[0] — /bitstreams/V1p/fpga_state == 'operating' (found 'operating')
+[OK] equivalence.pl_kernel.require[1] — /bitstreams/V1p/accumulation/extreme_neg/ok == True (found True)
+[OK] equivalence.pl_kernel.require[2] — /bitstreams/V1p/accumulation/extreme_pos/ok == True (found True)
+[OK] equivalence.pl_kernel.require[3] — /bitstreams/V1p/accumulation/random_full_blocks/mismatches == 0 (found 0)
+[..] enumeration domain: equivalence pl_kernel: 1073741824 inputs were enumerated; that these are ALL inputs on which ['p5_v2tile_v1p.bit'] can be invoked in the deployed configuration is not checked — it is the written judgement 'boundary', which must be read against this number
+[..] transcript provenance: equivalence pl_kernel: the transcript is a record written by the issuer's comparison tool; the verifier checks what it states and what it is bound to, not that the comparison was run as recorded
+[OK] risk.decimals — alpha, delta_parent, delta_derived are decimal strings in plain notation
+[OK] risk.alpha_zero — alpha = 0 (deterministic transfer only; a positive alpha is unsupported, not unverified)
+[OK] risk.composition — delta_derived equals delta_parent as exact decimal values (nothing is added: alpha must be zero)
+[OK] risk.parent — delta_parent equals the parent's risk (0.050000)
+[OK] risk.claim — delta_parent equals the claim's risk level
+[..] inventory completeness: that inventory_v1p.txt lists every artifact that can affect the outputs of the derived configuration is the issuer's statement; an artifact absent from both inventories is outside every check
+[..] judgement composition: The enumeration covers each lane's operand domain, not the full 256-element block domain. That exact per-lane products compose to the exact block result is an argument (T3): int32 addition is exact because |sum| <= 8*32*15*128*63 < 2^31. Extreme-value and 373,296 random full-block checks exercise the adder tree but do not enumerate it.
+[..] judgement boundary: Unchanged from the parent link: the floating-point tail is in libggml-cpu.so, which is byte-identical to V1 (hash identity).
+[..] judgement residual_path: The four host artifacts hashed at run time (server binary, CPU-backend library, model, frame) are byte-identical to V1.
+[..] judgement unrecorded_items: libggml-base.so and libllama.so were not re-hashed at V1' run time, and the patch file is a source record that was not re-listed. Their identity to V1 rests on T4: the authors attest that the V1' run used the same unmodified build directory as the V1 run. Recorded filesystem timestamps are supporting observations from the board's unsynchronised clock, not independent proof.
+[..] trust assumption T1_hls_toolchain: Vitis HLS 2022.1 and Vivado 2022.1 compiled q4k_dot_v1p.cpp into the loaded bitstream faithfully; the bitstream digest in the inventory is the one resident in the PL during the run (fpga_manager state 'operating', loaded before server start, no reload until run end).
+[..] trust assumption T3_compositionality: Exact per-lane products combined by exact int32 addition yield the exact integer sum for every reachable input (overflow bound in the composition judgement).
+[..] trust assumption T4_deployment_identity: The libraries not re-hashed during the V1' run are those of the V1 run (attested unmodified build directory).
+[..] trust assumption inherited: T2, T5, T6, A1 and A2 of the parent link continue to apply.
+CHAIN RECORD: INVALID  (failed: evidence.residual_source_identity)
+POLICY: none applied — record verification is not a release decision
+A VALID record is a CONDITIONAL statement: signatures, parent linkage, change coverage, evidence linkage and profile consistency were checked; the written judgements, trust assumptions and whatever established the root claim were not, and are printed. It is not a release decision; apply an acceptance policy for that.

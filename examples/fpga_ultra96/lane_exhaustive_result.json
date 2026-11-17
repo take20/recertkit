@@ -1,0 +1,96 @@
+{
+ "date": "2022-10-30",
+ "bitstreams": {
+  "V1": {
+   "file": "p5_v2tile.bit",
+   "sha256": "17b70231165268cf5f205ccb119b02c6889c675bbbdea22cc29fe309124da5fe",
+   "fpga_state": "operating",
+   "lane_exhaustive": {
+    "values_enumerated": 1073741824,
+    "mismatches": 0,
+    "first_mismatch": null
+   },
+   "lane_exhaustive_seconds": 443.1,
+   "accumulation": {
+    "extreme_neg": {
+     "expected": -30965760,
+     "got": [
+      -30965760,
+      -30965760,
+      -30965760,
+      -30965760,
+      -30965760,
+      -30965760,
+      -30965760,
+      -30965760
+     ],
+     "ok": true
+    },
+    "extreme_pos": {
+     "expected": 30723840,
+     "got": [
+      30723840,
+      30723840,
+      30723840,
+      30723840,
+      30723840,
+      30723840,
+      30723840,
+      30723840
+     ],
+     "ok": true
+    },
+    "random_full_blocks": {
+     "values": 373296,
+     "mismatches": 0
+    }
+   }
+  },
+  "V1p": {
+   "file": "p5_v2tile_v1p.bit",
+   "sha256": "ed35e0d636ce12083c974fc776b496417290bac1d8197622047d63e45bfdea34",
+   "fpga_state": "operating",
+   "lane_exhaustive": {
+    "values_enumerated": 1073741824,
+    "mismatches": 0,
+    "first_mismatch": null
+   },
+   "lane_exhaustive_seconds": 439.4,
+   "accumulation": {
+    "extreme_neg": {
+     "expected": -30965760,
+     "got": [
+      -30965760,
+      -30965760,
+      -30965760,
+      -30965760,
+      -30965760,
+      -30965760,
+      -30965760,
+      -30965760
+     ],
+     "ok": true
+    },
+    "extreme_pos": {
+     "expected": 30723840,
+     "got": [
+      30723840,
+      30723840,
+      30723840,
+      30723840,
+      30723840,
+      30723840,
+      30723840,
+      30723840
+     ],
+     "ok": true
+    },
+    "random_full_blocks": {
+     "values": 373296,
+     "mismatches": 0
+    }
+   }
+  }
+ },
+ "what_this_proves": "For each (group j, lane k, nibble half) the PL computes nibble*q8*scale exactly for ALL 2^8 x 2^8 x 2^6 operand values, with the partner scale set to a different value (so a swapped scale mapping would fail) and all other q8 elements zero. Accumulation across lanes/groups/sub-blocks is checked at both extremes and on random full blocks (E2). Compositionality of the adder tree (that per-lane exactness plus exact int32 addition without overflow yields exact sums) is an argument about the C source, trusted through the HLS/Vivado toolchain; it is NOT enumerated here."
+}

@@ -1,0 +1,21 @@
+{
+ "adapter": "gate-2.0",
+ "decision": "certified",
+ "claim": {
+  "metric_definition": "exact_match_accuracy",
+  "degradation_direction": "reference_minus_candidate",
+  "margin": "0.050000",
+  "risk_level": "0.050000",
+  "sampling_regime": "r2"
+ },
+ "role_digests": {
+  "server": "02e1901b92042c74ac0eb62d962c998bf6b03c7857b11202289e9a50fd7f3b20",
+  "model": "7657e50c663e80fd1f297574c1056b4c7474e270574d7e9b5d6dd3b4bbd1b39b"
+ },
+ "frame": {
+  "task_manifest_hash": "ddb70f16f0a9951b92a5b37dd647d326338bfa9cf0be867d6203df969c779e47",
+  "level": "digest if this equals the SHA-256 of the frame file, identifiers-only if it is the hash of an identifier manifest"
+ },
+ "inventory_digest": "e3dfdc0a7464803aab206088c4e9285b9765998a1b8d6f2cb98bb87bf019acc0",
+ "commitment_digest_sha256": "687d4e9a33508ace482a5f949d93a92c75652916f9a91b1846065cc4f61e8d97"
+}

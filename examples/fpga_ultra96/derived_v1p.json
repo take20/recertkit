@@ -1,0 +1,145 @@
+{
+ "certificate_version": "recertkit-3",
+ "tool": "recertkit 1.0.0",
+ "profile": {
+  "name": "recertkit-default-1",
+  "sha256": "4e89be1f32cc49144eaa776d7d51ae3b6d47792b3c422639aa77dca32cf2c114"
+ },
+ "certificate_id": "f438441c-522a-4e28-9231-b6949bfff909",
+ "issued_at": "2026-11-16T06:39:21.124792+00:00",
+ "parent": {
+  "certificate_id": "ed9ad15a-117f-4e89-8566-feb8062c784f",
+  "certificate_sha256": "30cca07f150b982f6a4e400b21e5efcbb7e34431cb59ee69cf1b0c4b19500892",
+  "kind": "derived",
+  "decision": "transfer"
+ },
+ "claim": {
+  "metric_definition": "exact_match_accuracy",
+  "degradation_direction": "reference_minus_candidate",
+  "margin": "0.050000",
+  "risk_level": "0.050000",
+  "sampling_regime": "r2"
+ },
+ "claim_scope": "The parent's fixed-frame (R2) claim on the 500-item frame F only. No population claim is derived: the equivalence argument covers the inputs the block can receive, and the residual path is argued for this deployment.",
+ "change": {
+  "summary": "Re-synthesis of the PL kernel from a source with reversed/split accumulation trees; host binaries unchanged",
+  "from": "V1: PL kernel q4k_dot, bitstream p5_v2tile.bit",
+  "to": "V1': PL kernel re-synthesised from q4k_dot_v1p.cpp, bitstream p5_v2tile_v1p.bit",
+  "block": "the bitstream"
+ },
+ "block": {
+  "changed": [
+   "p5_v2tile.bit",
+   "p5_v2tile_v1p.bit"
+  ],
+  "unchanged": [
+   "Llama-3.2-1B-Instruct-Q4_K_M.gguf",
+   "eval_mmlu500.jsonl",
+   "libggml-cpu.so",
+   "llama-server"
+  ],
+  "residual_rebuilt": [],
+  "unrecorded": [
+   "libggml-base.so",
+   "libllama.so",
+   "v1pl.patch"
+  ]
+ },
+ "roles": {
+  "server": "llama-server",
+  "model": "Llama-3.2-1B-Instruct-Q4_K_M.gguf",
+  "frame": "eval_mmlu500.jsonl"
+ },
+ "root_binding": {
+  "roles": {
+   "server": "digest",
+   "model": "digest",
+   "frame": "identifiers-only"
+  },
+  "inventory": "unbound",
+  "commitment_file": "root_commitment.json"
+ },
+ "parent_inventory": {
+  "file": "inventory_v1.txt",
+  "sha256": "9638241ea850b89fe6d046e1a242a8efc01817cf2fe3ade40d871159498ae3b6"
+ },
+ "derived_inventory": {
+  "file": "inventory_v1p.txt",
+  "sha256": "07424912ea036ec613565ec8596918d5d943de5f0c2a6b7639a78cf1db4567c6"
+ },
+ "equivalence": [
+  {
+   "id": "pl_kernel",
+   "method_code": "exhaustive_enumeration",
+   "subjects": [
+    "p5_v2tile_v1p.bit"
+   ],
+   "replaces": [
+    "p5_v2tile.bit"
+   ],
+   "reference": {
+    "kind": "parent_link",
+    "id": "exact integer products nibble x q8 x scale of the Q4_K x Q8_K dot product (integer path of ggml_vec_dot_q4_K_q8_K, llama.cpp commit 6c5de1cc)"
+   },
+   "transcript": "lane_enumeration",
+   "domain_size": 1073741824,
+   "domain": "per-lane operand domain of the kernel, enumerated on the loaded bitstream: every (group, lane, nibble half) position x weight byte 0..255 x activation -128..127 x scale 0..63 = 2^30 combinations",
+   "pointers": {
+    "subjects": {
+     "p5_v2tile_v1p.bit": "/bitstreams/V1p/sha256"
+    },
+    "enumerated": "/bitstreams/V1p/lane_exhaustive/values_enumerated",
+    "mismatches": "/bitstreams/V1p/lane_exhaustive/mismatches"
+   },
+   "require": [
+    {
+     "pointer": "/bitstreams/V1p/fpga_state",
+     "equals": "operating"
+    },
+    {
+     "pointer": "/bitstreams/V1p/accumulation/extreme_neg/ok",
+     "equals": true
+    },
+    {
+     "pointer": "/bitstreams/V1p/accumulation/extreme_pos/ok",
+     "equals": true
+    },
+    {
+     "pointer": "/bitstreams/V1p/accumulation/random_full_blocks/mismatches",
+     "equals": 0
+    }
+   ]
+  }
+ ],
+ "judgement_coverage": [],
+ "judgements": {
+  "composition": "The enumeration covers each lane's operand domain, not the full 256-element block domain. That exact per-lane products compose to the exact block result is an argument (T3): int32 addition is exact because |sum| <= 8*32*15*128*63 < 2^31. Extreme-value and 373,296 random full-block checks exercise the adder tree but do not enumerate it.",
+  "boundary": "Unchanged from the parent link: the floating-point tail is in libggml-cpu.so, which is byte-identical to V1 (hash identity).",
+  "residual_path": "The four host artifacts hashed at run time (server binary, CPU-backend library, model, frame) are byte-identical to V1.",
+  "unrecorded_items": "libggml-base.so and libllama.so were not re-hashed at V1' run time, and the patch file is a source record that was not re-listed. Their identity to V1 rests on T4: the authors attest that the V1' run used the same unmodified build directory as the V1 run. Recorded filesystem timestamps are supporting observations from the board's unsynchronised clock, not independent proof."
+ },
+ "evidence_files": {
+  "lane_enumeration": {
+   "file": "lane_exhaustive_result.json",
+   "sha256": "9aa333dfb675273dafe2b5df4e384ebe3536e811fd3569a7a6b05d903994023b"
+  }
+ },
+ "risk_budget": {
+  "delta_parent": "0.050000",
+  "alpha": "0",
+  "delta_derived": "0.050000"
+ },
+ "trust_assumptions": {
+  "T1_hls_toolchain": "Vitis HLS 2022.1 and Vivado 2022.1 compiled q4k_dot_v1p.cpp into the loaded bitstream faithfully; the bitstream digest in the inventory is the one resident in the PL during the run (fpga_manager state 'operating', loaded before server start, no reload until run end).",
+  "T3_compositionality": "Exact per-lane products combined by exact int32 addition yield the exact integer sum for every reachable input (overflow bound in the composition judgement).",
+  "T4_deployment_identity": "The libraries not re-hashed during the V1' run are those of the V1 run (attested unmodified build directory).",
+  "inherited": "T2, T5, T6, A1 and A2 of the parent link continue to apply."
+ },
+ "issuance_status": "retrospective. Issued in the RecertKit certificate format on 2026-11-16 from evidence generated in September 2026; the V1' run (2026-09-14) had been observed before issuance.",
+ "signature": {
+  "algorithm": "ed25519",
+  "value": "308c17533ac94fae5ca5c4ec37447cb70b9792a20b4dd5b7c0f94cb63f731ae42b47b833b71bdd53e016e8d389589b2edb1187726834819dc6cb63dd4bbb9705",
+  "public_key_id": "p5-release-key-1",
+  "canonicalization": "rfc8785_jcs_sorted_utf8_decimal_strings"
+ }
+}

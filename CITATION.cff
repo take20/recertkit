@@ -1,0 +1,26 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "RecertKit: issue and verify derived quality certificates after a declared deployment change"
+version: 1.0.0
+date-released: 2026-11-17
+license: Apache-2.0
+authors:
+  - family-names: "Jo"
+    given-names: "Myunglae"
+    affiliation: "Kyungpook National University, Daegu, Republic of Korea"
+  - family-names: "Kim"
+    given-names: "Donghyun"
+    affiliation: "Palusomni Co., Ltd., Seoul, Republic of Korea"
+  - family-names: "Son"
+    given-names: "Changhan"
+    affiliation: "Palusomni Co., Ltd., Seoul, Republic of Korea"
+  - family-names: "Park"
+    given-names: "Minseong"
+    affiliation: "Palusomni Co., Ltd., Seoul, Republic of Korea"
+  - family-names: "Yu"
+    given-names: "Il-Hyuk"
+    affiliation: "Palusomni Co., Ltd., Seoul, Republic of Korea"
+  - family-names: "Lim"
+    given-names: "Hyungkwang"
+    affiliation: "Palusomni Co., Ltd., Seoul, Republic of Korea; Kyungpook National University, Daegu, Republic of Korea"
+repository-code: "https://github.com/take20/recertkit"

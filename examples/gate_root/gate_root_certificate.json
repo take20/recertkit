@@ -1,0 +1,75 @@
+{
+  "certificate_version": "2.0",
+  "certificate_id": "d4007830-7066-4cc3-9994-4a2fe2f8ecd1",
+  "issued_at": "2026-11-16T05:12:32.923488+00:00",
+  "protocol_commitment_id": "35108e4d-b63a-4ec7-9cd3-414cd651eabc",
+  "commitment_digest_sha256": "687d4e9a33508ace482a5f949d93a92c75652916f9a91b1846065cc4f61e8d97",
+  "stage2_digest_sha256": null,
+  "supersedes_certificate_id": null,
+  "reference_configuration": {
+    "configuration_id": "toy-reference",
+    "engine": "toy-integer-classifier",
+    "engine_commit": "n/a",
+    "backend": "python",
+    "hardware_id": "any",
+    "artifact_filename": "model.json",
+    "artifact_sha256": "fdfed1b43f91f6eba8b38e8c3986be8cd7df4a1401f822eb2aa20744e4e848cc"
+  },
+  "candidate_configuration": {
+    "configuration_id": "toy-c0-coarse-weights",
+    "engine": "toy-integer-classifier",
+    "engine_commit": "n/a",
+    "backend": "python",
+    "hardware_id": "any",
+    "artifact_filename": "model.json",
+    "artifact_sha256": "7657e50c663e80fd1f297574c1056b4c7474e270574d7e9b5d6dd3b4bbd1b39b",
+    "server_binary_sha256": "02e1901b92042c74ac0eb62d962c998bf6b03c7857b11202289e9a50fd7f3b20",
+    "configuration_inventory_sha256": "e3dfdc0a7464803aab206088c4e9285b9765998a1b8d6f2cb98bb87bf019acc0"
+  },
+  "metric_and_parser_hash": "02e1901b92042c74ac0eb62d962c998bf6b03c7857b11202289e9a50fd7f3b20",
+  "task_manifest_hash": "ddb70f16f0a9951b92a5b37dd647d326338bfa9cf0be867d6203df969c779e47",
+  "selection_policy": "single_candidate",
+  "selection_record_digest_sha256": null,
+  "release_ledger": {
+    "release_family": "release-family-1",
+    "release_index": 1,
+    "parent_commitment_id": null,
+    "parent_commitment_digest_sha256": null,
+    "delta_this_release": "0.050000",
+    "delta_lifetime": "0.100000",
+    "rule": "sum_{r>=1} delta_r <= delta_lifetime; delta_r = delta_lifetime/2^r",
+    "history_scope": "supplied-linear-chain; completeness of the release history is not provable locally \u2014 full-family accounting requires --family-history or an append-only registry"
+  },
+  "estimand": {
+    "metric_definition": "exact_match_accuracy",
+    "degradation_direction": "reference_minus_candidate",
+    "margin": "0.050000",
+    "risk_level": "0.050000",
+    "sampling_regime": "r2"
+  },
+  "evidence": {
+    "ordered_record_uri": "gate_records.jsonl",
+    "record_digest_sha256": "ec63ba4903ffa48a12fd82682c22d369849a73cd6f3a2326ea9f4e62bd8795b6",
+    "n": 111,
+    "point_estimate": "0.000000",
+    "upper_confidence_sequence": {
+      "50": "0.132294",
+      "100": "0.057450",
+      "111": "0.049393"
+    },
+    "log_wealth": "3.044097",
+    "stopping_time": 111
+  },
+  "secondary_endpoints": {
+    "harmful_flip_rate": "0.000000",
+    "correctness_churn_rate": "0.000000"
+  },
+  "decision": "certified",
+  "threat_model_note": "integrity+reproducibility of declared evidence under the precommitted design; NOT remote attestation of execution",
+  "signature": {
+    "algorithm": "ed25519",
+    "value": "0dab9340c606081bc950fd3f088e54f2271fa447e7e39e1e7b32c4a3c324e2a583afbf4ee6951a79327e0ef28bc4cd380b4ccdecfd212a59200efe1c4b9a9e09",
+    "public_key_id": "gate-example",
+    "canonicalization": "rfc8785_jcs_sorted_utf8_decimal_strings"
+  }
+}

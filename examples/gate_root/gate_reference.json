@@ -1,0 +1,9 @@
+{
+ "configuration_id": "toy-reference",
+ "engine": "toy-integer-classifier",
+ "engine_commit": "n/a",
+ "backend": "python",
+ "hardware_id": "any",
+ "artifact_filename": "model.json",
+ "artifact_sha256": "fdfed1b43f91f6eba8b38e8c3986be8cd7df4a1401f822eb2aa20744e4e848cc"
+}

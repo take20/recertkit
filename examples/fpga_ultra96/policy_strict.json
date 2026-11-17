@@ -1,0 +1,22 @@
+{
+ "name": "strict-release-1",
+ "description": "Machine-linked evidence only: complete evidence, no coverage by judgement, no rebuilt or unrecorded artifacts, digest-level root bindings, references tied to the parent by digest. The case-study chain does NOT satisfy this policy; the rejection lists why.",
+ "require_all_evidence": true,
+ "coverage_by_judgement": "forbid",
+ "residual_rebuilt": "forbid",
+ "unrecorded": "forbid",
+ "reference_kinds": [
+  "parent_artifact",
+  "parent_link"
+ ],
+ "binding_levels": [
+  "digest"
+ ],
+ "transcript_mapping": "forbid",
+ "require_prospective": true,
+ "reference_by_declaration": "forbid",
+ "enumeration_domains": {
+  "p5_v2tile.bit": 1073741824,
+  "p5_v2tile_v1p.bit": 1073741824
+ }
+}

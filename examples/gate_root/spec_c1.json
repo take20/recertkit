@@ -1,0 +1,60 @@
+{
+ "change": {
+  "summary": "kernel.py: arithmetic -> table lookup"
+ },
+ "claim_scope": "the parent's claim on the fixed 200-item frame; no claim about other inputs",
+ "block": {
+  "changed": [
+   "kernel.py"
+  ],
+  "unchanged": [
+   "system.py",
+   "model.json",
+   "frame.jsonl"
+  ]
+ },
+ "roles": {
+  "server": "system.py",
+  "model": "model.json",
+  "frame": "frame.jsonl"
+ },
+ "root_binding": {
+  "roles": {
+   "server": "digest",
+   "model": "digest",
+   "frame": "digest"
+  },
+  "inventory": "digest",
+  "commitment_file": "gate_commitment.json"
+ },
+ "equivalence": [
+  {
+   "id": "kernel",
+   "method_code": "exhaustive_enumeration",
+   "subjects": [
+    "kernel.py"
+   ],
+   "replaces": [
+    "kernel.py"
+   ],
+   "reference": {
+    "kind": "parent_artifact",
+    "artifact": "kernel.py"
+   },
+   "transcript": "enumeration",
+   "domain_size": 65536,
+   "domain": "all signed 8-bit operand pairs (a, b)"
+  }
+ ],
+ "judgements": {
+  "boundary": "system.py calls the block only as q(x, w) with x a frame feature and w a model weight, both integers in [-128, 127]; the enumerated domain therefore covers every input the block can receive, and the block has no state.",
+  "residual_path": "system.py, model.json and frame.jsonl are byte-identical (hash identity)."
+ },
+ "evidence_files": {
+  "enumeration": "enumeration_c1.json",
+  "frame": "frame.jsonl"
+ },
+ "trust_assumptions": {
+  "interpreter": "the Python interpreter evaluates both kernels as written"
+ }
+}

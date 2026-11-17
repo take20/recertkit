@@ -1,0 +1,92 @@
+== root: gate_root_certificate.json ==
+[OK] signature.root — key gate-example
+[OK] root.decision — certified
+== link: derived_c1.json  <-  gate_root_certificate.json ==
+[OK] certificate.version — 'recertkit-3'; this tool verifies 'recertkit-3'
+[OK] certificate.profile — issued under 'recertkit-default-1'; verifier applies 'recertkit-default-1'
+[OK] signature.certificate — key gate-example
+[OK] signature.parent — key gate-example
+[OK] parent.digest — 6abf5e1964f6c1e3
+[OK] parent.id
+[OK] claim.fields — exactly ['degradation_direction', 'margin', 'metric_definition', 'risk_level', 'sampling_regime']
+[OK] claim.constraints — all fields satisfy the profile
+[OK] parent.decision — certified
+[OK] claim.invariance — every claim field equals the parent's
+[OK] inventory.digest.parent — inventory_c0.txt
+[OK] inventory.unique.parent — 4 artifacts
+[OK] inventory.digest.derived — inventory_c1.txt
+[OK] inventory.unique.derived — 4 artifacts
+[OK] block.complete — every inventory artifact is declared in exactly one category
+[OK] block.changed.kernel.py — added, removed or digest differs
+[OK] block.unchanged.frame.jsonl — equal digest in both inventories
+[OK] block.unchanged.model.json — equal digest in both inventories
+[OK] block.unchanged.system.py — equal digest in both inventories
+[OK] roles.declared — exactly ['frame', 'model', 'server']
+[OK] role.server.present — system.py is in both inventories
+[OK] role.model.present — model.json is in both inventories
+[OK] role.model.fixed — model.json is a fixed role: it must be unchanged
+[OK] role.frame.present — frame.jsonl is in both inventories
+[OK] role.frame.fixed — frame.jsonl is a fixed role: it must be unchanged
+[OK] roles.binding_level.server — declared 'digest'; this root provides 'digest'
+[OK] roles.root_binding.server — root digest for role server == parent inventory[system.py]
+[OK] roles.binding_level.model — declared 'digest'; this root provides 'digest'
+[OK] roles.root_binding.model — root digest for role model == parent inventory[model.json]
+[OK] roles.root_filename.model — root names model.json
+[OK] roles.binding_level.frame — declared 'digest'; this root provides 'digest'
+[OK] roles.root_binding.frame — root digest for role frame == parent inventory[frame.jsonl]
+[OK] roles.distinct — role artifacts have pairwise distinct digests
+[OK] root.inventory_level — declared 'digest'; this root provides 'digest'
+[OK] root.inventory_binding — the root binds the digest of the parent inventory
+[OK] root.commitment — commitment file digest == root.commitment_digest_sha256 (687d4e9a33508ace)
+[OK] root.frame_file — frame file present and equal to the parent inventory digest
+[OK] root.frame_ids — commitment.sampling_frame_hash recomputes from the frame's 200 item identifiers
+[OK] root.task_manifest — the root and its commitment bind the SHA-256 of the frame file
+[OK] root.commitment_params — commitment regime/epsilon/delta equal the claim (r2, 0.050000, 0.050000)
+[..] root protocol: the root's own evidence (ordered records, sequential-test replay) is verified by the release gate's verifier, not by RecertKit; here the root's signature, decision and bindings are checked
+[OK] judgements.required — present: ['boundary', 'residual_path']
+[OK] evidence.enumeration — enumeration_c1.json (925be2f4a8be773f)
+[OK] evidence.frame — frame.jsonl (ddb70f16f0a9951b)
+[OK] equivalence.ids — equivalence entries have distinct identifiers ['kernel']
+[OK] coverage.derived_side — each of the 1 changed artifacts of the derived inventory is a subject of exactly one equivalence entry or covered by one named judgement
+[OK] coverage.parent_side — each of the 1 changed artifacts of the parent inventory is replaced by exactly one equivalence entry or covered by one named judgement
+[OK] coverage.declared — nothing is listed as covered on a side where it is not a changed artifact
+[OK] coverage.equivalence_present — 1 equivalence entry
+[OK] equivalence.kernel.method — 'exhaustive_enumeration'; this profile accepts ['exhaustive_enumeration']
+[OK] equivalence.kernel.subjects — ['kernel.py'] are distinct changed artifacts of the derived configuration
+[OK] equivalence.kernel.replaces — ['kernel.py'] are distinct changed artifacts of the parent configuration
+[OK] equivalence.kernel.reference_kind — 'parent_artifact'; this profile accepts ['parent_artifact', 'parent_link', 'specification']
+[OK] equivalence.kernel.transcript — transcript 'enumeration' is a bound, present evidence file
+[OK] equivalence.kernel.transcript_layout — standard layout recertkit-enumeration-1
+[OK] equivalence.kernel.subject_digest — the transcript's subject digests equal the derived inventory for ['kernel.py']
+[OK] equivalence.kernel.reference_block — the reference consists of exactly the parent artifacts this entry replaces: reference ['kernel.py'], replaces ['kernel.py']
+[OK] equivalence.kernel.reference_digest — the transcript's reference (3724a958b937836f) must be ['kernel.py'] of the PARENT inventory (3724a958b937836f)
+[OK] equivalence.kernel.reference_field — the certificate's reference.sha256 is exactly the digest the reference was verified against
+[OK] equivalence.kernel.domain_enumerated — enumerated 65536 of the declared domain of 65536 inputs
+[OK] equivalence.kernel.zero_mismatches — mismatches = 0
+[..] enumeration domain: equivalence kernel: 65536 inputs were enumerated; that these are ALL inputs on which ['kernel.py'] can be invoked in the deployed configuration is not checked — it is the written judgement 'boundary', which must be read against this number
+[..] transcript provenance: equivalence kernel: the transcript is a record written by the issuer's comparison tool; the verifier checks what it states and what it is bound to, not that the comparison was run as recorded
+[OK] risk.decimals — alpha, delta_parent, delta_derived are decimal strings in plain notation
+[OK] risk.alpha_zero — alpha = 0 (deterministic transfer only; a positive alpha is unsupported, not unverified)
+[OK] risk.composition — delta_derived equals delta_parent as exact decimal values (nothing is added: alpha must be zero)
+[OK] risk.parent — delta_parent equals the parent's risk (0.050000)
+[OK] risk.claim — delta_parent equals the claim's risk level
+[..] inventory completeness: that inventory_c1.txt lists every artifact that can affect the outputs of the derived configuration is the issuer's statement; an artifact absent from both inventories is outside every check
+[..] judgement boundary: system.py calls the block only as q(x, w) with x a frame feature and w a model weight, both integers in [-128, 127]; the enumerated domain therefore covers every input the block can receive, and the block has no state.
+[..] judgement residual_path: system.py, model.json and frame.jsonl are byte-identical (hash identity).
+[..] trust assumption interpreter: the Python interpreter evaluates both kernels as written
+[POLICY OK] policy.require_all_evidence[derived_c1.json] — every evidence file is present
+[POLICY OK] policy.coverage_by_judgement[derived_c1.json] — no changed artifact rests on a judgement outside the policy
+[POLICY OK] policy.residual_rebuilt[derived_c1.json] — no residual_rebuilt artifacts
+[POLICY OK] policy.unrecorded[derived_c1.json] — no unrecorded artifacts
+[POLICY OK] policy.reference_kinds[derived_c1.json] — references are of kinds ['parent_artifact', 'parent_link']
+[POLICY OK] policy.reference_by_declaration[derived_c1.json] — for every comparison the verifier matched the transcript's reference digest
+[POLICY OK] policy.binding_levels[derived_c1.json] — root bindings are at levels ['digest']
+[POLICY OK] policy.transcript_mapping[derived_c1.json] — all transcripts use the standard layout
+[POLICY OK] policy.enumeration_domains[derived_c1.json] — every enumerated domain has the size the policy requires for its subjects
+[POLICY OK] policy.accepted_judgements[derived_c1.json] — every one of the judgements is accepted by the policy (by NAME only, text not pinned: ['boundary', 'residual_path'])
+[POLICY OK] policy.accepted_assumptions[derived_c1.json] — every one of the trust_assumptions is accepted by the policy (by NAME only, text not pinned: ['interpreter'])
+[POLICY OK] policy.root_adapters[derived_c1.json] — root format 'gate-2.0'
+[POLICY OK] policy.require_prospective[derived_c1.json] — declared issuance_status: 'prospective'
+CHAIN RECORD: VALID — conditional on 7 unchecked items (1 enumeration domain, 1 inventory completeness, 2 judgement, 1 root protocol, 1 transcript provenance, 1 trust assumption)
+POLICY gate-root-release-1: ACCEPTED
+A VALID record is a CONDITIONAL statement: signatures, parent linkage, change coverage, evidence linkage and profile consistency were checked; the written judgements, trust assumptions and whatever established the root claim were not, and are printed. It is not a release decision; apply an acceptance policy for that.

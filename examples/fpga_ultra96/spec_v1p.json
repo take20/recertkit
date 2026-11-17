@@ -1,0 +1,90 @@
+{
+ "change": {
+  "summary": "Re-synthesis of the PL kernel from a source with reversed/split accumulation trees; host binaries unchanged",
+  "from": "V1: PL kernel q4k_dot, bitstream p5_v2tile.bit",
+  "to": "V1': PL kernel re-synthesised from q4k_dot_v1p.cpp, bitstream p5_v2tile_v1p.bit",
+  "block": "the bitstream"
+ },
+ "claim_scope": "The parent's fixed-frame (R2) claim on the 500-item frame F only. No population claim is derived: the equivalence argument covers the inputs the block can receive, and the residual path is argued for this deployment.",
+ "roles": {
+  "server": "llama-server",
+  "model": "Llama-3.2-1B-Instruct-Q4_K_M.gguf",
+  "frame": "eval_mmlu500.jsonl"
+ },
+ "block": {
+  "changed": [
+   "p5_v2tile.bit",
+   "p5_v2tile_v1p.bit"
+  ],
+  "unchanged": [
+   "llama-server",
+   "libggml-cpu.so",
+   "Llama-3.2-1B-Instruct-Q4_K_M.gguf",
+   "eval_mmlu500.jsonl"
+  ],
+  "unrecorded": [
+   "libggml-base.so",
+   "libllama.so",
+   "v1pl.patch"
+  ]
+ },
+ "evidence_files": {
+  "lane_enumeration": "lane_exhaustive_result.json"
+ },
+ "trust_assumptions": {
+  "T1_hls_toolchain": "Vitis HLS 2022.1 and Vivado 2022.1 compiled q4k_dot_v1p.cpp into the loaded bitstream faithfully; the bitstream digest in the inventory is the one resident in the PL during the run (fpga_manager state 'operating', loaded before server start, no reload until run end).",
+  "T3_compositionality": "Exact per-lane products combined by exact int32 addition yield the exact integer sum for every reachable input (overflow bound in the composition judgement).",
+  "T4_deployment_identity": "The libraries not re-hashed during the V1' run are those of the V1 run (attested unmodified build directory).",
+  "inherited": "T2, T5, T6, A1 and A2 of the parent link continue to apply."
+ },
+ "issuance_status": "retrospective. Issued in the RecertKit certificate format on 2026-11-16 from evidence generated in September 2026; the V1' run (2026-09-14) had been observed before issuance.",
+ "equivalence": [
+  {
+   "id": "pl_kernel",
+   "method_code": "exhaustive_enumeration",
+   "subjects": [
+    "p5_v2tile_v1p.bit"
+   ],
+   "replaces": [
+    "p5_v2tile.bit"
+   ],
+   "reference": {
+    "kind": "parent_link"
+   },
+   "transcript": "lane_enumeration",
+   "domain_size": 1073741824,
+   "domain": "per-lane operand domain of the kernel, enumerated on the loaded bitstream: every (group, lane, nibble half) position x weight byte 0..255 x activation -128..127 x scale 0..63 = 2^30 combinations",
+   "pointers": {
+    "subjects": {
+     "p5_v2tile_v1p.bit": "/bitstreams/V1p/sha256"
+    },
+    "enumerated": "/bitstreams/V1p/lane_exhaustive/values_enumerated",
+    "mismatches": "/bitstreams/V1p/lane_exhaustive/mismatches"
+   },
+   "require": [
+    {
+     "pointer": "/bitstreams/V1p/fpga_state",
+     "equals": "operating"
+    },
+    {
+     "pointer": "/bitstreams/V1p/accumulation/extreme_neg/ok",
+     "equals": true
+    },
+    {
+     "pointer": "/bitstreams/V1p/accumulation/extreme_pos/ok",
+     "equals": true
+    },
+    {
+     "pointer": "/bitstreams/V1p/accumulation/random_full_blocks/mismatches",
+     "equals": 0
+    }
+   ]
+  }
+ ],
+ "judgements": {
+  "composition": "The enumeration covers each lane's operand domain, not the full 256-element block domain. That exact per-lane products compose to the exact block result is an argument (T3): int32 addition is exact because |sum| <= 8*32*15*128*63 < 2^31. Extreme-value and 373,296 random full-block checks exercise the adder tree but do not enumerate it.",
+  "boundary": "Unchanged from the parent link: the floating-point tail is in libggml-cpu.so, which is byte-identical to V1 (hash identity).",
+  "residual_path": "The four host artifacts hashed at run time (server binary, CPU-backend library, model, frame) are byte-identical to V1.",
+  "unrecorded_items": "libggml-base.so and libllama.so were not re-hashed at V1' run time, and the patch file is a source record that was not re-listed. Their identity to V1 rests on T4: the authors attest that the V1' run used the same unmodified build directory as the V1 run. Recorded filesystem timestamps are supporting observations from the board's unsynchronised clock, not independent proof."
+ }
+}
