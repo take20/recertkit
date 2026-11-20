@@ -18,7 +18,7 @@ multiply `q(a, b)` on signed 8-bit operands. `kernel.py` is the replaceable bloc
 | 6 | truncation instead of rounding: 11,756 of 65,536 inputs differ | **refused** (`equivalence.kernel.zero_mismatches`) |
 | 7a | a kernel that always returns 0, "shown equivalent" by comparing it with itself (a truthful transcript, 0 mismatches) | **refused** (`equivalence.kernel.reference_digest`) |
 | 7b | an equivalent kernel shipped with a modified `system.py` that has no evidence | **refused** (`coverage.derived_side`, `coverage.parent_side`) |
-| 7c | the same change, with `system.py` added to the parent artifacts the kernel comparison *replaces* | **refused** (`coverage.derived_side`, `equivalence.kernel.reference_block`) |
+| 7c | the same change, with `system.py` added to the parent artifacts the kernel comparison *replaces* | **refused** (`coverage.derived_side`, `equivalence.kernel.correspondence`, `equivalence.kernel.reference_block`) |
 
 ## Reading the output
 

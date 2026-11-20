@@ -1,12 +1,12 @@
 {
  "certificate_version": "recertkit-3",
- "tool": "recertkit 1.0.0",
+ "tool": "recertkit 1.1.0",
  "profile": {
   "name": "recertkit-default-1",
   "sha256": "4e89be1f32cc49144eaa776d7d51ae3b6d47792b3c422639aa77dca32cf2c114"
  },
- "certificate_id": "f438441c-522a-4e28-9231-b6949bfff909",
- "issued_at": "2026-11-16T06:39:21.124792+00:00",
+ "certificate_id": "0d7a1568-386e-4586-a6a9-d6dfbbc23515",
+ "issued_at": "2026-11-20T04:30:58.650332+00:00",
  "parent": {
   "certificate_id": "ed9ad15a-117f-4e89-8566-feb8062c784f",
   "certificate_sha256": "30cca07f150b982f6a4e400b21e5efcbb7e34431cb59ee69cf1b0c4b19500892",
@@ -116,7 +116,8 @@
   "composition": "The enumeration covers each lane's operand domain, not the full 256-element block domain. That exact per-lane products compose to the exact block result is an argument (T3): int32 addition is exact because |sum| <= 8*32*15*128*63 < 2^31. Extreme-value and 373,296 random full-block checks exercise the adder tree but do not enumerate it.",
   "boundary": "Unchanged from the parent link: the floating-point tail is in libggml-cpu.so, which is byte-identical to V1 (hash identity).",
   "residual_path": "The four host artifacts hashed at run time (server binary, CPU-backend library, model, frame) are byte-identical to V1.",
-  "unrecorded_items": "libggml-base.so and libllama.so were not re-hashed at V1' run time, and the patch file is a source record that was not re-listed. Their identity to V1 rests on T4: the authors attest that the V1' run used the same unmodified build directory as the V1 run. Recorded filesystem timestamps are supporting observations from the board's unsynchronised clock, not independent proof."
+  "unrecorded_items": "libggml-base.so and libllama.so were not re-hashed at V1' run time, and the patch file is a source record that was not re-listed. Their identity to V1 rests on T4: the authors attest that the V1' run used the same unmodified build directory as the V1 run. Recorded filesystem timestamps are supporting observations from the board's unsynchronised clock, not independent proof.",
+  "replacement_correspondence": "The host does not reach the kernel through the bitstream's file name. The unchanged CPU-backend library (byte-identical to V1) maps the kernel's control registers at physical address 0x80000000 - the default of pl_q4k.c; the V1' run set P5_PL and P5_PL_STATS but not P5_PL_BASE. The hardware handoff files of both bitstreams place these registers (q4k_dot_0, s_axi_control) at 0x80000000-0x8000FFFF (read on the board on 2026-11-20), so the library reaches the kernel of whichever bitstream is configured in the PL. p5_v2tile_v1p.bit was configured before the server started and not reconfigured until the run ended (T1_hls_toolchain); p5_v2tile.bit was not loaded during the V1' run."
  },
  "evidence_files": {
   "lane_enumeration": {
@@ -138,7 +139,7 @@
  "issuance_status": "retrospective. Issued in the RecertKit certificate format on 2026-11-16 from evidence generated in September 2026; the V1' run (2026-09-14) had been observed before issuance.",
  "signature": {
   "algorithm": "ed25519",
-  "value": "308c17533ac94fae5ca5c4ec37447cb70b9792a20b4dd5b7c0f94cb63f731ae42b47b833b71bdd53e016e8d389589b2edb1187726834819dc6cb63dd4bbb9705",
+  "value": "e4463e7149054236d10c917cf7ec61d038934a27cf21a705ea2925997a90911d2713d6ff8b88897e804cfca596d241b9bc1f80e155be3ca07b2f8cfa62707d04",
   "public_key_id": "p5-release-key-1",
   "canonicalization": "rfc8785_jcs_sorted_utf8_decimal_strings"
  }

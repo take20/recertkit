@@ -39,6 +39,7 @@ from .roots import RootError, read_root
 from .signing import sign
 
 CATEGORIES = ("changed", "unchanged", "residual_rebuilt", "unrecorded")
+CORRESPONDENCE = "replacement_correspondence"   # judgement required when a subject replaces a parent artifact of another name
 VERDICT_SEMANTICS = ("A VALID record is a CONDITIONAL statement: signatures, parent linkage, change coverage, evidence linkage and "
                      "profile consistency were checked; the written judgements, trust assumptions and whatever established the root "
                      "claim were not, and are printed. It is not a release decision; apply an acceptance policy for that.")
@@ -285,11 +286,33 @@ def _equivalence_entry(R, e, cert, pv, d, pinv, dinv, decl, profile, registry, p
     ref = e.get("reference") if isinstance(e.get("reference"), dict) else {}
     kind = ref.get("kind")
     st = {"subjects": subs, "replaces": reps, "method": mc, "reference_kind": kind, "reference_binding": None, "reference_digest": None,
-          "mapped": bool(e.get("pointers")), "domain_size": e.get("domain_size") if (mc == "exhaustive_enumeration" and _is_int(e.get("domain_size"))) else None}
+          "mapped": bool(e.get("pointers")), "domain_size": e.get("domain_size") if (mc == "exhaustive_enumeration" and _is_int(e.get("domain_size"))) else None,
+          "renamed": sorted(r for r in reps if r not in subs)}
     R.check(f"{P}.subjects", bool(subs) and subs == e.get("subjects") and len(set(subs)) == len(subs) and all(s in changed and s in dinv for s in subs),
             f"{subs} are distinct changed artifacts of the derived configuration")
     R.check(f"{P}.replaces", reps == (e.get("replaces") or []) and len(set(reps)) == len(reps) and all(r in changed and r in pinv for r in reps),
             f"{reps} are distinct changed artifacts of the parent configuration")
+    if reps:
+        # The verifier identifies artifacts by NAME and cannot see where the running system reaches them.  A subject that
+        # carries the name of the artifact it replaces is taken to occupy that artifact's place.  When the names differ (a
+        # renamed file; two artifacts declared as each other's replacements), that each new artifact takes the place of
+        # the replaced one is a written judgement: required, printed, and refusable by a policy (renamed_replacement).
+        jd = cert.get("judgements") if isinstance(cert.get("judgements"), dict) else {}
+        has_j = isinstance(jd.get(CORRESPONDENCE), str) and bool(jd.get(CORRESPONDENCE).strip())
+        ren = st["renamed"]
+        R.check(f"{P}.correspondence", not ren or has_j,
+                f"every replaced artifact {reps} has a subject of the same name" if not ren else
+                f"{ren} of the parent configuration {'is' if len(ren) == 1 else 'are'} replaced by {subs}, under another name; where the system reaches the "
+                f"new artifacts is the written judgement {CORRESPONDENCE!r}" if has_j else
+                f"{ren} of the parent configuration {'is' if len(ren) == 1 else 'are'} replaced by {subs}, under another name; this requires the written "
+                f"judgement {CORRESPONDENCE!r}, which the certificate does not carry")
+        if ren:
+            still = [r for r in ren if r in dinv]
+            R.notice("renamed replacement", f"equivalence {e.get('id')}: {ren} of the parent configuration {'is' if len(ren) == 1 else 'are'} replaced by {subs}, "
+                     f"which do{'es' if len(subs) == 1 else ''} not carry {'its' if len(ren) == 1 else 'their'} name; that the running system now reaches {subs} where "
+                     f"it reached {ren} is not checked — the verifier identifies artifacts by name only. It is the written judgement {CORRESPONDENCE!r}"
+                     + (f". {still} still {'exists' if len(still) == 1 else 'exist'} in the derived configuration, as a different file: a system that reaches "
+                        f"{'it' if len(still) == 1 else 'them'} by name reaches that file, not {subs}" if still else ""))
     okk = R.check(f"{P}.reference_kind", kind in REFERENCE_KINDS and kind in profile.get("reference_kinds", REFERENCE_KINDS),
                   f"{kind!r}; this profile accepts {list(profile.get('reference_kinds', REFERENCE_KINDS))}")
     ev = cert.get("evidence_files", {}); te = ev.get(e.get("transcript") or "\0", {})

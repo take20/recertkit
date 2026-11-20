@@ -38,7 +38,7 @@ behind it; it reads roots through *adapters* (`docs/roots.md`).
 
 ## Coverage and linkage
 
-Two questions are separate, and both are checked:
+Three questions are separate, and all three are checked:
 
 1. **Is the list of changes complete?** Every artifact of either inventory is declared in exactly one category, and
    the declaration agrees with the digests (`block.*`).
@@ -55,6 +55,16 @@ Two questions are separate, and both are checked:
    side (`coverage.derived_side`, `coverage.parent_side`), and nothing may be listed on a side where it is not an
    obligation (`coverage.declared`). An artifact covered by judgement is printed as *not covered by equivalence
    evidence*, with the side.
+3. **Does each new artifact take the place of what it was compared with?** Artifacts are identified by **name**; how
+   the running system reaches them is not visible to the verifier. When every artifact an entry replaces has a subject
+   of the same name, the new block stands where the old one stood. When one does not — a renamed file, two artifacts
+   declared as each other's replacements, a deleted file absorbed by a block under another name — that the system now
+   reaches the subjects where it reached the replaced artifacts is the written judgement
+   `replacement_correspondence`. Without it the declaration is refused (`equivalence.<id>.correspondence`); with it,
+   every run prints a *renamed replacement* notice, which also names any replaced artifact that still exists in the
+   derived configuration as a different file, and the policy member `renamed_replacement` can refuse it. (Before
+   1.1.0, two kernels whose contents were swapped, each declared as the replacement of the other, were accepted with
+   two true comparisons and complete coverage.)
 
 And for each comparison, **both sides are identified**:
 

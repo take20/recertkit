@@ -41,7 +41,7 @@ A JSON object. Paths in `evidence_files` are relative to the spec file.
 | `id` | identifier (`[A-Za-z0-9_-]+`), unique in the certificate; appears in check names |
 | `method_code` | a method the profile accepts |
 | `subjects` | the changed artifacts of the **derived** configuration the compared block consists of; the transcript must record the digest of each. Being a subject discharges the derived-side coverage obligation of that artifact |
-| `replaces` | the changed artifacts of the **parent** configuration that the subjects replace (empty when the block is new). Being replaced discharges the parent-side obligation only — never the obligation of a same-named file of the derived configuration |
+| `replaces` | the changed artifacts of the **parent** configuration that the subjects replace (empty when the block is new). Being replaced discharges the parent-side obligation only — never the obligation of a same-named file of the derived configuration. A replaced artifact without a subject of the same name requires the judgement `replacement_correspondence` (below) |
 | `reference` | `{"kind": "parent_artifact", "artifact": N}` or `{"kind": "parent_artifact", "artifacts": [N, …]}` — must name exactly the artifacts in `replaces`; `{"kind": "parent_link"}` — the parent link must have an entry whose subjects are exactly `replaces`; or `{"kind": "specification", "id": …, "judgement": …, "evidence": <optional evidence name>}` |
 | `transcript` | name of an evidence file (never detached) |
 | `domain_size`, `require` | `exhaustive_enumeration`: size of the enumerated domain; optional side conditions `{"pointer", "equals"}` |
@@ -62,6 +62,11 @@ of several artifacts the value is the digest of the sorted `{name: digest}` map.
 | two files become one | `[k, p]` | `[k]` | `[k, p]` | parent artifacts `[k, p]` (the transcript records both digests) |
 | rename `k` → `f` | `[k, f]` (+ whatever loads it) | `[f]` | `[k]` | parent artifact `k` |
 | unrelated file added / removed | `[…, x]` | — | — | `judgement_coverage` with `side` `derived` / `parent` |
+
+In *two files become one* and *rename*, a replaced artifact (`p`; `k`) has no subject of its name. The declaration
+must then carry the judgement `replacement_correspondence`, stating why the running system reaches the subjects where
+it reached the replaced artifacts — for a rename, what loads `f` instead of `k`; for a merge, that nothing outside
+the block read `p`. It is printed on every run as a *renamed replacement* (`docs/concepts.md`).
 
 ## Transcript layout
 

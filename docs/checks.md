@@ -65,6 +65,7 @@ what was not checked is printed, and an acceptance policy (`--policy`) decides w
 | `equivalence.*.method` | the method is accepted by the profile and registered |
 | `equivalence.*.subjects` | the subjects are distinct changed artifacts of the derived configuration |
 | `equivalence.*.replaces` | the replaced artifacts are distinct changed artifacts of the parent configuration |
+| `equivalence.*.correspondence` | every replaced parent artifact has a subject of the same name, or the certificate carries the written judgement 'replacement_correspondence' (printed): artifacts are identified by name, and where the system reaches them is not visible to the verifier |
 | `equivalence.*.reference_kind` | the kind of reference is one the profile accepts |
 | `equivalence.*.transcript` | the transcript is a bound evidence file and is present (never detached) |
 | `equivalence.*.transcript_json` | the transcript parses as JSON |
@@ -132,6 +133,7 @@ what was not checked is printed, and an acceptance policy (`--policy`) decides w
 | `policy.enumeration_domains[*]` | every equivalence entry is an exhaustive enumeration over a domain of the size the policy requires for its subjects |
 | `policy.binding_levels[*]` | every root binding is at a level the policy accepts |
 | `policy.transcript_mapping[*]` | no transcript is read through issuer-declared pointers |
+| `policy.renamed_replacement[*]` | no equivalence entry replaces a parent artifact by a subject of another name |
 | `policy.chain[*]` | single-link verification of a later link: never satisfied — the earlier links were not evaluated (NOT EVALUATED) |
 | `policy.accepted_judgements[*]` | every written judgement is one the policy accepts — by name, or by name and SHA-256 of its text when the policy pins one |
 | `policy.accepted_assumptions[*]` | every trust assumption is one the policy accepts — by name, or by name and SHA-256 of its text when the policy pins one |

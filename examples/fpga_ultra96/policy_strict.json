@@ -18,5 +18,6 @@
  "enumeration_domains": {
   "p5_v2tile.bit": 1073741824,
   "p5_v2tile_v1p.bit": 1073741824
- }
+ },
+ "renamed_replacement": "forbid"
 }

@@ -45,10 +45,15 @@ def _replaces_only(chain):
     json.dump(spec, open(chain.P("spec_bad.json"), "w")); return spec
 
 
+# Since 1.1.0 the reviewer's declaration also fails equivalence.kernel.correspondence: it declares the parent's
+# system.py as replaced by kernel.py, a file of another name (tests/test_renamed_replacement.py).
+RO = ["coverage.derived_side", "equivalence.kernel.correspondence", "equivalence.kernel.reference_block"]
+
+
 def test_replaces_only_coverage_is_refused_at_issue(chain):
     _replaces_only(chain)
     rc, rep = chain.issue("root.json", "inventory_v0.txt", "inventory_bad.txt", "spec_bad.json", "derived_bad.json")
-    assert rc == 1 and rep["failed_checks"] == ["coverage.derived_side", "equivalence.kernel.reference_block"] and not os.path.exists(chain.P("derived_bad.json"))
+    assert rc == 1 and rep["failed_checks"] == RO and not os.path.exists(chain.P("derived_bad.json"))
     before, after = toy.evaluate(chain.P("config_v0")), toy.evaluate(chain.P("config_bad"))
     assert sum(a["pred"] != b["pred"] for a, b in zip(before, after)) == 127 and (sum(r["correct"] for r in before), sum(r["correct"] for r in after)) == (150, 67)
 
@@ -56,7 +61,16 @@ def test_replaces_only_coverage_is_refused_at_issue(chain):
 def test_replaces_only_coverage_signed_anyway_is_rejected_by_the_verifier(chain):
     chain.forge("root.json", "inventory_v0.txt", "inventory_bad.txt", _replaces_only(chain), "derived_bad.json")
     rc, rep = chain.verify_chain(links=("derived_bad.json",), extra=["--require-all-evidence", "--policy", os.path.join(os.path.dirname(toy.__file__), "policy.json")])
-    assert rc == 1 and rep["failed_checks"] == ["coverage.derived_side", "equivalence.kernel.reference_block"] and rep["policy_verdict"] == "REJECTED"
+    assert rc == 1 and rep["failed_checks"] == RO and rep["policy_verdict"] == "REJECTED"
+
+
+def test_replaces_only_coverage_is_refused_without_the_correspondence_check(chain):
+    """The side-specific coverage rule refuses the declaration on its own: with the correspondence judgement written,
+    the same two checks as before fail."""
+    spec = _replaces_only(chain); spec["judgements"]["replacement_correspondence"] = "system.py is replaced by kernel.py."
+    json.dump(spec, open(chain.P("spec_bad.json"), "w"))
+    rc, rep = chain.issue("root.json", "inventory_v0.txt", "inventory_bad.txt", "spec_bad.json", "derived_bad.json")
+    assert rc == 1 and rep["failed_checks"] == ["coverage.derived_side", "equivalence.kernel.reference_block"]
 
 
 def test_replaces_only_coverage_with_a_composite_reference_is_still_refused(chain):
@@ -65,7 +79,7 @@ def test_replaces_only_coverage_with_a_composite_reference_is_still_refused(chai
     spec = _replaces_only(chain); spec["equivalence"][0]["reference"] = {"kind": "parent_artifact", "artifacts": ["kernel.py", "system.py"]}
     json.dump(spec, open(chain.P("spec_bad.json"), "w"))
     rc, rep = chain.issue("root.json", "inventory_v0.txt", "inventory_bad.txt", "spec_bad.json", "derived_bad.json")
-    assert rc == 1 and rep["failed_checks"] == ["coverage.derived_side", "equivalence.kernel.reference_digest"]
+    assert rc == 1 and rep["failed_checks"] == ["coverage.derived_side", "equivalence.kernel.correspondence", "equivalence.kernel.reference_digest"]
 
 
 def test_replaces_only_coverage_on_the_real_gate_issued_root(tmp_path):
@@ -83,7 +97,7 @@ def test_replaces_only_coverage_on_the_real_gate_issued_root(tmp_path):
     trust = ["--trust", "gate-example=" + P("gate_example.pub"), "--trust", "audit=" + P("audit.pub")]
     rc = cli(["issue", "--parent", P("gate_root_certificate.json"), "--spec", P("spec_changed.json"), "--parent-inventory", P("inventory_c0.txt"), "--derived-inventory", P("inventory_changed.txt"),
               "--key", P("audit.key"), "--key-id", "audit", "--out", P("derived_changed.json"), *trust, "--json-report", P("issue.json")])
-    assert rc == 1 and load_json(P("issue.json"))["failed_checks"] == ["coverage.derived_side", "equivalence.kernel.reference_block"]
+    assert rc == 1 and load_json(P("issue.json"))["failed_checks"] == RO
     from recertkit.engine import build_certificate
     from recertkit.profiles import load_profile
     from recertkit.signing import sign
@@ -91,7 +105,7 @@ def test_replaces_only_coverage_on_the_real_gate_issued_root(tmp_path):
     json.dump(sign(c, P("audit.key"), "audit"), open(P("derived_changed.json"), "w"))
     rc = cli(["verify-chain", "--root", P("gate_root_certificate.json"), "--links", P("derived_changed.json"), *trust, "--policy", P("policy.json"), "--require-all-evidence", "--json-report", P("verify.json")])
     rep = load_json(P("verify.json"))
-    assert rc == 1 and not rep["record_valid"] and rep["policy_verdict"] == "REJECTED" and rep["failed_checks"] == ["coverage.derived_side", "equivalence.kernel.reference_block"]
+    assert rc == 1 and not rep["record_valid"] and rep["policy_verdict"] == "REJECTED" and rep["failed_checks"] == RO
     assert open(P("gate_root_certificate.json"), "rb").read() == root_before
     ref, c0, c1 = (toy.evaluate(P(x)) for x in ("config_reference", "config_c0", "config_c1"))
     assert [sum(r["correct"] for r in x) for x in (ref, c0, c1)] == [150, 150, 67] and sum(a["pred"] != b["pred"] for a, b in zip(c0, c1)) == 127
@@ -129,8 +143,11 @@ def _split(chain):
     json.dump(spec, open(chain.P("spec_split.json"), "w")); return cfg, spec
 
 
-def _policy_for(chain, domains):
+def _policy_for(chain, domains, renamed=False):
+    """The quick-start release policy with other domains; ``renamed=True`` additionally accepts renamed replacements
+    and the judgement that states their correspondence (the quick-start policy itself forbids them)."""
     p = load_json(os.path.join(os.path.dirname(toy.__file__), "policy.json")); p["enumeration_domains"] = domains
+    if renamed: p["renamed_replacement"] = "allow"; p["accepted_judgements"] = sorted(p["accepted_judgements"] + ["replacement_correspondence"])
     json.dump(p, open(chain.P("policy_t.json"), "w")); return ["--policy", chain.P("policy_t.json")]
 
 
@@ -154,8 +171,13 @@ def test_added_file_named_as_subject_without_a_digest_in_the_transcript_is_refus
     assert rc == 1 and rep["failed_checks"] == ["equivalence.kernel.subject_digest"]
 
 
-def _merge(chain, replaces, reference, reference_files=True):
-    """split kernel (two artifacts) -> the single-file 'sel' kernel: kernel_params.json is DELETED."""
+MERGE_CORRESPONDENCE = "kernel_params.json was read only by kernel.py; the merged kernel.py is reached under its own name."
+
+
+def _merge(chain, replaces, reference, reference_files=True, correspondence=True):
+    """split kernel (two artifacts) -> the single-file 'sel' kernel: kernel_params.json is DELETED.  Replacing it by
+    kernel.py is a replacement under another name, so the judgement 'replacement_correspondence' is written unless
+    ``correspondence=False``."""
     _split(chain)
     assert chain.issue("root.json", "inventory_v0.txt", "inventory_split.txt", "spec_split.json", "derived_split.json")[0] == 0
     cfg = _config(chain, "merged", "sel")
@@ -163,6 +185,7 @@ def _merge(chain, replaces, reference, reference_files=True):
     toy.enumerate_block(cfg["kernel.py"], old[0], chain.P("enumeration_merged.json"), reference_files=[old[1]] if reference_files else ())
     spec = _spec(chain, "merged", "enumeration_merged.json", block={"changed": ["kernel.py", "kernel_params.json"], "unchanged": ["system.py", "model.json", "frame.jsonl"]})
     spec["equivalence"][0].update({"replaces": replaces, "reference": reference})
+    if correspondence and "kernel_params.json" in replaces: spec["judgements"]["replacement_correspondence"] = MERGE_CORRESPONDENCE
     json.dump(spec, open(chain.P("spec_merged.json"), "w"))
     return chain.issue("derived_split.json", "inventory_split.txt", "inventory_merged.txt", "spec_merged.json", "derived_merged.json")
 
@@ -170,8 +193,17 @@ def _merge(chain, replaces, reference, reference_files=True):
 def test_deleted_file_is_covered_when_the_reference_block_contains_it(chain):
     rc, rep = _merge(chain, ["kernel.py", "kernel_params.json"], {"kind": "parent_artifact", "artifacts": ["kernel.py", "kernel_params.json"]})
     assert rc == 0
-    rc, rep = chain.verify_chain(links=("derived_split.json", "derived_merged.json"), extra=_policy_for(chain, {"kernel.py": 65536, "kernel_params.json": 65536}))
+    rc, rep = chain.verify_chain(links=("derived_split.json", "derived_merged.json"), extra=_policy_for(chain, {"kernel.py": 65536, "kernel_params.json": 65536}, renamed=True))
     assert rc == 0 and rep["policy_verdict"] == "ACCEPTED" and rep["links"][1]["entries"]["kernel"]["reference_binding"] == "digest"
+    notes = [n["text"] for n in rep["not_checked"] if n["kind"] == "renamed replacement"]
+    assert len(notes) == 1 and "['kernel_params.json'] of the parent configuration is replaced by ['kernel.py']" in notes[0] and "still exist" not in notes[0]
+    rc, rep = chain.verify_chain(links=("derived_split.json", "derived_merged.json"), extra=_policy_for(chain, {"kernel.py": 65536, "kernel_params.json": 65536}))
+    assert rc == 1 and rep["record_valid"] and set(rep["policy"]["failed_checks"]) == {"policy.renamed_replacement[derived_merged.json]", "policy.accepted_judgements[derived_merged.json]"}
+
+
+def test_deleted_file_absorbed_by_a_file_of_another_name_needs_the_correspondence_judgement(chain):
+    rc, rep = _merge(chain, ["kernel.py", "kernel_params.json"], {"kind": "parent_artifact", "artifacts": ["kernel.py", "kernel_params.json"]}, correspondence=False)
+    assert rc == 1 and rep["failed_checks"] == ["equivalence.kernel.correspondence"]
 
 
 def test_deleted_file_that_nothing_replaces_is_refused(chain):
@@ -202,9 +234,10 @@ def test_parent_link_reference_for_the_whole_block_is_accepted(chain):
     toy.enumerate_block(cfg["kernel.py"], chain.P("config_v0", "kernel.py"), chain.P("enumeration_merged.json"))          # against C0's kernel: link 1's reference
     spec = _spec(chain, "merged", "enumeration_merged.json", block={"changed": ["kernel.py", "kernel_params.json"], "unchanged": ["system.py", "model.json", "frame.jsonl"]})
     spec["equivalence"][0].update({"replaces": ["kernel.py", "kernel_params.json"], "reference": {"kind": "parent_link"}})
+    spec["judgements"]["replacement_correspondence"] = MERGE_CORRESPONDENCE
     json.dump(spec, open(chain.P("spec_merged.json"), "w"))
     assert chain.issue("derived_split.json", "inventory_split.txt", "inventory_merged.txt", "spec_merged.json", "derived_merged.json")[0] == 0
-    rc, rep = chain.verify_chain(links=("derived_split.json", "derived_merged.json"), extra=_policy_for(chain, {"kernel.py": 65536, "kernel_params.json": 65536}))
+    rc, rep = chain.verify_chain(links=("derived_split.json", "derived_merged.json"), extra=_policy_for(chain, {"kernel.py": 65536, "kernel_params.json": 65536}, renamed=True))
     assert rc == 0 and rep["policy_verdict"] == "ACCEPTED"
 
 
@@ -254,14 +287,19 @@ def test_rename_is_a_deletion_and_an_addition_tied_by_one_entry(chain):
     spec = _spec(chain, "ren", "enumeration_ren.json", block={"changed": ["kernel.py", "fastkernel.py", "system.py"], "unchanged": ["model.json", "frame.jsonl"]})
     spec["equivalence"][0]["subjects"] = ["fastkernel.py"]; json.dump(spec, open(chain.P("spec_ren.json"), "w"))
     rc, rep = chain.issue("root.json", "inventory_v0.txt", "inventory_ren.txt", "spec_ren.json", "derived_ren.json")
-    assert rc == 1 and rep["failed_checks"] == ["coverage.derived_side", "coverage.parent_side"]                      # system.py, both sides
+    assert rc == 1 and rep["failed_checks"] == ["coverage.derived_side", "coverage.parent_side", "equivalence.kernel.correspondence"]   # system.py, both sides; the new name
     spec["judgement_coverage"] = [{"artifacts": ["system.py"], "judgement": "loader_change"}]; spec["judgements"]["loader_change"] = "Only the file name passed to the loader changed."
+    json.dump(spec, open(chain.P("spec_ren.json"), "w"))
+    rc, rep = chain.issue("root.json", "inventory_v0.txt", "inventory_ren.txt", "spec_ren.json", "derived_ren.json")
+    assert rc == 1 and rep["failed_checks"] == ["equivalence.kernel.correspondence"]                                  # the new name must be tied to the old place
+    spec["judgements"]["replacement_correspondence"] = "system.py loads fastkernel.py where it loaded kernel.py (the changed line of system.py)."
     json.dump(spec, open(chain.P("spec_ren.json"), "w"))
     assert chain.issue("root.json", "inventory_v0.txt", "inventory_ren.txt", "spec_ren.json", "derived_ren.json")[0] == 0
     assert toy.evaluate(chain.P("config_ren")) == toy.evaluate(chain.P("config_v0"))
     rc, rep = chain.verify_chain(links=("derived_ren.json",))
     e = rep["links"][0]["entries"]["kernel"]
     assert rc == 0 and (e["subjects"], e["replaces"], e["reference_binding"]) == (["fastkernel.py"], ["kernel.py"], "digest") and rep["links"][0]["judgement_covered"] == ["system.py"]
+    assert e["renamed"] == ["kernel.py"] and any(n["kind"] == "renamed replacement" for n in rep["not_checked"])
 
 
 def test_residual_rebuilt_and_inventory_completeness_are_printed(chain):

@@ -23,6 +23,8 @@ A policy is a JSON object.  Every member except ``name`` is optional; an absent 
                            certificate by a digest recorded in the transcript (it is then identified by name only)
 ``binding_levels``         list of accepted root binding levels, e.g. ["digest"] (excludes "identifiers-only", "unbound")
 ``transcript_mapping``     "forbid" or "allow": transcripts in a foreign layout mapped by issuer-declared pointers
+``renamed_replacement``    "forbid" or "allow": equivalence entries whose subjects replace parent artifacts of OTHER names
+                           (that the new artifact takes the old one's place is then the judgement 'replacement_correspondence')
 ``enumeration_domains``    {artifact: N}: every equivalence entry must be an exhaustive enumeration whose subjects are
                            all listed here and whose enumerated domain has exactly N inputs for each of them
 ``accepted_judgements``    "*", a list of judgement names, or an object {name: "*" | sha256}: with a digest, the judgement is
@@ -37,7 +39,7 @@ import json
 
 KEYS = {"name", "description", "require_all_evidence", "coverage_by_judgement", "residual_rebuilt", "unrecorded", "reference_kinds",
         "binding_levels", "transcript_mapping", "reference_by_declaration", "enumeration_domains", "accepted_judgements", "accepted_assumptions",
-        "root_adapters", "require_prospective"}
+        "root_adapters", "require_prospective", "renamed_replacement"}
 SINGLE_LINK = "not verified in this run: the parent is itself a derived certificate — verify the whole chain with verify-chain"
 
 
@@ -50,7 +52,7 @@ def load_policy(path: str) -> dict:
     if not isinstance(p, dict) or not isinstance(p.get("name"), str) or not p["name"]: raise PolicyError("a policy needs a name")
     unknown = sorted(set(p) - KEYS)
     if unknown: raise PolicyError(f"unknown policy members {unknown}")
-    for k in ("residual_rebuilt", "unrecorded", "transcript_mapping", "reference_by_declaration"):
+    for k in ("residual_rebuilt", "unrecorded", "transcript_mapping", "reference_by_declaration", "renamed_replacement"):
         if k in p and p[k] not in ("forbid", "allow"): raise PolicyError(f"{k} must be 'forbid' or 'allow'")
     cj = p.get("coverage_by_judgement")
     if cj is not None and cj not in ("forbid", "allow") and not isinstance(cj, list): raise PolicyError("coverage_by_judgement must be 'forbid', 'allow' or a list")
@@ -103,6 +105,10 @@ def apply_policy(R, policy: dict, state: dict):
     if policy.get("transcript_mapping") == "forbid":
         mapped = sorted(i for i, e in entries.items() if e["mapped"])
         R.policy(P("transcript_mapping"), not mapped, "all transcripts use the standard layout" if not mapped else f"mapped by issuer-declared pointers: {mapped}")
+    if policy.get("renamed_replacement") == "forbid":
+        ren = sorted(i for i, e in entries.items() if e.get("renamed"))
+        R.policy(P("renamed_replacement"), not ren, "every replaced parent artifact is replaced under its own name" if not ren
+                 else f"parent artifacts replaced under another name (judgement 'replacement_correspondence'): {ren}")
     if "enumeration_domains" in policy:
         want = policy["enumeration_domains"]; bad = []
         for i, e in sorted(entries.items()):

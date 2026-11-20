@@ -1,6 +1,35 @@
 # Changelog
 
-## 1.0.0 — unreleased (first public release)
+## 1.1.0 — 2026-11-20
+
+An external review of the first public release found a third way to obtain an accepted certificate with truthful
+evidence and valid signatures. The contents of two kernels were swapped, and each new file was declared as the
+replacement of the *other* parent file. Both comparisons were true, every changed artifact was covered once on each
+side, and 1.0.0 issued the certificate and accepted it under a strict policy — although the system reaches its
+kernels by name and now computed something else. The verifier identifies artifacts by name only: which file a running
+system reaches in place of a replaced one cannot be read from the record.
+
+* An equivalence entry whose replaced artifacts do not all have a subject of the same name — a renamed file, two
+  artifacts declared as each other's replacements, or a deleted file absorbed by a block under another name — now
+  requires the written judgement `replacement_correspondence` (check `equivalence.<id>.correspondence`). The
+  condition is printed on every run as a `renamed replacement` notice, which also says when a replaced name still
+  exists in the derived configuration as a different file.
+* New policy member `renamed_replacement` (`"forbid"` or `"allow"`). The release policies of the quick start and of
+  the gate-root example forbid renamed replacements; in the FPGA example `policy_strict.json` forbids them and
+  `policy_case_study.json` accepts them with the judgement.
+* The second link of the FPGA example replaces `p5_v2tile.bit` by `p5_v2tile_v1p.bit`. It was re-issued with the
+  judgement, which states how the host reaches the kernel: by physical address, not by file name, and both
+  bitstreams place the kernel's registers at the same address (read from their hardware handoff files on the board).
+  The root and the first link are unchanged.
+* `tests/test_renamed_replacement.py` signs every declaration of the reviewer's swap built from single-subject entries
+  (72 declarations with true transcripts, with and without the judgement) and verifies each under the reviewer's
+  policy and under the supplied quick-start policy. Entries whose subject is a block of several artifacts are outside
+  that space.
+
+The certificate format is unchanged (`recertkit-3`). Certificates issued by 1.1.0 can be read by 1.0.0; a certificate
+issued by 1.0.0 remains a valid record under 1.1.0 unless it contains a renamed replacement without the judgement.
+
+## 1.0.0 — 2026-11-17 (first public release)
 
 Commands `keygen`, `inventory`, `root-issue`, `root-info`, `issue`, `verify`, `verify-chain`, `profile`, `checks`;
 built-in profile `recertkit-default-1`; acceptance policies; root adapters `recertkit-root-1` and `gate-2.0`;

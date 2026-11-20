@@ -21,7 +21,7 @@ def test_without_a_policy_the_report_says_no_release_decision_was_made(chain, ca
 
 def test_quickstart_policy_accepts_the_toy_chain(chain, capsys):
     rc, rep = chain.verify_chain(extra=["--policy", QS_POLICY])
-    assert rc == 0 and rep["policy_verdict"] == "ACCEPTED" and rep["accepted"] and len(rep["policy"]["checks"]) == 24 and not rep["policy"]["not_evaluated"]
+    assert rc == 0 and rep["policy_verdict"] == "ACCEPTED" and rep["accepted"] and len(rep["policy"]["checks"]) == 26 and not rep["policy"]["not_evaluated"]   # 13 members x 2 links
     assert "POLICY quickstart-release-1: ACCEPTED" in capsys.readouterr().out
 
 
@@ -72,7 +72,8 @@ def test_policy_on_unrecorded_and_rebuilt_artifacts_and_reference_by_name():
     assert cli(base + ["--policy", os.path.join(ex, "policy_strict.json"), "--json-report", rep]) == 1
     r = load_json(rep); kinds = {c.split("[")[0] for c in r["policy"]["failed_checks"]}
     assert r["record_valid"] and kinds == {"policy.require_all_evidence", "policy.coverage_by_judgement", "policy.residual_rebuilt", "policy.unrecorded", "policy.reference_kinds",
-                                           "policy.reference_by_declaration", "policy.binding_levels", "policy.transcript_mapping", "policy.require_prospective"}
+                                           "policy.reference_by_declaration", "policy.binding_levels", "policy.transcript_mapping", "policy.require_prospective",
+                                           "policy.renamed_replacement"}
 
 
 def test_invalid_record_is_never_accepted(chain):

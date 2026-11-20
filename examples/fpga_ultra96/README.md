@@ -12,8 +12,8 @@ enumeration, part written argument — and how the two verdicts separate.
 ```
 cd examples/fpga_ultra96
 T="--trust p5-release-key-1=release_key.pub"; L="--root root_certificate.json --links derived_v1.json derived_v1p.json"
-recertkit verify-chain $L $T                                        # RECORD VALID, 44 unchecked items listed
-recertkit verify-chain $L $T --policy policy_strict.json            # POLICY REJECTED: 13 of 20 policy checks fail
+recertkit verify-chain $L $T                                        # RECORD VALID, 46 unchecked items listed
+recertkit verify-chain $L $T --policy policy_strict.json            # POLICY REJECTED: 14 of 22 policy checks fail
 recertkit verify-chain $L $T --policy policy_case_study.json        # POLICY ACCEPTED
 recertkit verify-chain $L $T --require-all-evidence                 # RECORD INVALID: one bound file is not included
 ```
@@ -29,6 +29,7 @@ recertkit verify-chain $L $T --require-all-evidence                 # RECORD INV
 | Three rebuilt host binaries | `residual_rebuilt`: judgement `residual_path`, supported by a source/build correspondence record that is bound by digest but **not included** (detached) |
 | Root binding | server and model by digest; frame by **identifiers only**; the three libraries of the parent inventory are **not bound by the root** (judgement `root_configuration`) |
 | Link 2 | three artifacts `unrecorded` at run time (assumption T4); reference inherited from link 1 by name — no digest of the reference was verified in either link, so neither certificate carries one |
+| … a bitstream of another name | `p5_v2tile_v1p.bit` replaces `p5_v2tile.bit` (*renamed replacement*). That the host reaches the new bitstream where it reached the old one is the judgement `replacement_correspondence`: the host maps the kernel's registers by physical address, not by file name; the hardware handoff files of both bitstreams place those registers at the same address (0x80000000–0x8000FFFF, read on the board on 2026-11-20; the handoff files are not distributed); and the new bitstream was the one configured during the run. Link 2 was re-issued with this judgement in release 1.1.0; root and link 1 are unchanged |
 | Enumerated domain | 2^30 inputs per bitstream are printed as the domain size; both policies state this number for the two bitstreams (`enumeration_domains`), which fixes *how many* inputs were compared, not that they are the right ones (judgements `boundary`, `composition`) |
 | Transcript layout | the lane transcript predates RecertKit; it is read through issuer-declared pointers |
 | Issuance | **retrospective**: both links were issued after the changed systems had been run |

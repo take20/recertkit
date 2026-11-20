@@ -38,6 +38,7 @@ a policy is only as strict as the members it states; unknown members are an erro
 | `reference_by_declaration` | `"forbid"`, `"allow"` | comparisons whose reference the verifier could not tie to the certificate by a transcript digest |
 | `binding_levels` | list | accepted root binding levels (`digest`, `identifiers-only`, `unbound`), as provided by the root |
 | `transcript_mapping` | `"forbid"`, `"allow"` | foreign transcript layouts read through issuer-declared pointers |
+| `renamed_replacement` | `"forbid"`, `"allow"` | equivalence entries that replace a parent artifact by a subject of another name (they rest on the judgement `replacement_correspondence`) |
 | `enumeration_domains` | `{artifact: N}` | every equivalence entry is an exhaustive enumeration, each of its subjects is listed, and its domain has exactly `N` inputs |
 | `accepted_judgements`, `accepted_assumptions` | `"*"`, a list of names, or `{name: "*" \| sha256}` | every judgement / assumption of a link is listed; with a digest, its text must be exactly the reviewed text |
 | `root_adapters` | list | accepted root formats |
@@ -72,9 +73,9 @@ bindings and three named conditions. The
 quick-start and gate-root chains are accepted.
 
 `examples/fpga_ultra96/policy_strict.json` — the same kind of policy applied to the case-study chain: **rejected**;
-13 of its 20 checks fail (an absent evidence file, two artifacts covered by judgement, rebuilt and unrecorded
+14 of its 22 checks fail (an absent evidence file, two artifacts covered by judgement, rebuilt and unrecorded
 artifacts, a specification as reference, references the verifier could not tie by digest, identifier-only and
-unbound root bindings, pointer-mapped transcripts, retrospective issuance).
+unbound root bindings, pointer-mapped transcripts, a bitstream replaced under another name, retrospective issuance).
 
 `examples/fpga_ultra96/policy_case_study.json` — the conditions under which the authors accept that chain, written
 out: every judgement and assumption by name. **Accepted.** The two files together show what "VALID" left open.

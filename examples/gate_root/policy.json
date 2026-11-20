@@ -27,5 +27,6 @@
  ],
  "enumeration_domains": {
   "kernel.py": 65536
- }
+ },
+ "renamed_replacement": "forbid"
 }

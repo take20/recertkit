@@ -31,8 +31,9 @@ carries over. It is not a release decision, it does not say the evidence is comp
 quality was preserved. Every run prints what was **not** checked: written judgements, trust assumptions, whatever
 established the root claim, artifacts covered by judgement instead of evidence, references tied to the parent by
 judgement, root bindings weaker than a digest, absent evidence files, how many inputs an enumeration covered (whether
-that is the whole input domain is a judgement), that the inventory lists everything relevant, and the fact that a
-transcript is the issuer's record of a comparison the verifier did not re-run. Without `--policy` the output says so:
+that is the whole input domain is a judgement), a replacement under another name (which file the running system
+reaches is a judgement), that the inventory lists everything relevant, and the fact that a transcript is the
+issuer's record of a comparison the verifier did not re-run. Without `--policy` the output says so:
 `POLICY: none applied — record verification is not a release decision`.
 
 A policy condition has three outcomes: satisfied, violated, or **not evaluated** because the information it needs
@@ -105,10 +106,12 @@ must be about the changed artifacts of the *derived* inventory (by digest), and 
 equivalent to, or a named specification whose relation to the parent is a written judgement (printed). Coverage is
 counted **per side**: a changed file of the derived configuration must be a subject of one comparison or be covered
 by a named judgement; a changed file of the parent configuration must be replaced by one comparison or be covered by
-a named judgement; the same file name on the two sides is two obligations. The configuration is tied to the root at
+a named judgement; the same file name on the two sides is two obligations. Artifacts are identified by name, so a
+replaced artifact without a subject of the same name needs the written judgement `replacement_correspondence`
+(printed), which a policy can refuse. The configuration is tied to the root at
 a declared level per role — `digest`, `identifiers-only` (frame) or `unbound` — and anything weaker than a digest is
 printed and requires a written judgement. The policy is evaluated on the state these checks established.
-`docs/checks.md` lists all 69 record checks and 14 policy checks.
+`docs/checks.md` lists all 70 record checks and 15 policy checks.
 
 ## Documentation
 
@@ -135,7 +138,7 @@ printed and requires a written judgement. The policy is evaluated on the state t
 ## Tests
 
 ```
-python -m pytest -q                         # 233 tests
+python -m pytest -q                         # 242 tests
 python tests/mutation_probe.py              # disables each check in turn; reports checks no test depends on (expected: none)
 python tests/declaration_search.py out.json # exhaustive search: can a harmful change be declared so that it is accepted? (expected: no; exit status 1 otherwise)
 ```
@@ -143,8 +146,10 @@ python tests/declaration_search.py out.json # exhaustive search: can a harmful c
 The first two ask whether the checks that exist are exercised. The third asks the converse — whether the checks are
 *sufficient* on a bounded space: it signs every one of 221,184 ways of declaring one harmful change with truthful
 evidence files and verifies each under the supplied policy; none is accepted (see `docs/assurance.md`, which also
-states what this does not show). `tests/test_risk_exact.py` compares the numeric checks with exact rational
-arithmetic on random decimals longer than the default working precision.
+states what this does not show). `tests/test_renamed_replacement.py` does the same for two kernels whose contents
+are swapped: it signs all 72 declarations built from single-subject entries and verifies each; none is accepted.
+`tests/test_risk_exact.py` compares the numeric checks with exact rational arithmetic on random decimals longer than
+the default working precision.
 
 ## Scope and limits
 
@@ -162,6 +167,8 @@ arithmetic on random decimals longer than the default working precision.
   artifact (`enumeration_domains`); that fixes how many inputs were compared, not which.
 * **The inventory is the issuer's statement of what the configuration consists of.** A file that is in neither
   inventory is outside every check.
+* **Artifacts are identified by name.** Which file a running system reaches is not visible to the verifier; a
+  replacement under another name rests on the printed judgement `replacement_correspondence`.
 * **A policy restricts only what its members name.** An absent member imposes no restriction.
 
 ## Licence

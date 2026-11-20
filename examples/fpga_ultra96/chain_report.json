@@ -594,6 +594,11 @@
    "detail": "['p5_v2tile.bit'] are distinct changed artifacts of the parent configuration"
   },
   {
+   "check": "equivalence.pl_kernel.correspondence",
+   "ok": true,
+   "detail": "['p5_v2tile.bit'] of the parent configuration is replaced by ['p5_v2tile_v1p.bit'], under another name; where the system reaches the new artifacts is the written judgement 'replacement_correspondence'"
+  },
+  {
    "check": "equivalence.pl_kernel.reference_kind",
    "ok": true,
    "detail": "'parent_link'; this profile accepts ['parent_artifact', 'parent_link', 'specification']"
@@ -810,6 +815,10 @@
    "text": "v1pl.patch was not recorded for the derived configuration; that it is unchanged is the written judgement 'unrecorded_items'"
   },
   {
+   "kind": "renamed replacement",
+   "text": "equivalence pl_kernel: ['p5_v2tile.bit'] of the parent configuration is replaced by ['p5_v2tile_v1p.bit'], which does not carry its name; that the running system now reaches ['p5_v2tile_v1p.bit'] where it reached ['p5_v2tile.bit'] is not checked \u2014 the verifier identifies artifacts by name only. It is the written judgement 'replacement_correspondence'"
+  },
+  {
    "kind": "transcript mapping",
    "text": "equivalence pl_kernel: the transcript is in a foreign layout; which of its fields hold the subject digests, the number of inputs compared and the mismatch count is the issuer's declaration ({\"enumerated\": \"/bitstreams/V1p/lane_exhaustive/values_enumerated\", \"mismatches\": \"/bitstreams/V1p/lane_exhaustive/mismatches\", \"subjects\": {\"p5_v2tile_v1p.bit\": \"/bitstreams/V1p/sha256\"}})"
   },
@@ -844,6 +853,10 @@
   {
    "kind": "judgement unrecorded_items",
    "text": "libggml-base.so and libllama.so were not re-hashed at V1' run time, and the patch file is a source record that was not re-listed. Their identity to V1 rests on T4: the authors attest that the V1' run used the same unmodified build directory as the V1 run. Recorded filesystem timestamps are supporting observations from the board's unsynchronised clock, not independent proof."
+  },
+  {
+   "kind": "judgement replacement_correspondence",
+   "text": "The host does not reach the kernel through the bitstream's file name. The unchanged CPU-backend library (byte-identical to V1) maps the kernel's control registers at physical address 0x80000000 - the default of pl_q4k.c; the V1' run set P5_PL and P5_PL_STATS but not P5_PL_BASE. The hardware handoff files of both bitstreams place these registers (q4k_dot_0, s_axi_control) at 0x80000000-0x8000FFFF (read on the board on 2026-11-20), so the library reaches the kernel of whichever bitstream is configured in the PL. p5_v2tile_v1p.bit was configured before the server started and not reconfigured until the run ended (T1_hls_toolchain); p5_v2tile.bit was not loaded during the V1' run."
   },
   {
    "kind": "trust assumption T1_hls_toolchain",
@@ -885,7 +898,8 @@
      "reference_binding": "declaration",
      "reference_digest": null,
      "mapped": true,
-     "domain_size": 1073741824
+     "domain_size": 1073741824,
+     "renamed": []
     }
    },
    "judgement_covered": [
@@ -955,7 +969,10 @@
      "reference_binding": "declaration",
      "reference_digest": null,
      "mapped": true,
-     "domain_size": 1073741824
+     "domain_size": 1073741824,
+     "renamed": [
+      "p5_v2tile.bit"
+     ]
     }
    },
    "judgement_covered": [],
@@ -981,6 +998,7 @@
    "judgements": {
     "boundary": "d9c426aeb4d9dad06cf3f9ea437cd9abd6e6c8dfe8098ab387c9707dd06d5950",
     "composition": "6561c1e1297f7d4b802e55df575519b9f56d394de7ac4eac489e1bc32c86105d",
+    "replacement_correspondence": "da7086140f5685507720eabd287da9a4c197f6e7abd3960a356e17e8cedbdbb4",
     "residual_path": "67ef1fb2517964b452622df4a5baebbdb4cd37b6f667d3285cd3da02457fefd0",
     "unrecorded_items": "e10c49c0b9d262b10495cca28fe4b2914002116a35ab1ade68c609453936a369"
    },
