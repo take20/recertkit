@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Palusomni Co., Ltd.
 """The risk budget is preserved EXACTLY, for decimals of any length and under any Decimal context
 (review of the third draft, finding V2-1: ``delta_parent + alpha == delta_derived`` was evaluated in Decimal arithmetic,
 which rounds to 28 significant digits, so an exact copy of a 30-digit risk level was refused and a rounded copy accepted)."""

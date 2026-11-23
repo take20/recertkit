@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Palusomni Co., Ltd.
 """The shipped FPGA case-study chain: verified read-only with the public key, then probed on private copies."""
 import json, os, shutil, tempfile
 import pytest

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Palusomni Co., Ltd.
 """A sample of the exhaustive declaration search (tests/declaration_search.py): no way of declaring a harmful change is
 accepted, none is silent about the changed file, and the harmless control IS accepted."""
 import os, sys
@@ -46,9 +48,11 @@ def test_without_the_domain_member_a_one_input_comparison_of_system_py_would_be_
     assert row["record"] and row["policy"] == "REJECTED" and row["failed"] == ["policy.enumeration_domains"] and row["accepted_without_domain_member"] is True and row["system_named"]
 
 
-def test_listing_system_py_on_both_sides_of_a_kernel_comparison_is_a_valid_record_that_the_domain_member_rejects(work):
-    """The kernel comparison is true, and both system.py files are listed as files of the compared blocks.  Nothing in the
-    record contradicts this; which artifacts may be treated as an enumerable block is the relying party's statement."""
+def test_listing_system_py_on_both_sides_of_a_kernel_comparison_is_not_a_valid_record(work):
+    """The kernel comparison is true, and both system.py files are listed as files of the compared blocks.  The transcript
+    states one result for that block and the verifier cannot see which file was exercised.  Until 1.1.0 this was a valid
+    record that only the policy member ``enumeration_domains`` rejected; since 1.2.0 an entry of several artifacts
+    requires the written judgement 'replacement_correspondence', which no declaration of the search carries."""
     d = {"cat_s": "changed", "cat_k": "changed", "subjects": [ds.K, ds.S], "replaces": [ds.K, ds.S], "reference": "pa:k+s", "transcript": "k_both_sys", "pointers": False, "second": False, "jc": None}
     row = ds.evaluate(work, "first", [d], POLICY)[0]
-    assert row["record"] and row["policy"] == "REJECTED" and row["failed"] == ["policy.enumeration_domains"] and row["accepted_without_domain_member"] is True and row["system_named"]
+    assert not row["record"] and "equivalence.kernel.correspondence" in row["failed"] and not row.get("accepted") and not row.get("accepted_without_domain_member")

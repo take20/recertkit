@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Palusomni Co., Ltd.
 """Root adapters: how a parent ROOT certificate is read.
 
 RecertKit does not establish a quality claim; it carries one.  The claim originates in a root certificate produced
@@ -36,7 +38,7 @@ Adapters
 from __future__ import annotations
 import hashlib, json, os
 from . import ROOT_VERSION
-from .canon import canon, load_json, resolve_path, sha_file, open_bytes
+from .canon import evidence_path, canon, load_json, resolve_path, sha_file, sha_raw, open_bytes
 
 
 class RootError(ValueError):
@@ -111,11 +113,13 @@ class GateRoot:
     def extra_checks(self, R, cert, evidence_dir, pinv, frame_level):
         root, rb = self.root, cert.get("root_binding", {})
         frame_item = cert.get("roles", {}).get(self.profile["frame_role"])
-        cpath = resolve_path(os.path.join(evidence_dir, rb.get("commitment_file") or "\0"))
+        cpath = evidence_path(evidence_dir, rb.get("commitment_file"))
         okc = R.check("root.commitment", bool(cpath) and sha_file(cpath) == root.get("commitment_digest_sha256"),
                       f"commitment file digest == root.commitment_digest_sha256 ({str(root.get('commitment_digest_sha256'))[:16]})")
-        fpath = resolve_path(os.path.join(evidence_dir, frame_item)) if frame_item else None
-        okf = R.check("root.frame_file", bool(fpath) and sha_file(fpath) == pinv.get(frame_item),
+        fpath = evidence_path(evidence_dir, frame_item) if frame_item else None
+        # the frame is an ARTIFACT: its inventory digest is that of its bytes as stored; a copy kept compressed beside the
+        # certificates (found as <name>.gz) is uncompressed first
+        okf = R.check("root.frame_file", bool(fpath) and (sha_raw(fpath) if os.path.basename(fpath) == frame_item else sha_file(fpath)) == pinv.get(frame_item),
                       "frame file present and equal to the parent inventory digest")
         if okc and okf:
             cm = load_json(cpath)

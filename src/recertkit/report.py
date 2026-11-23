@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Palusomni Co., Ltd.
 """Check results.
 
 Two kinds of result are kept apart:

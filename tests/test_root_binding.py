@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Palusomni Co., Ltd.
 """How strongly the configuration is tied to the root, and what happens when the tie is weak."""
 import json, os
 import toy

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Palusomni Co., Ltd.
 """The gate-root example: a root issued by the release gate (stored), verified read-only and probed on private copies."""
 import json, os, shutil, tempfile
 import pytest

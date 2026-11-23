@@ -1,20 +1,26 @@
-"""Replacement under another name (external review of package v6, finding M1-a).
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Palusomni Co., Ltd.
+"""Which new artifact takes the place of which replaced one (independent review of release 1.0.0, findings M1-a and M1-b).
 
-The verifier identifies artifacts by NAME.  The reviewer swapped the contents of two kernels, kernel_add.py and
-kernel_mul.py, and declared each new file as the replacement of the OTHER parent file.  Both comparisons are true
-(the new kernel_add.py computes exactly what the old kernel_mul.py computed, and vice versa), every name was covered,
-and RecertKit 1.0.0 issued the certificate and accepted it under a strict policy — while system.py, which reaches the
-kernels by name, now multiplies where it added.
+The verifier identifies artifacts by NAME.  It cannot see where the running system reaches them, nor which file of a
+block a comparison exercised.  The reviewer swapped the contents of two kernels, kernel_add.py and kernel_mul.py.
+system.py reaches the kernels by name, so it now multiplies where it added.  The swap can be declared in two ways with
+comparison transcripts whose numbers are all true:
 
-Since 1.1.0 an equivalence entry whose replaced artifacts do not all have a subject of the same name needs the written
-judgement ``replacement_correspondence`` (check ``equivalence.<id>.correspondence``); the condition is printed as a
-``renamed replacement`` notice on every run, and the policy member ``renamed_replacement: forbid`` refuses it.
+* per file, crosswise: each new file as the replacement of the OTHER parent file (1.0.0 issued and accepted this);
+* as one block: one entry whose subjects and replaced artifacts are both kernels (1.0.0 and 1.1.0 issued and accepted
+  this; 1.1.0 refused only the crosswise form).
 
-The last test signs EVERY declaration of the swap that uses single-subject entries — each subject paired with each
-non-empty set of replaced kernels and each choice of the compared reference kernel, one or two entries, with and
-without the judgement — using true comparison transcripts, and verifies each under the reviewer's policy and under the
-supplied quick-start policy.  Entries whose subject is a block of several artifacts are outside this space (they are
-the subject of finding M1-b, which this revision does not address).
+Since 1.2.0 an equivalence entry is NAME-ALIGNED when it has one subject and replaces at most one parent artifact, of
+the same name.  Any other entry needs the written judgement ``replacement_correspondence`` (check
+``equivalence.<id>.correspondence``).  The condition is printed on every run as a ``renamed replacement`` and/or a
+``multi-artifact block`` notice, and the policy members ``renamed_replacement`` and ``multi_artifact_block`` refuse it.
+
+The last test signs EVERY declaration of the swap built from one or two entries — single-file entries and two-file
+block entries, each with every non-empty set of replaced kernels and every choice of the pair of files that was
+actually compared, with and without the judgement — and verifies each under the reviewer's policy and under the
+supplied quick-start policy.  Not in this space: transcripts whose numbers are false (the verifier does not re-run
+comparisons), and systems other than this one.
 """
 import itertools, json, os, random
 import pytest
@@ -91,39 +97,42 @@ class World:
         assert cli(["root-issue", "--claim", P("claim.json"), "--role", f"server={c['system.py']}", "--role", f"model={c['model.json']}", "--role", f"frame={c['frame.jsonl']}",
                     "--inventory", P("inventory_c0.txt"), "--basis", "test root", "--key", P("release.key"), "--key-id", "release", "--out", P("root.json")]) == 0
         for name, pol in (("reviewer", REVIEWER_POLICY), ("supplied", self._supplied()), ("forbid_only", self._supplied(accept=True)),
-                          ("accepting", self._supplied(accept=True, renamed="allow"))):
+                          ("accepting", self._supplied(accept=True, renamed="allow")), ("accepting_blocks", self._supplied(accept=True, blocks="allow"))):
             json.dump(pol, open(P(f"policy_{name}.json"), "w"))
         self._t = {}
 
     def P(self, *a): return os.path.join(self.work, *a)
 
     @staticmethod
-    def _supplied(accept=False, renamed=None):
+    def _supplied(accept=False, renamed=None, blocks=None):
         """The supplied quick-start release policy, with the two kernels' domain sizes; optionally it also accepts the
-        correspondence judgement (``accept``) or allows renamed replacements (``renamed="allow"``)."""
+        correspondence judgement (``accept``), allows renamed replacements or allows multi-artifact blocks."""
         p = load_json(os.path.join(os.path.dirname(toy.__file__), "policy.json")); p["enumeration_domains"] = DOMAINS
-        assert p["renamed_replacement"] == "forbid"
+        assert p["renamed_replacement"] == "forbid" and p["multi_artifact_block"] == "forbid"
         if accept: p["accepted_judgements"] = sorted(p["accepted_judgements"] + ["replacement_correspondence"])
         if renamed: p["renamed_replacement"] = renamed
+        if blocks: p["multi_artifact_block"] = blocks
         return p
 
-    def transcript(self, world, subject, replaces, compared):
-        """A TRUE comparison of the new ``subject`` with the parent's ``compared`` kernel; a composite reference also
-        records the digests of the other replaced parent kernels."""
-        key = (world, subject, tuple(replaces), compared)
+    def transcript(self, world, subjects, replaces, new, old):
+        """A TRUE comparison of the new file ``new`` with the parent's file ``old`` on all 65,536 inputs, written by the
+        package's own toy.enumerate_block.  The transcript also records the digests of the other subjects and of the
+        other replaced parent files, as that function does for a block of several files."""
+        key = (world, tuple(subjects), tuple(replaces), new, old)
         if key not in self._t:
-            name = f"t_{world}_{subject[7:10]}_{'_'.join(r[7:10] for r in replaces)}_{compared[7:10]}.json"
-            others = [self.P("c0", r) for r in replaces if r != compared]
-            t = toy.enumerate_block(self.P(world, subject), self.P("c0", compared), self.P(name), reference_files=others)
+            name = f"t_{world}_{len(self._t):03d}.json"
+            t = toy.enumerate_block(self.P(world, new), self.P("c0", old), self.P(name),
+                                    subject_files=[self.P(world, x) for x in subjects if x != new], reference_files=[self.P("c0", r) for r in replaces if r != old])
             self._t[key] = (name, t["mismatches"])
         return self._t[key]
 
     def spec(self, world, entries, judgement):
+        """``entries``: tuples (subjects, replaces, new, old) — ``new`` and ``old`` are the two files actually compared."""
         eq, ev = [], {}
-        for i, (s, R, r) in enumerate(entries, 1):
-            name, _ = self.transcript(world, s, R, r)
-            ref = {"kind": "parent_artifact", "artifact": R[0]} if len(R) == 1 else {"kind": "parent_artifact", "artifacts": list(R)}
-            eq.append({"id": f"e{i}", "method_code": "exhaustive_enumeration", "subjects": [s], "replaces": list(R), "reference": ref,
+        for i, (S, Rp, new, old) in enumerate(entries, 1):
+            name, _ = self.transcript(world, S, Rp, new, old)
+            ref = {"kind": "parent_artifact", "artifact": Rp[0]} if len(Rp) == 1 else {"kind": "parent_artifact", "artifacts": list(Rp)}
+            eq.append({"id": f"e{i}", "method_code": "exhaustive_enumeration", "subjects": list(S), "replaces": list(Rp), "reference": ref,
                        "transcript": f"t{i}", "domain_size": 65536, "domain": "all signed 8-bit operand pairs (a, b)"})
             ev[f"t{i}"] = name
         spec = {"change": {"summary": f"two kernels replaced ({world})"}, "claim_scope": "the parent's claim on the fixed 200-item frame",
@@ -160,8 +169,11 @@ def world(tmp_path_factory):
     return World(str(tmp_path_factory.mktemp("swap")))
 
 
-CROSS = [("kernel_add.py", ("kernel_mul.py",), "kernel_mul.py"), ("kernel_mul.py", ("kernel_add.py",), "kernel_add.py")]
-IDENTITY = [("kernel_add.py", ("kernel_add.py",), "kernel_add.py"), ("kernel_mul.py", ("kernel_mul.py",), "kernel_mul.py")]
+A, M = KERNELS
+CROSS = [((A,), (M,), A, M), ((M,), (A,), M, A)]                 # each new file declared as the replacement of the OTHER parent file
+IDENTITY = [((A,), (A,), A, A), ((M,), (M,), M, M)]              # each new file declared as the replacement of the parent file of its name
+BLOCK = [(KERNELS, KERNELS, A, M)]                               # ONE entry for both kernels; the files compared are new add and parent mul
+BLOCK_ALIGNED = [(KERNELS, KERNELS, A, A)]                       # the same entry for the control: new add compared with parent add
 CROSS_FAILS = ["equivalence.e1.correspondence", "equivalence.e2.correspondence"]
 
 
@@ -216,10 +228,50 @@ def test_same_name_replacement_needs_no_judgement(world):
     assert rc == 0 and rep["policy_verdict"] == "ACCEPTED" and not [n for n in rep["not_checked"] if n["kind"] == "renamed replacement"]
 
 
+def test_block_declaration_of_the_swap_is_refused_at_issue_and_when_signed_anyway(world):
+    """1.1.0 issued this declaration and accepted it under the reviewer's policy and under the supplied policy, with no
+    notice.  Both pairs of files are truly equivalent (0 mismatches each); the transcript states one result for the block."""
+    assert world.transcript("swap", *BLOCK[0])[1] == 0 and world.transcript("swap", (M,), (A,), M, A)[1] == 0
+    spec = world.spec("swap", BLOCK, judgement=False)
+    rc, rep = world.issue("swap", spec)
+    assert rc == 1 and rep["failed_checks"] == ["equivalence.e1.correspondence"] and not os.path.exists(world.P("derived.json"))
+    world.forge("swap", spec)
+    for pol in ("reviewer", "supplied"):
+        rc, rep = world.verify(policy=pol)
+        assert rc == 1 and not rep["record_valid"] and rep["failed_checks"] == ["equivalence.e1.correspondence"] and rep["policy_verdict"] == "REJECTED"
+
+
+def test_block_declaration_with_the_judgement_is_printed_and_refused_by_release_policies(world):
+    rc, _ = world.issue("swap", world.spec("swap", BLOCK, judgement=True))
+    assert rc == 0
+    rc, rep = world.verify("derived.json")
+    notes = [n["text"] for n in rep["not_checked"] if n["kind"] == "multi-artifact block"]
+    assert rc == 0 and rep["record_valid"] and len(notes) == 1 and "Which of these files the comparison exercised" in notes[0]
+    e = rep["links"][0]["entries"]["e1"]; assert e["multi_artifact"] is True and e["renamed"] == []
+    rc, rep = world.verify("derived.json", policy="reviewer")                                   # the reviewer's policy, unchanged
+    assert rc == 1 and rep["record_valid"] and rep["policy"]["failed_checks"] == ["policy.accepted_judgements[derived.json]"]
+    rc, rep = world.verify("derived.json", policy="supplied")
+    assert rc == 1 and set(rep["policy"]["failed_checks"]) == {"policy.accepted_judgements[derived.json]", "policy.multi_artifact_block[derived.json]"}
+    rc, rep = world.verify("derived.json", policy="forbid_only")                                # accepts the judgement, still forbids blocks
+    assert rc == 1 and rep["policy"]["failed_checks"] == ["policy.multi_artifact_block[derived.json]"]
+    rc, rep = world.verify("derived.json", policy="accepting_blocks")                           # a relying party that takes the judgement on trust
+    assert rc == 0 and rep["policy_verdict"] == "ACCEPTED"
+
+
+def test_block_declaration_of_the_harmless_control_is_treated_the_same(world):
+    """The record cannot tell the swap from an equivalent re-implementation declared as one block: both need the judgement."""
+    rc, rep = world.issue("ctrl", world.spec("ctrl", BLOCK_ALIGNED, judgement=False))
+    assert rc == 1 and rep["failed_checks"] == ["equivalence.e1.correspondence"]
+
+
 def _entries():
-    for s in KERNELS:
-        for R in (("kernel_add.py",), ("kernel_mul.py",), KERNELS):
-            for r in R: yield (s, R, r)
+    sets = ((A,), (M,), KERNELS)
+    for s_ in KERNELS:                                            # single-file entries
+        for Rp in sets:
+            for old in Rp: yield ((s_,), Rp, s_, old)
+    for Rp in sets:                                               # two-file block entries
+        for new in KERNELS:
+            for old in Rp: yield (KERNELS, Rp, new, old)
 
 
 def _declarations():
@@ -237,35 +289,39 @@ def _search(world, w):
         world.forge(w, spec)
         _, plain = world.verify()
         verdicts = {p: world.verify(policy=p)[1]["policy_verdict"] for p in ("reviewer", "supplied")}
-        renamed_entries = [f"e{i}" for i, (s, R, r) in enumerate(entries, 1) if any(x != s for x in R)]
-        noticed = {t["text"].split(":")[0].replace("equivalence ", "") for t in plain["not_checked"] if t["kind"] == "renamed replacement"}
-        rows.append({"entries": [[s, list(R), r] for s, R, r in entries], "judgement": judgement, "issued": rc_issue == 0, "record_valid": plain["record_valid"],
-                     "failed_checks": plain["failed_checks"], "renamed_entries": renamed_entries, "renamed_noticed": sorted(noticed),
+        unaligned = sorted(f"e{i}" for i, (S, Rp, new, old) in enumerate(entries, 1) if len(S) > 1 or len(Rp) > 1 or any(x not in S for x in Rp))
+        noticed = sorted({t["text"].split(":")[0].replace("equivalence ", "") for t in plain["not_checked"] if t["kind"] in ("renamed replacement", "multi-artifact block")})
+        rows.append({"entries": [[list(S), list(Rp), new, old] for S, Rp, new, old in entries], "judgement": judgement, "issued": rc_issue == 0, "record_valid": plain["record_valid"],
+                     "failed_checks": plain["failed_checks"], "unaligned_entries": unaligned, "noticed_entries": noticed,
                      "accepted_reviewer_policy": verdicts["reviewer"] == "ACCEPTED", "accepted_supplied_policy": verdicts["supplied"] == "ACCEPTED"})
     return rows
 
 
-def test_every_single_subject_declaration_of_the_swap(world):
+SPACE = 272                                                       # 16 entries; C(16,1) + C(16,2) = 136 declarations; with and without the judgement
+
+
+def test_every_declaration_of_the_swap_from_single_file_and_block_entries(world):
     swap, ctrl = _search(world, "swap"), _search(world, "ctrl")
-    assert len(swap) == len(ctrl) == 72
+    assert len(swap) == len(ctrl) == SPACE
     # (1) without the judgement, no declaration of the harmful swap is issued or is a valid record
     assert not [r for r in swap if not r["judgement"] and (r["issued"] or r["record_valid"])]
-    # (2) with it, every valid record prints the renamed replacement of every entry that has one
+    # (2) with it, every valid record has an entry that is not name-aligned, and prints a notice for every such entry
     valid = [r for r in swap if r["record_valid"]]
-    assert valid and all(r["renamed_entries"] and set(r["renamed_noticed"]) == set(r["renamed_entries"]) for r in valid)
+    assert valid and all(r["unaligned_entries"] and r["noticed_entries"] == r["unaligned_entries"] for r in valid)
     # (3) none is accepted under the reviewer's policy or under the supplied policy
     assert not [r for r in swap if r["accepted_reviewer_policy"] or r["accepted_supplied_policy"]]
-    # control: the same declarations for an equivalent change under the same names; exactly the identity mapping is accepted
+    # control: the same declarations for an equivalent change under the same names; exactly the name-aligned mapping is accepted
     acc = [r for r in ctrl if r["accepted_supplied_policy"]]
-    assert [(r["entries"], r["judgement"]) for r in acc] == [([[s, list(R), r_] for s, R, r_ in IDENTITY], False)]
+    assert [(r["entries"], r["judgement"]) for r in acc] == [([[list(S), list(Rp), new, old] for S, Rp, new, old in IDENTITY], False)]
     out = os.environ.get("RECERTKIT_SWAP_SEARCH_OUT")
     if out:
         summary = lambda rows: {"declarations": len(rows), "issued": sum(r["issued"] for r in rows), "valid_records": sum(r["record_valid"] for r in rows),
                                 "valid_without_judgement": sum(r["record_valid"] and not r["judgement"] for r in rows),
                                 "accepted_reviewer_policy": sum(r["accepted_reviewer_policy"] for r in rows), "accepted_supplied_policy": sum(r["accepted_supplied_policy"] for r in rows)}
-        json.dump({"what": __doc__.strip().splitlines()[0], "space": "single-subject entries: subject x non-empty set of replaced kernels x compared kernel; 1 or 2 entries; "
-                   "with and without the judgement 'replacement_correspondence'; true comparison transcripts",
+        json.dump({"what": "every declaration of the kernel swap built from one or two entries (single-file and two-file block entries)",
+                   "space": "entries: (a) one subject x non-empty set of replaced kernels x compared parent kernel; (b) both kernels as subjects x non-empty set of "
+                            "replaced kernels x compared new kernel x compared parent kernel; 1 or 2 entries; with and without the judgement "
+                            "'replacement_correspondence'; true comparison transcripts written by toy.enumerate_block",
                    "accuracy": {v: _accuracy(world, v) for v in ("c0", "swap", "ctrl")},
                    "predictions_changed": {v: sum(a["pred"] != b["pred"] for a, b in zip(toy.evaluate(world.P("c0")), toy.evaluate(world.P(v)))) for v in ("swap", "ctrl")},
-                   "swap": summary(swap), "control": summary(ctrl),
-                   "swap_rows": swap, "control_rows": ctrl}, open(out, "w"), indent=1)
+                   "swap": summary(swap), "control": summary(ctrl), "swap_rows": swap, "control_rows": ctrl}, open(out, "w"), indent=1)

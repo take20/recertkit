@@ -19,5 +19,6 @@
   "p5_v2tile.bit": 1073741824,
   "p5_v2tile_v1p.bit": 1073741824
  },
- "renamed_replacement": "forbid"
+ "renamed_replacement": "forbid",
+ "multi_artifact_block": "forbid"
 }

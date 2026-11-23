@@ -66,6 +66,7 @@
 [OK] equivalence.pl_kernel.method — 'exhaustive_enumeration'; this profile accepts ['exhaustive_enumeration']
 [OK] equivalence.pl_kernel.subjects — ['p5_v2tile.bit'] are distinct changed artifacts of the derived configuration
 [OK] equivalence.pl_kernel.replaces — [] are distinct changed artifacts of the parent configuration
+[OK] equivalence.pl_kernel.correspondence — one subject, replacing at most one parent artifact, of the same name
 [OK] equivalence.pl_kernel.reference_kind — 'specification'; this profile accepts ['parent_artifact', 'parent_link', 'specification']
 [OK] equivalence.pl_kernel.transcript — transcript 'lane_enumeration' is a bound, present evidence file
 [OK] equivalence.pl_kernel.transcript_layout — foreign layout mapped by declared pointers
@@ -111,6 +112,7 @@
 [POLICY FAIL] policy.binding_levels[derived_v1.json] — not accepted: ['(inventory)=unbound', 'frame=identifiers-only']
 [POLICY FAIL] policy.transcript_mapping[derived_v1.json] — mapped by issuer-declared pointers: ['pl_kernel']
 [POLICY OK] policy.renamed_replacement[derived_v1.json] — every replaced parent artifact is replaced under its own name
+[POLICY OK] policy.multi_artifact_block[derived_v1.json] — every equivalence entry has one subject and replaces at most one artifact
 [POLICY OK] policy.enumeration_domains[derived_v1.json] — every enumerated domain has the size the policy requires for its subjects
 [POLICY FAIL] policy.require_prospective[derived_v1.json] — declared issuance_status: 'retrospective. Issued in the RecertKit certificate format on'
 == link: derived_v1p.json  <-  derived_v1.json ==
@@ -161,7 +163,7 @@
 [OK] equivalence.pl_kernel.method — 'exhaustive_enumeration'; this profile accepts ['exhaustive_enumeration']
 [OK] equivalence.pl_kernel.subjects — ['p5_v2tile_v1p.bit'] are distinct changed artifacts of the derived configuration
 [OK] equivalence.pl_kernel.replaces — ['p5_v2tile.bit'] are distinct changed artifacts of the parent configuration
-[OK] equivalence.pl_kernel.correspondence — ['p5_v2tile.bit'] of the parent configuration is replaced by ['p5_v2tile_v1p.bit'], under another name; where the system reaches the new artifacts is the written judgement 'replacement_correspondence'
+[OK] equivalence.pl_kernel.correspondence — ['p5_v2tile.bit'] of the parent configuration is replaced under another name; which new artifact takes the place of which replaced one is the written judgement 'replacement_correspondence'
 [..] renamed replacement: equivalence pl_kernel: ['p5_v2tile.bit'] of the parent configuration is replaced by ['p5_v2tile_v1p.bit'], which does not carry its name; that the running system now reaches ['p5_v2tile_v1p.bit'] where it reached ['p5_v2tile.bit'] is not checked — the verifier identifies artifacts by name only. It is the written judgement 'replacement_correspondence'
 [OK] equivalence.pl_kernel.reference_kind — 'parent_link'; this profile accepts ['parent_artifact', 'parent_link', 'specification']
 [OK] equivalence.pl_kernel.transcript — transcript 'lane_enumeration' is a bound, present evidence file
@@ -204,6 +206,7 @@
 [POLICY FAIL] policy.binding_levels[derived_v1p.json] — not accepted: ['(inventory)=unbound', 'frame=identifiers-only']
 [POLICY FAIL] policy.transcript_mapping[derived_v1p.json] — mapped by issuer-declared pointers: ['pl_kernel']
 [POLICY FAIL] policy.renamed_replacement[derived_v1p.json] — parent artifacts replaced under another name (judgement 'replacement_correspondence'): ['pl_kernel']
+[POLICY OK] policy.multi_artifact_block[derived_v1p.json] — every equivalence entry has one subject and replaces at most one artifact
 [POLICY OK] policy.enumeration_domains[derived_v1p.json] — every enumerated domain has the size the policy requires for its subjects
 [POLICY FAIL] policy.require_prospective[derived_v1p.json] — declared issuance_status: 'retrospective. Issued in the RecertKit certificate format on'
 CHAIN RECORD: VALID — conditional on 46 unchecked items (2 coverage by judgement, 1 detached evidence, 2 enumeration domain, 1 frame boundary, 2 inventory completeness, 11 judgement, 2 reference by declaration, 1 reference by judgement, 1 renamed replacement, 3 residual rebuilt, 1 root protocol, 2 transcript mapping, 2 transcript provenance, 11 trust assumption, 1 unbound inventory, 3 unrecorded artifact)

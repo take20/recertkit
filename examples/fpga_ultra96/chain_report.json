@@ -289,6 +289,11 @@
    "detail": "[] are distinct changed artifacts of the parent configuration"
   },
   {
+   "check": "equivalence.pl_kernel.correspondence",
+   "ok": true,
+   "detail": "one subject, replacing at most one parent artifact, of the same name"
+  },
+  {
    "check": "equivalence.pl_kernel.reference_kind",
    "ok": true,
    "detail": "'specification'; this profile accepts ['parent_artifact', 'parent_link', 'specification']"
@@ -596,7 +601,7 @@
   {
    "check": "equivalence.pl_kernel.correspondence",
    "ok": true,
-   "detail": "['p5_v2tile.bit'] of the parent configuration is replaced by ['p5_v2tile_v1p.bit'], under another name; where the system reaches the new artifacts is the written judgement 'replacement_correspondence'"
+   "detail": "['p5_v2tile.bit'] of the parent configuration is replaced under another name; which new artifact takes the place of which replaced one is the written judgement 'replacement_correspondence'"
   },
   {
    "check": "equivalence.pl_kernel.reference_kind",
@@ -899,7 +904,8 @@
      "reference_digest": null,
      "mapped": true,
      "domain_size": 1073741824,
-     "renamed": []
+     "renamed": [],
+     "multi_artifact": false
     }
    },
    "judgement_covered": [
@@ -972,7 +978,8 @@
      "domain_size": 1073741824,
      "renamed": [
       "p5_v2tile.bit"
-     ]
+     ],
+     "multi_artifact": false
     }
    },
    "judgement_covered": [],

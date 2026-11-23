@@ -39,6 +39,7 @@ a policy is only as strict as the members it states; unknown members are an erro
 | `binding_levels` | list | accepted root binding levels (`digest`, `identifiers-only`, `unbound`), as provided by the root |
 | `transcript_mapping` | `"forbid"`, `"allow"` | foreign transcript layouts read through issuer-declared pointers |
 | `renamed_replacement` | `"forbid"`, `"allow"` | equivalence entries that replace a parent artifact by a subject of another name (they rest on the judgement `replacement_correspondence`) |
+| `multi_artifact_block` | `"forbid"`, `"allow"` | equivalence entries with several subjects or several replaced artifacts (they rest on the same judgement: which file the comparison exercised is not visible to the verifier) |
 | `enumeration_domains` | `{artifact: N}` | every equivalence entry is an exhaustive enumeration, each of its subjects is listed, and its domain has exactly `N` inputs |
 | `accepted_judgements`, `accepted_assumptions` | `"*"`, a list of names, or `{name: "*" \| sha256}` | every judgement / assumption of a link is listed; with a digest, its text must be exactly the reviewed text |
 | `root_adapters` | list | accepted root formats |
@@ -73,7 +74,7 @@ bindings and three named conditions. The
 quick-start and gate-root chains are accepted.
 
 `examples/fpga_ultra96/policy_strict.json` — the same kind of policy applied to the case-study chain: **rejected**;
-14 of its 22 checks fail (an absent evidence file, two artifacts covered by judgement, rebuilt and unrecorded
+14 of its 24 checks fail (an absent evidence file, two artifacts covered by judgement, rebuilt and unrecorded
 artifacts, a specification as reference, references the verifier could not tie by digest, identifier-only and
 unbound root bindings, pointer-mapped transcripts, a bitstream replaced under another name, retrospective issuance).
 

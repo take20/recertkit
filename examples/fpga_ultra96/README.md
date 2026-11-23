@@ -13,7 +13,7 @@ enumeration, part written argument — and how the two verdicts separate.
 cd examples/fpga_ultra96
 T="--trust p5-release-key-1=release_key.pub"; L="--root root_certificate.json --links derived_v1.json derived_v1p.json"
 recertkit verify-chain $L $T                                        # RECORD VALID, 46 unchecked items listed
-recertkit verify-chain $L $T --policy policy_strict.json            # POLICY REJECTED: 14 of 22 policy checks fail
+recertkit verify-chain $L $T --policy policy_strict.json            # POLICY REJECTED: 14 of 24 policy checks fail
 recertkit verify-chain $L $T --policy policy_case_study.json        # POLICY ACCEPTED
 recertkit verify-chain $L $T --require-all-evidence                 # RECORD INVALID: one bound file is not included
 ```

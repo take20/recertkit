@@ -1,5 +1,44 @@
 # Changelog
 
+## 1.2.0 — 2026-11-23
+
+Release 1.1.0 refused the swap of two kernels only in the form in which a reviewer had declared it (each new file as
+the replacement of the other parent file). An audit of 1.1.0 by the authors declared the same swap as **one entry
+whose subjects and replaced artifacts are both kernels**, with a transcript written by the package's own
+`toy.enumerate_block` from a real comparison (0 mismatches). 1.1.0 issued that certificate through the normal path and
+accepted it under the reviewer's strict policy and under the supplied policy, with no notice, although the system
+changes 130 of 200 predictions (correct: 180 → 72). Both forms have one cause: artifacts are identified by name, a
+transcript states one result, and nothing in a record shows which file a comparison exercised or how the running
+system reaches a file.
+
+* **Name alignment.** An equivalence entry is name-aligned when it has one subject and replaces at most one parent
+  artifact, of the same name. Every other entry — a replacement under another name, *or a block of several
+  artifacts on either side* — now requires the written judgement `replacement_correspondence`
+  (`equivalence.<id>.correspondence`). A block is printed on every run as a `multi-artifact block` notice.
+* New policy member `multi_artifact_block` (`"forbid"` or `"allow"`). All four supplied policies forbid such
+  blocks; no stored example chain contains one, so all stored certificates are unchanged and remain valid.
+* `tests/test_renamed_replacement.py` now signs every declaration of the swap built from single-file **and two-file**
+  entries (272 declarations with true transcripts, with and without the judgement); none is accepted under the
+  reviewer's policy or the supplied policy.
+* **Evidence files are read by plain name only.** A file name in a certificate that contains a directory part, is
+  absolute, or is `.`/`..` is treated as absent. Before, a signed certificate could make the verifier read a file
+  outside the evidence directory.
+* **Malformed input never ends in a traceback.** A certificate, declaration or plugin of an unexpected shape ends
+  with exit status 2 and one line on stderr; nothing is issued or accepted. `RECERTKIT_DEBUG=1` shows the traceback.
+* **`recertkit inventory` refuses two files of the same name** (it used to write an inventory that every later
+  command rejected), and writes nothing when it refuses.
+* **Artifacts are hashed as stored.** Inventory lines and role digests are those of `sha256sum`. Before, an artifact
+  named `*.gz` was hashed after decompression. Records (certificates, inventories, evidence files) may still be kept
+  as `<name>.gz` and are hashed uncompressed. No stored example contains a compressed artifact.
+* The profile switches `coverage_by_judgement` and `require_equivalence` must be booleans. The documentation now
+  states that a change supported by judgement alone (a rebuild with no comparison) cannot be issued under the
+  built-in profile, and how a profile admits it (`docs/profiles.md`).
+* `Licence.txt` (identical to `LICENSE`) and an SPDX licence line in every Python source file, except six example
+  configuration artifacts whose digests a stored certificate binds.
+
+The certificate format is unchanged (`recertkit-3`). A certificate issued by 1.1.0 remains a valid record under
+1.2.0 unless it contains an entry of several artifacts without the judgement, or names an evidence file by a path.
+
 ## 1.1.0 — 2026-11-20
 
 An external review of the first public release found a third way to obtain an accepted certificate with truthful

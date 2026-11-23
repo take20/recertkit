@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Palusomni Co., Ltd.
 """A hardware-free toy deployment used by the quick-start and by the test suite.
 
 The "deployed system" is a tiny integer classifier.  One file, ``kernel.py``, is the replaceable block: a fixed-point

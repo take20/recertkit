@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Palusomni Co., Ltd.
 """Ed25519 signing and a small trust store keyed by ``public_key_id``."""
 from __future__ import annotations
 import os

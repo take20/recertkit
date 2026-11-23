@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Palusomni Co., Ltd.
 """Record validity and acceptance are separate verdicts."""
 import json, os
 import pytest
@@ -21,7 +23,7 @@ def test_without_a_policy_the_report_says_no_release_decision_was_made(chain, ca
 
 def test_quickstart_policy_accepts_the_toy_chain(chain, capsys):
     rc, rep = chain.verify_chain(extra=["--policy", QS_POLICY])
-    assert rc == 0 and rep["policy_verdict"] == "ACCEPTED" and rep["accepted"] and len(rep["policy"]["checks"]) == 26 and not rep["policy"]["not_evaluated"]   # 13 members x 2 links
+    assert rc == 0 and rep["policy_verdict"] == "ACCEPTED" and rep["accepted"] and len(rep["policy"]["checks"]) == 28 and not rep["policy"]["not_evaluated"]   # 14 members x 2 links
     assert "POLICY quickstart-release-1: ACCEPTED" in capsys.readouterr().out
 
 

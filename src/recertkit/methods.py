@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Palusomni Co., Ltd.
 """Equivalence methods and transcript layouts.
 
 An equivalence entry of a certificate says: *these changed artifacts (subjects) compute the same function as this

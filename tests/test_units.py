@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Palusomni Co., Ltd.
 import pytest
 from recertkit.canon import canon, dec, pointer
 from recertkit.inventory import InventoryError, parse_inventory

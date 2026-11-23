@@ -66,6 +66,7 @@
 [OK] equivalence.pl_kernel.method — 'exhaustive_enumeration'; this profile accepts ['exhaustive_enumeration']
 [OK] equivalence.pl_kernel.subjects — ['p5_v2tile.bit'] are distinct changed artifacts of the derived configuration
 [OK] equivalence.pl_kernel.replaces — [] are distinct changed artifacts of the parent configuration
+[OK] equivalence.pl_kernel.correspondence — one subject, replacing at most one parent artifact, of the same name
 [OK] equivalence.pl_kernel.reference_kind — 'specification'; this profile accepts ['parent_artifact', 'parent_link', 'specification']
 [OK] equivalence.pl_kernel.transcript — transcript 'lane_enumeration' is a bound, present evidence file
 [OK] equivalence.pl_kernel.transcript_layout — foreign layout mapped by declared pointers
@@ -105,6 +106,7 @@
 [POLICY OK] policy.coverage_by_judgement[derived_v1.json] — no changed artifact rests on a judgement outside the policy
 [POLICY OK] policy.reference_kinds[derived_v1.json] — references are of kinds ['specification', 'parent_link']
 [POLICY OK] policy.binding_levels[derived_v1.json] — root bindings are at levels ['digest', 'identifiers-only', 'unbound']
+[POLICY OK] policy.multi_artifact_block[derived_v1.json] — every equivalence entry has one subject and replaces at most one artifact
 [POLICY OK] policy.enumeration_domains[derived_v1.json] — every enumerated domain has the size the policy requires for its subjects
 [POLICY OK] policy.accepted_judgements[derived_v1.json] — every one of the judgements is accepted by the policy (by NAME only, text not pinned: ['boundary', 'composition', 'host_integration', 'reference_link', 'residual_path', 'root_configuration'])
 [POLICY OK] policy.accepted_assumptions[derived_v1.json] — every one of the trust_assumptions is accepted by the policy (by NAME only, text not pinned: ['A1_build_provenance', 'A2_build_environment', 'T1_hls_toolchain', 'T2_host_path', 'T3_compositionality', 'T5_frame_content', 'T6_native_toolchain'])
@@ -157,7 +159,7 @@
 [OK] equivalence.pl_kernel.method — 'exhaustive_enumeration'; this profile accepts ['exhaustive_enumeration']
 [OK] equivalence.pl_kernel.subjects — ['p5_v2tile_v1p.bit'] are distinct changed artifacts of the derived configuration
 [OK] equivalence.pl_kernel.replaces — ['p5_v2tile.bit'] are distinct changed artifacts of the parent configuration
-[OK] equivalence.pl_kernel.correspondence — ['p5_v2tile.bit'] of the parent configuration is replaced by ['p5_v2tile_v1p.bit'], under another name; where the system reaches the new artifacts is the written judgement 'replacement_correspondence'
+[OK] equivalence.pl_kernel.correspondence — ['p5_v2tile.bit'] of the parent configuration is replaced under another name; which new artifact takes the place of which replaced one is the written judgement 'replacement_correspondence'
 [..] renamed replacement: equivalence pl_kernel: ['p5_v2tile.bit'] of the parent configuration is replaced by ['p5_v2tile_v1p.bit'], which does not carry its name; that the running system now reaches ['p5_v2tile_v1p.bit'] where it reached ['p5_v2tile.bit'] is not checked — the verifier identifies artifacts by name only. It is the written judgement 'replacement_correspondence'
 [OK] equivalence.pl_kernel.reference_kind — 'parent_link'; this profile accepts ['parent_artifact', 'parent_link', 'specification']
 [OK] equivalence.pl_kernel.transcript — transcript 'lane_enumeration' is a bound, present evidence file
@@ -194,6 +196,7 @@
 [POLICY OK] policy.coverage_by_judgement[derived_v1p.json] — no changed artifact rests on a judgement outside the policy
 [POLICY OK] policy.reference_kinds[derived_v1p.json] — references are of kinds ['specification', 'parent_link']
 [POLICY OK] policy.binding_levels[derived_v1p.json] — root bindings are at levels ['digest', 'identifiers-only', 'unbound']
+[POLICY OK] policy.multi_artifact_block[derived_v1p.json] — every equivalence entry has one subject and replaces at most one artifact
 [POLICY OK] policy.enumeration_domains[derived_v1p.json] — every enumerated domain has the size the policy requires for its subjects
 [POLICY OK] policy.accepted_judgements[derived_v1p.json] — every one of the judgements is accepted by the policy (by NAME only, text not pinned: ['boundary', 'composition', 'replacement_correspondence', 'residual_path', 'unrecorded_items'])
 [POLICY OK] policy.accepted_assumptions[derived_v1p.json] — every one of the trust_assumptions is accepted by the policy (by NAME only, text not pinned: ['T1_hls_toolchain', 'T3_compositionality', 'T4_deployment_identity', 'inherited'])

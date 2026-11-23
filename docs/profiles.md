@@ -11,6 +11,11 @@ A profile is the verifier's rule set, as data. `recertkit profile` prints the bu
   `specification`;
 * `coverage_by_judgement: true` — a changed artifact may be covered by a named judgement (it is then printed);
   set it to `false` to make equivalence evidence mandatory for every changed artifact;
+* `require_equivalence: true` — a link must contain at least one equivalence entry. A change supported by judgement
+  alone (a rebuild with no comparison: every changed artifact declared `residual_rebuilt`) can therefore not be
+  issued under the built-in profile. A profile that sets it to `false` admits such links; they are valid records
+  whose notices say that they rest on judgement, and the policy member `residual_rebuilt` can refuse them
+  (`tests/test_robustness.py`);
 * required judgements: `boundary`, `residual_path`; `unrecorded_items` when artifacts are unrecorded;
   `root_configuration` when a root binding is weaker than a digest;
 * `deterministic_only: true` — this version rejects any profile that sets it to false.

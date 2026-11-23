@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Palusomni Co., Ltd.
 """Quick start: certify once, change the system, carry the certificate forward — and see bad changes refused.
 
     python examples/quickstart/run.py [workdir]

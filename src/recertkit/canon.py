@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Palusomni Co., Ltd.
 """Canonical bytes, digests and exact decimals.
 
 Certificates are signed over RFC 8785 (JCS) canonical JSON.  All risk and margin values are decimal STRINGS and are
@@ -28,13 +30,34 @@ def resolve_path(path: str) -> str | None:
     return None
 
 
+def evidence_path(directory: str, name) -> str | None:
+    """Path of the evidence file ``name`` inside ``directory`` (or its ``.gz``), or None.
+
+    ``name`` comes from a certificate.  Only a plain file name is accepted: anything with a directory part, an absolute
+    path, ``.`` or ``..`` is treated as absent, so a certificate cannot make the verifier read outside the directory."""
+    if not isinstance(name, str) or not name or name in (".", "..") or "\0" in name: return None
+    if name != os.path.basename(name) or "/" in name or "\\" in name or os.path.isabs(name): return None
+    return resolve_path(os.path.join(directory, name))
+
+
 def open_bytes(path: str):
     """Open a file for reading uncompressed bytes (transparently gunzipping ``*.gz``)."""
     return gzip.open(path, "rb") if path.endswith(".gz") else open(path, "rb")
 
 
+def sha_raw(path: str) -> str:
+    """SHA-256 of the bytes of ``path`` exactly as stored — what ``sha256sum`` prints.  Used for ARTIFACTS of a
+    configuration (inventory lines, role files), so that an inventory can be written or checked with ``sha256sum``."""
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""): h.update(chunk)
+    return h.hexdigest()
+
+
 def sha_file(path: str) -> str:
-    """SHA-256 of the uncompressed content of ``path``."""
+    """SHA-256 of the uncompressed content of ``path``.  Used for RECORDS (certificates, inventories, evidence files),
+    which may be stored gzip-compressed as ``<name>.gz``: the digest is that of the uncompressed record either way.
+    Artifacts are hashed with ``sha_raw``."""
     h = hashlib.sha256()
     with open_bytes(path) as f:
         for chunk in iter(lambda: f.read(1 << 20), b""): h.update(chunk)

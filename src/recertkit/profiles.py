@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Palusomni Co., Ltd.
 """Profiles: the relying party's rules, as data.
 
 A profile says which claim fields a certificate must carry and how they are constrained, which configuration roles
@@ -54,6 +56,8 @@ def validate_profile(p: dict) -> dict:
     if not p["roles"][p["frame_role"]].get("fixed"): raise ProfileError("the frame role must be fixed")
     if not set(p.get("reference_kinds", REFERENCE_KINDS)) <= set(REFERENCE_KINDS):
         raise ProfileError(f"reference_kinds must be a subset of {list(REFERENCE_KINDS)}")
+    for k in ("coverage_by_judgement", "require_equivalence"):
+        if k in p and not isinstance(p[k], bool): raise ProfileError(f"{k} must be true or false")
     if p["deterministic_only"] is not True:
         raise ProfileError("this version supports deterministic transfer only (deterministic_only must be true)")
     return p

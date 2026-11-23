@@ -271,7 +271,7 @@
   {
    "check": "equivalence.kernel.correspondence",
    "ok": true,
-   "detail": "every replaced artifact ['kernel.py'] has a subject of the same name"
+   "detail": "one subject, replacing at most one parent artifact, of the same name"
   },
   {
    "check": "equivalence.kernel.reference_kind",
@@ -400,7 +400,8 @@
      "reference_digest": "3724a958b937836fba76483747f6d1e4aa7ec55ea8eb8488ef9d234b4275ad6a",
      "mapped": false,
      "domain_size": 65536,
-     "renamed": []
+     "renamed": [],
+     "multi_artifact": false
     }
    },
    "judgement_covered": [],
@@ -478,6 +479,11 @@
     "check": "policy.renamed_replacement[derived_c1.json]",
     "ok": true,
     "detail": "every replaced parent artifact is replaced under its own name"
+   },
+   {
+    "check": "policy.multi_artifact_block[derived_c1.json]",
+    "ok": true,
+    "detail": "every equivalence entry has one subject and replaces at most one artifact"
    },
    {
     "check": "policy.enumeration_domains[derived_c1.json]",

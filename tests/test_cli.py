@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Palusomni Co., Ltd.
 import os
 from recertkit.cli import main as cli
 from recertkit.checks import CHECKS, documented, markdown

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Palusomni Co., Ltd.
 """Coverage obligations are side-specific (review of the second draft, finding R1).
 
 The same file name in the parent and in the derived configuration denotes two different things.  Naming the parent's
@@ -133,29 +135,49 @@ def test_one_name_on_both_sides_is_two_obligations(chain, side, failed):
         assert rc == 1 and "policy.coverage_by_judgement[derived_mod.json]" in rep["policy"]["failed_checks"]
 
 
-def _split(chain):
-    """C0 -> a kernel that consists of TWO artifacts (kernel.py and the added kernel_params.json)."""
+SPLIT_CORRESPONDENCE = "kernel.py is the block's only entry point and is reached under its own name; kernel_params.json is read only by kernel.py."
+
+
+def _split(chain, correspondence=True):
+    """C0 -> a kernel that consists of TWO artifacts (kernel.py and the added kernel_params.json).  An entry with several
+    subjects is a multi-artifact block, so the judgement 'replacement_correspondence' is written unless
+    ``correspondence=False``."""
     cfg = _config(chain, "split", "split")
     t = toy.enumerate_block(cfg["kernel.py"], chain.P("config_v0", "kernel.py"), chain.P("enumeration_split.json"), subject_files=[cfg["kernel_params.json"]])
     assert t["mismatches"] == 0 and set(t["subjects"]) == {"kernel.py", "kernel_params.json"}
     spec = _spec(chain, "split", "enumeration_split.json", block={"changed": ["kernel.py", "kernel_params.json"], "unchanged": ["system.py", "model.json", "frame.jsonl"]})
     spec["equivalence"][0]["subjects"] = ["kernel.py", "kernel_params.json"]
+    if correspondence: spec["judgements"]["replacement_correspondence"] = SPLIT_CORRESPONDENCE
     json.dump(spec, open(chain.P("spec_split.json"), "w")); return cfg, spec
 
 
-def _policy_for(chain, domains, renamed=False):
-    """The quick-start release policy with other domains; ``renamed=True`` additionally accepts renamed replacements
-    and the judgement that states their correspondence (the quick-start policy itself forbids them)."""
+def _policy_for(chain, domains, renamed=False, blocks=False):
+    """The quick-start release policy with other domains.  ``renamed=True`` / ``blocks=True`` additionally allow renamed
+    replacements / multi-artifact blocks and accept the judgement that states their correspondence (the quick-start
+    policy itself forbids both)."""
     p = load_json(os.path.join(os.path.dirname(toy.__file__), "policy.json")); p["enumeration_domains"] = domains
-    if renamed: p["renamed_replacement"] = "allow"; p["accepted_judgements"] = sorted(p["accepted_judgements"] + ["replacement_correspondence"])
+    if renamed: p["renamed_replacement"] = "allow"
+    if blocks: p["multi_artifact_block"] = "allow"
+    if renamed or blocks: p["accepted_judgements"] = sorted(p["accepted_judgements"] + ["replacement_correspondence"])
     json.dump(p, open(chain.P("policy_t.json"), "w")); return ["--policy", chain.P("policy_t.json")]
 
 
 def test_block_of_two_artifacts_added_file_is_a_subject(chain):
     _split(chain)
     assert chain.issue("root.json", "inventory_v0.txt", "inventory_split.txt", "spec_split.json", "derived_split.json")[0] == 0
-    rc, rep = chain.verify_chain(links=("derived_split.json",), extra=_policy_for(chain, {"kernel.py": 65536, "kernel_params.json": 65536}))
+    rc, rep = chain.verify_chain(links=("derived_split.json",), extra=_policy_for(chain, {"kernel.py": 65536, "kernel_params.json": 65536}, blocks=True))
     assert rc == 0 and rep["policy_verdict"] == "ACCEPTED" and rep["links"][0]["entries"]["kernel"]["subjects"] == ["kernel.py", "kernel_params.json"]
+    notes = [n["text"] for n in rep["not_checked"] if n["kind"] == "multi-artifact block"]
+    assert len(notes) == 1 and "['kernel.py', 'kernel_params.json'] are compared as one block" in notes[0] and rep["links"][0]["entries"]["kernel"]["multi_artifact"] is True
+    rc, rep = chain.verify_chain(links=("derived_split.json",), extra=_policy_for(chain, {"kernel.py": 65536, "kernel_params.json": 65536}))     # the supplied policy forbids blocks
+    assert rc == 1 and rep["record_valid"] and set(rep["policy"]["failed_checks"]) == {"policy.multi_artifact_block[derived_split.json]", "policy.accepted_judgements[derived_split.json]"}
+
+
+def test_block_of_two_artifacts_needs_the_correspondence_judgement(chain):
+    """A truthful transcript states ONE result for the block; which file was exercised is not visible to the verifier."""
+    _split(chain, correspondence=False)
+    rc, rep = chain.issue("root.json", "inventory_v0.txt", "inventory_split.txt", "spec_split.json", "derived_split.json")
+    assert rc == 1 and rep["failed_checks"] == ["equivalence.kernel.correspondence"]
 
 
 def test_added_file_that_is_neither_subject_nor_judged_is_refused(chain):
@@ -193,12 +215,15 @@ def _merge(chain, replaces, reference, reference_files=True, correspondence=True
 def test_deleted_file_is_covered_when_the_reference_block_contains_it(chain):
     rc, rep = _merge(chain, ["kernel.py", "kernel_params.json"], {"kind": "parent_artifact", "artifacts": ["kernel.py", "kernel_params.json"]})
     assert rc == 0
-    rc, rep = chain.verify_chain(links=("derived_split.json", "derived_merged.json"), extra=_policy_for(chain, {"kernel.py": 65536, "kernel_params.json": 65536}, renamed=True))
+    rc, rep = chain.verify_chain(links=("derived_split.json", "derived_merged.json"), extra=_policy_for(chain, {"kernel.py": 65536, "kernel_params.json": 65536}, renamed=True, blocks=True))
     assert rc == 0 and rep["policy_verdict"] == "ACCEPTED" and rep["links"][1]["entries"]["kernel"]["reference_binding"] == "digest"
     notes = [n["text"] for n in rep["not_checked"] if n["kind"] == "renamed replacement"]
     assert len(notes) == 1 and "['kernel_params.json'] of the parent configuration is replaced by ['kernel.py']" in notes[0] and "still exist" not in notes[0]
+    assert len([n for n in rep["not_checked"] if n["kind"] == "multi-artifact block"]) == 2                             # the split link and the merge link
     rc, rep = chain.verify_chain(links=("derived_split.json", "derived_merged.json"), extra=_policy_for(chain, {"kernel.py": 65536, "kernel_params.json": 65536}))
-    assert rc == 1 and rep["record_valid"] and set(rep["policy"]["failed_checks"]) == {"policy.renamed_replacement[derived_merged.json]", "policy.accepted_judgements[derived_merged.json]"}
+    assert rc == 1 and rep["record_valid"] and set(rep["policy"]["failed_checks"]) == {
+        "policy.multi_artifact_block[derived_split.json]", "policy.accepted_judgements[derived_split.json]",
+        "policy.renamed_replacement[derived_merged.json]", "policy.multi_artifact_block[derived_merged.json]", "policy.accepted_judgements[derived_merged.json]"}
 
 
 def test_deleted_file_absorbed_by_a_file_of_another_name_needs_the_correspondence_judgement(chain):
@@ -237,7 +262,7 @@ def test_parent_link_reference_for_the_whole_block_is_accepted(chain):
     spec["judgements"]["replacement_correspondence"] = MERGE_CORRESPONDENCE
     json.dump(spec, open(chain.P("spec_merged.json"), "w"))
     assert chain.issue("derived_split.json", "inventory_split.txt", "inventory_merged.txt", "spec_merged.json", "derived_merged.json")[0] == 0
-    rc, rep = chain.verify_chain(links=("derived_split.json", "derived_merged.json"), extra=_policy_for(chain, {"kernel.py": 65536, "kernel_params.json": 65536}, renamed=True))
+    rc, rep = chain.verify_chain(links=("derived_split.json", "derived_merged.json"), extra=_policy_for(chain, {"kernel.py": 65536, "kernel_params.json": 65536}, renamed=True, blocks=True))
     assert rc == 0 and rep["policy_verdict"] == "ACCEPTED"
 
 

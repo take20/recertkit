@@ -1,7 +1,9 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Palusomni Co., Ltd.
 """E1 inventories: one ``<sha256>  <path>`` line per artifact of a deployed configuration (``sha256sum`` format)."""
 from __future__ import annotations
 import os
-from .canon import open_bytes, sha_file
+from .canon import open_bytes, sha_raw
 
 
 class InventoryError(ValueError):
@@ -25,5 +27,11 @@ def parse_inventory(path: str) -> dict[str, str]:
 
 
 def make_inventory(paths) -> str:
-    """Inventory text for the given files (basenames only, so no machine-specific path is recorded)."""
-    return "".join(f"{sha_file(p)}  {os.path.basename(p)}\n" for p in sorted(paths, key=os.path.basename))
+    """Inventory text for the given files (basenames only, so no machine-specific path is recorded).
+
+    Artifacts are identified by file name, so two files of the same name cannot both be listed: they are refused here,
+    as ``parse_inventory`` would refuse the result."""
+    paths = list(paths); names = [os.path.basename(p) for p in paths]
+    dup = sorted({n for n in names if names.count(n) > 1})
+    if dup: raise InventoryError(f"duplicate file names {dup}: an inventory identifies artifacts by file name; give the files distinct names")
+    return "".join(f"{sha_raw(p)}  {os.path.basename(p)}\n" for p in sorted(paths, key=os.path.basename))

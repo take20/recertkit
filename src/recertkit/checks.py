@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Palusomni Co., Ltd.
 """Catalogue of the checks the verifier performs (``recertkit checks`` prints it; docs/checks.md is generated from it).
 
 ``*`` stands for an artifact name, a role, an evidence name or the identifier of an equivalence entry.  Record checks
@@ -35,14 +37,14 @@ CHECKS = [
   ("coverage.derived_side", "every changed artifact present in the DERIVED inventory is a subject of exactly one equivalence entry, or is covered by one named judgement"),
   ("coverage.parent_side", "every changed artifact present in the PARENT inventory is replaced by exactly one equivalence entry, or is covered by one named judgement"),
   ("coverage.declared", "nothing is listed as covered on a side where it is not a changed artifact"),
-  ("coverage.equivalence_present", "at least one equivalence entry exists"),
+  ("coverage.equivalence_present", "at least one equivalence entry exists (profile switch require_equivalence; the built-in profile sets it, so a change supported by judgements alone — a rebuild with no comparison — cannot be issued under it)"),
   ("coverage.judgement.*", "an artifact covered by judgement names an existing, non-empty judgement and bound supporting evidence, and the profile permits it; the artifact is printed as NOT covered by equivalence evidence"),
   ("equivalence.ids", "equivalence entries have distinct, well-formed identifiers")]),
  ("evidence linkage (per equivalence entry)", [
   ("equivalence.*.method", "the method is accepted by the profile and registered"),
   ("equivalence.*.subjects", "the subjects are distinct changed artifacts of the derived configuration"),
   ("equivalence.*.replaces", "the replaced artifacts are distinct changed artifacts of the parent configuration"),
-  ("equivalence.*.correspondence", "every replaced parent artifact has a subject of the same name, or the certificate carries the written judgement 'replacement_correspondence' (printed): artifacts are identified by name, and where the system reaches them is not visible to the verifier"),
+  ("equivalence.*.correspondence", "the entry is name-aligned (one subject, replacing at most one parent artifact, of the same name), or the certificate carries the written judgement 'replacement_correspondence' (printed): artifacts are identified by name; where the system reaches them, and which file of a block a comparison exercised, is not visible to the verifier"),
   ("equivalence.*.reference_kind", "the kind of reference is one the profile accepts"),
   ("equivalence.*.transcript", "the transcript is a bound evidence file and is present (never detached)"),
   ("equivalence.*.transcript_json", "the transcript parses as JSON"),
@@ -97,6 +99,7 @@ POLICY_CHECKS = [
   ("policy.binding_levels[*]", "every root binding is at a level the policy accepts"),
   ("policy.transcript_mapping[*]", "no transcript is read through issuer-declared pointers"),
   ("policy.renamed_replacement[*]", "no equivalence entry replaces a parent artifact by a subject of another name"),
+  ("policy.multi_artifact_block[*]", "no equivalence entry compares several artifacts as one block"),
   ("policy.chain[*]", "single-link verification of a later link: never satisfied — the earlier links were not evaluated (NOT EVALUATED)"),
   ("policy.accepted_judgements[*]", "every written judgement is one the policy accepts — by name, or by name and SHA-256 of its text when the policy pins one"),
   ("policy.accepted_assumptions[*]", "every trust assumption is one the policy accepts — by name, or by name and SHA-256 of its text when the policy pins one"),

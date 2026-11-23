@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Palusomni Co., Ltd.
 import json, os, shutil, sys
 import pytest
 HERE = os.path.dirname(os.path.abspath(__file__))

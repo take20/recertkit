@@ -66,6 +66,7 @@
 [OK] equivalence.pl_kernel.method — 'exhaustive_enumeration'; this profile accepts ['exhaustive_enumeration']
 [OK] equivalence.pl_kernel.subjects — ['p5_v2tile.bit'] are distinct changed artifacts of the derived configuration
 [OK] equivalence.pl_kernel.replaces — [] are distinct changed artifacts of the parent configuration
+[OK] equivalence.pl_kernel.correspondence — one subject, replacing at most one parent artifact, of the same name
 [OK] equivalence.pl_kernel.reference_kind — 'specification'; this profile accepts ['parent_artifact', 'parent_link', 'specification']
 [OK] equivalence.pl_kernel.transcript — transcript 'lane_enumeration' is a bound, present evidence file
 [OK] equivalence.pl_kernel.transcript_layout — foreign layout mapped by declared pointers
@@ -150,7 +151,7 @@
 [OK] equivalence.pl_kernel.method — 'exhaustive_enumeration'; this profile accepts ['exhaustive_enumeration']
 [OK] equivalence.pl_kernel.subjects — ['p5_v2tile_v1p.bit'] are distinct changed artifacts of the derived configuration
 [OK] equivalence.pl_kernel.replaces — ['p5_v2tile.bit'] are distinct changed artifacts of the parent configuration
-[OK] equivalence.pl_kernel.correspondence — ['p5_v2tile.bit'] of the parent configuration is replaced by ['p5_v2tile_v1p.bit'], under another name; where the system reaches the new artifacts is the written judgement 'replacement_correspondence'
+[OK] equivalence.pl_kernel.correspondence — ['p5_v2tile.bit'] of the parent configuration is replaced under another name; which new artifact takes the place of which replaced one is the written judgement 'replacement_correspondence'
 [..] renamed replacement: equivalence pl_kernel: ['p5_v2tile.bit'] of the parent configuration is replaced by ['p5_v2tile_v1p.bit'], which does not carry its name; that the running system now reaches ['p5_v2tile_v1p.bit'] where it reached ['p5_v2tile.bit'] is not checked — the verifier identifies artifacts by name only. It is the written judgement 'replacement_correspondence'
 [OK] equivalence.pl_kernel.reference_kind — 'parent_link'; this profile accepts ['parent_artifact', 'parent_link', 'specification']
 [OK] equivalence.pl_kernel.transcript — transcript 'lane_enumeration' is a bound, present evidence file

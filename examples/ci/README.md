@@ -25,4 +25,4 @@ Status as of 2026-11-16: the workflow file is a template and has not been execut
 is a statement about what was done, not about what is possible: GitHub Actions also runs in private repositories.
 Its verification step was executed locally, as written, on the quick-start chain arranged in the layout above: it
 exits with status 0 under the quick-start policy and with status 1 when the policy is changed so that it no longer
-accepts one of the judgements (`docs/assurance.md`, "What was executed where").
+accepts one of the judgements (`docs/assurance.md`, "What is executed for a release").

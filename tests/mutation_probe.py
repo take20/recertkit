@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Palusomni Co., Ltd.
 """Check-disabling probe.
 
 For every record and policy check pattern in the catalogue (``recertkit.checks``), force all checks matching that pattern to pass

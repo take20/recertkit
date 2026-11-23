@@ -54,7 +54,7 @@
 [OK] equivalence.kernel.method — 'exhaustive_enumeration'; this profile accepts ['exhaustive_enumeration']
 [OK] equivalence.kernel.subjects — ['kernel.py'] are distinct changed artifacts of the derived configuration
 [OK] equivalence.kernel.replaces — ['kernel.py'] are distinct changed artifacts of the parent configuration
-[OK] equivalence.kernel.correspondence — every replaced artifact ['kernel.py'] has a subject of the same name
+[OK] equivalence.kernel.correspondence — one subject, replacing at most one parent artifact, of the same name
 [OK] equivalence.kernel.reference_kind — 'parent_artifact'; this profile accepts ['parent_artifact', 'parent_link', 'specification']
 [OK] equivalence.kernel.transcript — transcript 'enumeration' is a bound, present evidence file
 [OK] equivalence.kernel.transcript_layout — standard layout recertkit-enumeration-1
@@ -84,6 +84,7 @@
 [POLICY OK] policy.binding_levels[derived_c1.json] — root bindings are at levels ['digest']
 [POLICY OK] policy.transcript_mapping[derived_c1.json] — all transcripts use the standard layout
 [POLICY OK] policy.renamed_replacement[derived_c1.json] — every replaced parent artifact is replaced under its own name
+[POLICY OK] policy.multi_artifact_block[derived_c1.json] — every equivalence entry has one subject and replaces at most one artifact
 [POLICY OK] policy.enumeration_domains[derived_c1.json] — every enumerated domain has the size the policy requires for its subjects
 [POLICY OK] policy.accepted_judgements[derived_c1.json] — every one of the judgements is accepted by the policy (by NAME only, text not pinned: ['boundary', 'residual_path'])
 [POLICY OK] policy.accepted_assumptions[derived_c1.json] — every one of the trust_assumptions is accepted by the policy (by NAME only, text not pinned: ['interpreter'])

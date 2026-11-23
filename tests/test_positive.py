@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Palusomni Co., Ltd.
 import gzip, json, os, shutil
 from recertkit.canon import load_json, sha_file
 

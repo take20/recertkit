@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Palusomni Co., Ltd.
 """Evidence linkage and change coverage.
 
 The first two tests are the counterexamples found in the review of the first draft (2026-11-16): in both, every

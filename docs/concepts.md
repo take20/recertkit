@@ -3,8 +3,9 @@
 ## Objects
 
 **Configuration and inventory.** A configuration is the set of artifacts a deployed system consists of. Its
-*inventory* is a text file with one `sha256  name` line per artifact (`recertkit inventory`). Names are basenames
-and must be unique.
+*inventory* is a text file with one `sha256  name` line per artifact (`recertkit inventory`, or `sha256sum`: the
+digest is that of the file as stored). Names are basenames and must be unique: artifacts are identified by file
+name, and `recertkit inventory` refuses two files of the same name.
 
 **Roles.** A profile names the roles every configuration has. The built-in profile has `server` (the program),
 `model` and `frame` (the evaluation frame the claim is about). `model` and `frame` are *fixed*: a transfer may
@@ -55,16 +56,23 @@ Three questions are separate, and all three are checked:
    side (`coverage.derived_side`, `coverage.parent_side`), and nothing may be listed on a side where it is not an
    obligation (`coverage.declared`). An artifact covered by judgement is printed as *not covered by equivalence
    evidence*, with the side.
-3. **Does each new artifact take the place of what it was compared with?** Artifacts are identified by **name**; how
-   the running system reaches them is not visible to the verifier. When every artifact an entry replaces has a subject
-   of the same name, the new block stands where the old one stood. When one does not — a renamed file, two artifacts
-   declared as each other's replacements, a deleted file absorbed by a block under another name — that the system now
-   reaches the subjects where it reached the replaced artifacts is the written judgement
-   `replacement_correspondence`. Without it the declaration is refused (`equivalence.<id>.correspondence`); with it,
-   every run prints a *renamed replacement* notice, which also names any replaced artifact that still exists in the
-   derived configuration as a different file, and the policy member `renamed_replacement` can refuse it. (Before
-   1.1.0, two kernels whose contents were swapped, each declared as the replacement of the other, were accepted with
-   two true comparisons and complete coverage.)
+3. **Does each new artifact take the place of what it was compared with?** Artifacts are identified by **name**. The
+   verifier sees neither how the running system reaches a file nor which file of a block a comparison exercised. An
+   entry is *name-aligned* when it has one subject and replaces at most one parent artifact, of the same name: the new
+   file then stands where the old one stood, and nothing further is needed. Any other entry rests on the written
+   judgement `replacement_correspondence`, which must say which new artifact takes the place of which replaced one:
+
+   | entry | example | printed as |
+   |---|---|---|
+   | a replaced artifact has no subject of its name | a renamed file; two files declared as each other's replacements; a deleted file absorbed by another | *renamed replacement* (also names a replaced file that still exists in the derived configuration as a different file) |
+   | several subjects, or several replaced artifacts | one file becomes two; two files compared as one block | *multi-artifact block* |
+
+   Without the judgement the declaration is refused (`equivalence.<id>.correspondence`). With it, the notice is printed
+   on every run, and the policy members `renamed_replacement` and `multi_artifact_block` can refuse it. The reason is
+   the same in both rows: a transcript states one result, and nothing in the record shows that the comparison was
+   about the pairing the system actually uses. Two kernels whose contents are swapped can be declared crosswise
+   (1.0.0 accepted this) or as one block of two files (1.0.0 and 1.1.0 accepted this) with comparisons that are all
+   true, while the system — which reaches them by name — computes something else.
 
 And for each comparison, **both sides are identified**:
 

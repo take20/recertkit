@@ -2,7 +2,7 @@
 
 RecertKit's purpose is to refuse an invalid transfer. A tool of this kind fails silently: a missing check produces
 no error, only an acceptance that should not have happened. This page records how the checks are tested, what
-independent review nevertheless found in three successive drafts and in the first public release, and what remains
+review nevertheless found in three pre-release drafts and in the first two public releases, and what remains
 untested.
 
 ## Four kinds of test
@@ -14,14 +14,16 @@ untested.
 | Can a harmful change be *declared* so that it is accepted? | `tests/declaration_search.py` — exhaustive over a bounded space of declarations; exits with status 1 if an invariant is violated. `tests/test_renamed_replacement.py` — the same question for two kernels whose contents are swapped | none accepted under the supplied policy (both searches) |
 | Do the numeric checks agree with exact arithmetic? | `tests/test_risk_exact.py` — 4,000 random decimals, most longer than the default working precision, against a rational-number oracle; the same verdicts under four decimal contexts | no disagreement |
 
-The first two can only confirm checks that somebody thought of. Both were green for the two earlier drafts in
+The first two can only confirm checks that somebody thought of. Both were green for two pre-release drafts in
 which reviewers then found acceptance errors (below). The third was added for that reason. It was in turn green for
 release 1.0.0, in which a reviewer then found an acceptance error outside its space: the search fixes one harmful
 change (a modified `system.py` next to an equivalent kernel), and none of its transcripts compares a new file with a
 parent file of another name. Two files whose contents are swapped, each truly equivalent to the other's
-predecessor, are therefore not in it. The swap search was added for that reason. The fourth was added
-after the third review found a defect of a kind the first three do not look for: a check that was present, tested
-and exercised, but computed in rounding arithmetic.
+predecessor, are therefore not in it. The swap search was added for that reason — and in release 1.1.0 it covered
+only entries with a single subject, so the same swap declared as one block of two files was accepted (below). Each
+search is evidence about the space it enumerates and about nothing else. The fourth instrument was added after a
+review found a defect of a kind the first three do not look for: a check that was present, tested and exercised,
+but computed in rounding arithmetic.
 
 ## The declaration search
 
@@ -47,30 +49,31 @@ checks and verified as a chain under `examples/quickstart/policy.json`.
 
 | engine | policy | declarations | valid records | accepted |
 |---|---|---|---|---|
-| this version | supplied with this version | 221,184 | 74 | **0** |
-| this version | the second draft's policy (see below) | 221,184 | 74 | 8 |
-| second draft | the second draft's policy | 221,184 | 642 | 21 |
+| this version (1.2.0) | supplied with this version | 221,184 | 62 | **0** |
+| this version (1.2.0) | the supplied policy without `enumeration_domains` | 221,184 | 62 | 6 |
+| a pre-release draft (the second) | supplied with that draft, which had no `enumeration_domains` | 221,184 | 642 | 21 |
 | this version, harmless control (kernel only) | supplied with this version | 3,456 | 5 | 2 |
 
-The two drafts were each measured under the policy supplied with them, and the two policies differ: this
-version's adds the members `enumeration_domains` and (in 1.1.0) `renamed_replacement`. The step from 21 to 0 is
-therefore not the effect of the engine alone. The second row uses this version's policy without
-`enumeration_domains`; it still states `renamed_replacement: "forbid"`, which cannot change a verdict in this space:
-no declaration in it carries the judgement `replacement_correspondence`, and a renamed replacement without that
-judgement is not a valid record. Under one and the same policy — the second draft's — the engine change takes 21 to
-8; the domain-size member takes 8 to 0. (The second draft's code cannot read this version's policy: it rejects the
-unknown members.)
+The third row is historical and was measured on that draft's code under that draft's policy; the draft cannot read
+this version's policy. Rows one and two separate two effects for this version: the record checks leave 62 valid
+records, of which the policy members other than `enumeration_domains` reject all but 6, and
+`enumeration_domains` rejects those. The members `renamed_replacement` and `multi_artifact_block` cannot change a
+verdict in this space: no declaration in it carries the judgement `replacement_correspondence`, so an entry that
+would need it is not a valid record in the first place.
 
-Release 1.0.0 had 86 valid records here; 1.1.0 has 74. Re-evaluating, with the search's own functions on the
-1.0.0 code, all 96,768 declarations of the space that replace an artifact under another name gives 12 valid records
-under 1.0.0 (six in each chain position), all of one shape: a kernel entry with the subject `kernel.py` lists
-`system.py` among the parent artifacts it replaces, while the new `system.py` is covered by judgement on the derived
-side. None of them was accepted by the policy supplied with 1.0.0. Under 1.1.0 none of the 96,768 is a valid record —
-none carries the judgement `replacement_correspondence` — and 86 − 12 = 74: these 12 are the records that 1.1.0 no
-longer accepts as valid.
+The number of valid records fell with each release, and each step is attributed by re-evaluating the affected
+declarations with the search's own functions on the earlier release's code:
+
+| release | valid records | declarations that stopped being valid records |
+|---|---|---|
+| 1.0.0 | 86 | — |
+| 1.1.0 | 74 | 12: the kernel entry lists `system.py` among the parent artifacts it replaces without having it as a subject (a replacement under another name; all 96,768 such declarations were re-evaluated) |
+| 1.2.0 | 62 | 12: the kernel entry has several subjects or several replaced artifacts (a block of several artifacts; all 55,296 such declarations that are not also replacements under another name were re-evaluated on the 1.1.0 code) |
+
+None of these 24 was accepted by the policy supplied with its release.
 
 Two invariants hold for this version: no declaration of the harmful change is accepted, and every one of the
-74 that is a *valid record* names `system.py` among the conditions that were not checked (covered by
+62 that is a *valid record* names `system.py` among the conditions that were not checked (covered by
 judgement, rebuilt, or enumerated on a stated number of inputs). The second invariant shows that the condition is
 printed; it does not show that the condition holds or that a reader weighs it correctly. In the control space of
 3,456 declarations two are accepted. Both declare the kernel-only change with the kernel as the subject and the
@@ -79,12 +82,15 @@ those two files record the same comparison. The control shows that the verifier 
 does not show that every legitimate way of declaring a change is accepted. A seeded sample of the search, together with every declaration whose kernel part is the truthful one,
 runs in the test suite (`tests/test_declaration_search.py`).
 
-**What the search found in this version.** 8 of the 74 valid records would be accepted by the supplied
-policy *if it did not state* `enumeration_domains`: a one-input comparison of `system.py`, and a true kernel
-comparison whose transcript lists both `system.py` files as files of the compared blocks. Neither can be rejected
-as a record — the record cannot know which domain is adequate for which artifact, nor which files a comparison
-really exercised. They are rejected because the supplied policies state the domain size required for each artifact that
-may be enumerated. A relying party that omits this member accepts them; `docs/policy.md` says so.
+**What the search found in this version.** 6 of the 62 valid records would be accepted by the supplied
+policy *if it did not state* `enumeration_domains`. All 6 have the same shape: a truthful kernel entry, and a
+second entry for `system.py` whose transcript compares the new and the old file on a single frame item on which
+they agree. They cannot be rejected as records — a record cannot know which domain is adequate for which artifact.
+They are rejected because the supplied policies state the domain size required for each artifact that may be
+enumerated. A relying party that omits this member accepts them; `docs/policy.md` says so. (Up to 1.1.0 there was
+a second shape: a true kernel comparison whose transcript lists both `system.py` files as files of the compared
+blocks. Since 1.2.0 an entry of several artifacts needs the judgement `replacement_correspondence` and is no longer
+a valid record without it.)
 
 **What the search does not show.** It covers one change of one toy system, one equivalence method, the member
 values listed above, single-entry coverage patterns, and chains of at most two links. It does not cover false
@@ -96,29 +102,41 @@ attestation, plugin methods, or policies other than the supplied one. It is evid
 `tests/test_renamed_replacement.py` builds a system that reaches two kernels by name, `kernel_add.py` and
 `kernel_mul.py`, and swaps their contents: each new file computes exactly what the *other* parent file computed, so
 a comparison of each new file with the other parent file is true and reports zero mismatches. The system now
-multiplies where it added: 130 of 200 predictions change (correct: 180 → 72).
-This is the external reviewer's construction of finding M1-a.
+multiplies where it added: 130 of 200 predictions change (correct: 180 → 72). This is an independent reviewer's
+construction (finding M1-a of the review of release 1.0.0).
 
-Every declaration of the change that uses single-subject entries is signed with the trusted key **without** the
-issuer-side checks: each new kernel as subject, each non-empty set of replaced parent kernels, each choice of the
-compared parent kernel, one or two entries, with and without the judgement `replacement_correspondence` — 72
-declarations, each with a true transcript. Each is verified under the reviewer's policy (as written in the review)
-and under the supplied quick-start policy.
+The change can be declared with true transcripts in two ways: per file and crosswise (each new file as the
+replacement of the other parent file), or as one entry whose subjects and replaced artifacts are both kernels, with
+a transcript that records one comparison and the digests of all four files. The search enumerates both kinds of
+entry:
+
+* single-file entries: each new kernel as the subject, each non-empty set of replaced parent kernels, each choice of
+  the parent kernel it was compared with (8 entries);
+* two-file entries: both new kernels as subjects, each non-empty set of replaced parent kernels, each choice of the
+  new kernel and of the parent kernel that were actually compared (8 entries);
+* every declaration of one or two of these 16 entries, with and without the judgement `replacement_correspondence`:
+  272 declarations.
+
+Each is signed with the trusted key **without** the issuer-side checks, with transcripts written by the package's
+own `toy.enumerate_block` from comparisons that were run, and verified under the reviewer's policy (as written in
+the review) and under the supplied quick-start policy.
 
 | system | declarations | valid records | valid without the judgement | accepted (reviewer's policy) | accepted (supplied policy) |
 |---|---|---|---|---|---|
-| swapped kernels (harmful) | 72 | 1 | 0 | **0** | **0** |
-| equivalent re-implementations under the same names (control) | 72 | 2 | 1 | 1 | 1 |
+| swapped kernels (harmful) | 272 | 3 | 0 | **0** | **0** |
+| equivalent re-implementations under the same names (control) | 272 | 4 | 1 | 1 | 1 |
 
-The one valid record of the swap is the reviewer's cross declaration *with* the judgement; it prints a *renamed
-replacement* notice for both entries, each saying that the replaced name still exists in the derived configuration
-as a different file. The reviewer's policy rejects it because it does not accept the judgement by name; the supplied
-policy also because it forbids renamed replacements. In the control, the declaration that pairs each kernel with its
-own parent file is accepted; the same declaration with the (unneeded) judgement is a valid record but is not
-accepted, because the supplied policy does not accept that judgement.
+Every valid record of the swap carries the judgement and prints a *renamed replacement* or *multi-artifact block*
+notice for each entry that is not name-aligned. The reviewer's policy rejects them because it does not accept the
+judgement by name; the supplied policy also because it forbids renamed replacements and multi-artifact blocks. In
+the control, the one declaration that pairs each kernel with the parent file of its own name, without the
+judgement, is accepted. The same declaration with the (unneeded) judgement is a valid record but is not accepted,
+because the supplied policy does not accept that judgement.
 
-**What the swap search does not show.** Entries whose subject is a block of several artifacts are outside its space
-(finding M1-b of the same review, not addressed in 1.1.0). It covers one system with two kernels and one change.
+**What the swap search does not show.** It covers one system with two kernels, one change, and entries of at most
+two files. With the judgement `replacement_correspondence` and a policy that accepts it, the swap **is** accepted:
+the tool then relies on a statement it cannot check, prints that it does so, and leaves the decision to the relying
+party. The record cannot distinguish the swap from an equivalent re-implementation declared in the same way.
 
 ## What review found
 
@@ -135,33 +153,39 @@ accepted, because the supplied policy does not accept that judgement.
 | third | external reviewer | a risk budget rounded to 28 digits accepted in place of the parent's 30-digit budget, and the exact copy refused (no change of system behaviour involved) | `risk.composition` compares exact values and adds nothing; plain decimal notation only |
 | fourth | external reviewer | no defect in the checks; two editorial corrections (a duplicated table header on this page, the naming of a draft in the paper) | — |
 | release 1.0.0 | independent reviewer | two kernels with swapped contents, each declared as the replacement of the other: true comparisons, complete coverage on both sides, accepted under a strict policy | `equivalence.*.correspondence`; notice *renamed replacement*; policy member `renamed_replacement` (1.1.0) |
+| release 1.1.0 | authors, auditing the fix above | the same swap declared as one entry whose subjects and replaced artifacts are both kernels, with a true transcript: issued by the normal path, accepted under the reviewer's policy and the supplied policy, no notice | `equivalence.*.correspondence` extended to every entry that is not name-aligned; notice *multi-artifact block*; policy member `multi_artifact_block` (1.2.0) |
+| release 1.0.0 | independent reviewer | (not acceptance errors) a signed certificate could name an evidence file outside the evidence directory; malformed signed input ended in a traceback; `recertkit inventory` wrote an inventory with duplicate names; artifacts named `*.gz` were hashed after decompression | plain file names only; exit status 2; refusal; artifacts hashed as stored (1.2.0, `tests/test_robustness.py`) |
 
 The reviewer's reproductions of the second draft's three findings are re-run against both versions in the review
 material (`adversarial_probe_v2.py`); each is accepted by the second draft and not accepted by this version, both
 through `issue` and when force-signed. The third draft's finding is re-run in the same way (`risk_probe_v3.py`).
 
-## What was executed where (as of 2026-11-16, before any hosted run)
+## What is executed for a release
 
-This table records what had been run on the date in the heading. Runs made later, on a hosted service or on other
-platforms, are recorded in the release notes of the tagged version and not here.
-
-| what | where | result |
-|---|---|---|
-| the `run:` steps of `.github/workflows/tests.yml`, as written, with the shell options GitHub uses | locally on macOS (x86-64), Python 3.10, 3.11, 3.12 and 3.13; for each, an archive of the tagged tree was unpacked and installed from PyPI dependencies into a new virtual environment with nothing else on the path | every step exits 0; 233 tests pass; the strict policy rejects a valid record with exit status 1 |
-| the same workflow on a hosted runner | not executed | — |
-| Linux, Windows | not executed | — |
-| the verification step of `examples/ci/release-gate.yml`, as written | locally, on the quick-start chain in the layout the template assumes | exit 0 when the policy accepts, exit 1 when it rejects |
-| the FPGA experiment behind `examples/fpga_ultra96` | not re-run by this repository; the example verifies stored records | — |
+`.github/workflows/tests.yml` runs the test suite, the quick start and the verification of the stored example
+chains on Ubuntu and macOS under Python 3.10, 3.11, 3.12 and 3.13, for every push and every tag. The results for a
+tagged version cannot be part of the tagged tree; they are recorded in that version's release notes on GitHub, with
+links to the runs, together with a local run on the tag's archive downloaded without signing in.
 
 The workflow's step for the strict policy requires exit status exactly 1 and reads the verdict from the JSON
 report. A step that only required a non-zero status would also pass on a usage error (status 2).
 
+Not executed by the authors for any release:
+
+* Windows;
+* `examples/ci/release-gate.yml` on a hosted runner — it is a template; its verification step was executed locally
+  on the quick-start chain in the layout the template assumes (exit 0 when the policy accepts, 1 when it rejects);
+* the FPGA experiment behind `examples/fpga_ultra96` — the example verifies stored records.
+
 ## Standing limits
 
-* Sufficiency of the checks is tested by review and by bounded searches, not proved. Review found a defect in each
-  of three successive drafts and in release 1.0.0.
-* Artifacts are identified by name. Which file a running system reaches is not visible to the verifier; a
-  replacement under another name rests on the printed judgement `replacement_correspondence`.
+* Sufficiency of the checks is tested by review and by bounded searches, not proved. Review found a defect in
+  each of three pre-release drafts and in releases 1.0.0 and 1.1.0 (table above).
+* Artifacts are identified by name. How a running system reaches a file, and which file of a block a comparison
+  exercised, is not visible to the verifier. Whenever names do not settle it, the record rests on the printed
+  judgement `replacement_correspondence`; a policy that accepts that judgement accepts what it cannot check.
+* A record can be valid and harmful when a judgement it carries is false. The verifier's contribution is that the
+  judgement is required, signed, printed and refusable — not that it is true.
 * `enumeration_domains` fixes how many inputs were enumerated, not which.
 * Truthfulness of transcripts, truth of judgements, adequacy of an enumerated domain and completeness of an
   inventory are outside the verifier; each is printed on every run.

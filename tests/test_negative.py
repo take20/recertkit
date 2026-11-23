@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Palusomni Co., Ltd.
 """Every case is a certificate that must be rejected, and must be rejected BY THE NAMED CHECK."""
 import json, os
 import pytest

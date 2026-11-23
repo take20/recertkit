@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Palusomni Co., Ltd.
 """Command line interface: ``recertkit <command>``.
 
 Exit status: 0 = issued, or record VALID and — when a policy is given — policy ACCEPTED; 1 = REFUSED, record INVALID,
@@ -53,11 +55,19 @@ def _finish(R, args, label):
 
 
 def main(argv=None) -> int:
-    """Run the CLI; input problems (missing or malformed files) are usage errors (exit 2), never tracebacks."""
+    """Run the CLI; input problems (missing or malformed files) are usage errors (exit 2), never tracebacks.
+
+    Any input that cannot be processed ends with exit status 2 and one line on stderr — including a certificate, a
+    declaration or a plugin whose content has an unexpected shape.  Nothing is accepted in that case.  Set
+    ``RECERTKIT_DEBUG=1`` to see the traceback instead."""
     try:
         return _main(argv)
     except (OSError, ValueError, KeyError) as ex:
         print(f"recertkit: error: {type(ex).__name__}: {ex}", file=sys.stderr)
+        return 2
+    except Exception as ex:                                  # malformed content (wrong JSON shape, null members, a missing plugin file)
+        if os.environ.get("RECERTKIT_DEBUG"): raise
+        print(f"recertkit: error: malformed input ({type(ex).__name__}: {ex}); nothing was issued or accepted", file=sys.stderr)
         return 2
 
 
@@ -88,7 +98,8 @@ def _main(argv=None) -> int:
     if args.cmd == "keygen":
         keygen(args.private, args.public); print(f"wrote {args.private} (keep secret) and {args.public}"); return 0
     if args.cmd == "inventory":
-        open(args.out, "w", encoding="utf-8").write(make_inventory(args.files)); print(f"wrote {args.out} ({len(args.files)} artifacts)"); return 0
+        text = make_inventory(args.files)                 # raises before anything is written (duplicate names, unreadable files)
+        open(args.out, "w", encoding="utf-8").write(text); print(f"wrote {args.out} ({len(args.files)} artifacts)"); return 0
     if args.cmd == "texts":
         import hashlib
         cert = load_json(args.certificate)

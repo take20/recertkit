@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Palusomni Co., Ltd.
 """Issue and verify derived certificates.
 
 A derived certificate states: *if the listed judgements and assumptions hold, the parent's claim also holds for the
@@ -30,7 +32,7 @@ decision.  Whether the printed conditions are acceptable is decided by an accept
 from __future__ import annotations
 import datetime, hashlib, json, os, re, uuid
 from . import CERT_VERSION, __version__
-from .canon import dec, load_json, resolve_path, sha_file, sha_obj
+from .canon import dec, evidence_path, load_json, resolve_path, sha_file, sha_obj, sha_raw
 from .inventory import InventoryError, parse_inventory
 from .methods import STANDARD_SCHEMA, _is_int, transcript_field
 from .policy import apply_policy
@@ -39,7 +41,7 @@ from .roots import RootError, read_root
 from .signing import sign
 
 CATEGORIES = ("changed", "unchanged", "residual_rebuilt", "unrecorded")
-CORRESPONDENCE = "replacement_correspondence"   # judgement required when a subject replaces a parent artifact of another name
+CORRESPONDENCE = "replacement_correspondence"   # judgement required when an equivalence entry is not name-aligned (see _equivalence_entry)
 VERDICT_SEMANTICS = ("A VALID record is a CONDITIONAL statement: signatures, parent linkage, change coverage, evidence linkage and "
                      "profile consistency were checked; the written judgements, trust assumptions and whatever established the root "
                      "claim were not, and are printed. It is not a release decision; apply an acceptance policy for that.")
@@ -77,7 +79,7 @@ def _claim_checks(R, claim, profile, pv):
 def _inventories(R, cert, d):
     out = []
     for key in ("parent_inventory", "derived_inventory"):
-        ref = cert.get(key, {}); p = resolve_path(os.path.join(d, ref.get("file") or "\0"))
+        ref = cert.get(key, {}); p = evidence_path(d, ref.get("file"))
         ok = R.check(f"inventory.digest.{key.split('_')[0]}", bool(p) and sha_file(p) == ref.get("sha256"), str(ref.get("file")))
         inv = {}
         if ok:
@@ -179,7 +181,7 @@ def _risk_checks(R, cert, pv, profile):
 def _evidence_files(R, cert, d):
     ev = cert.get("evidence_files", {}); absent = []
     for name, e in ev.items():
-        p = resolve_path(os.path.join(d, e.get("file") or "\0"))
+        p = evidence_path(d, e.get("file"))
         if p is None: absent.append(name)
         if p is None and e.get("detached") is True and not R.require_all_evidence:
             R.notice("detached evidence", f"{name}: {e.get('file')} is not present; its digest {str(e.get('sha256'))[:16]}… is recorded but was NOT checked")
@@ -287,36 +289,41 @@ def _equivalence_entry(R, e, cert, pv, d, pinv, dinv, decl, profile, registry, p
     kind = ref.get("kind")
     st = {"subjects": subs, "replaces": reps, "method": mc, "reference_kind": kind, "reference_binding": None, "reference_digest": None,
           "mapped": bool(e.get("pointers")), "domain_size": e.get("domain_size") if (mc == "exhaustive_enumeration" and _is_int(e.get("domain_size"))) else None,
-          "renamed": sorted(r for r in reps if r not in subs)}
+          "renamed": sorted(r for r in reps if r not in subs), "multi_artifact": len(subs) > 1 or len(reps) > 1}
     R.check(f"{P}.subjects", bool(subs) and subs == e.get("subjects") and len(set(subs)) == len(subs) and all(s in changed and s in dinv for s in subs),
             f"{subs} are distinct changed artifacts of the derived configuration")
     R.check(f"{P}.replaces", reps == (e.get("replaces") or []) and len(set(reps)) == len(reps) and all(r in changed and r in pinv for r in reps),
             f"{reps} are distinct changed artifacts of the parent configuration")
-    if reps:
-        # The verifier identifies artifacts by NAME and cannot see where the running system reaches them.  A subject that
-        # carries the name of the artifact it replaces is taken to occupy that artifact's place.  When the names differ (a
-        # renamed file; two artifacts declared as each other's replacements), that each new artifact takes the place of
-        # the replaced one is a written judgement: required, printed, and refusable by a policy (renamed_replacement).
-        jd = cert.get("judgements") if isinstance(cert.get("judgements"), dict) else {}
-        has_j = isinstance(jd.get(CORRESPONDENCE), str) and bool(jd.get(CORRESPONDENCE).strip())
-        ren = st["renamed"]
-        R.check(f"{P}.correspondence", not ren or has_j,
-                f"every replaced artifact {reps} has a subject of the same name" if not ren else
-                f"{ren} of the parent configuration {'is' if len(ren) == 1 else 'are'} replaced by {subs}, under another name; where the system reaches the "
-                f"new artifacts is the written judgement {CORRESPONDENCE!r}" if has_j else
-                f"{ren} of the parent configuration {'is' if len(ren) == 1 else 'are'} replaced by {subs}, under another name; this requires the written "
-                f"judgement {CORRESPONDENCE!r}, which the certificate does not carry")
-        if ren:
-            still = [r for r in ren if r in dinv]
-            R.notice("renamed replacement", f"equivalence {e.get('id')}: {ren} of the parent configuration {'is' if len(ren) == 1 else 'are'} replaced by {subs}, "
-                     f"which do{'es' if len(subs) == 1 else ''} not carry {'its' if len(ren) == 1 else 'their'} name; that the running system now reaches {subs} where "
-                     f"it reached {ren} is not checked — the verifier identifies artifacts by name only. It is the written judgement {CORRESPONDENCE!r}"
-                     + (f". {still} still {'exists' if len(still) == 1 else 'exist'} in the derived configuration, as a different file: a system that reaches "
-                        f"{'it' if len(still) == 1 else 'them'} by name reaches that file, not {subs}" if still else ""))
+    # The verifier identifies artifacts by NAME.  It cannot see where the running system reaches them, nor which file of
+    # a block a comparison exercised.  An entry is NAME-ALIGNED when it has one subject and replaces at most one parent
+    # artifact, of the same name: the new file then stands where the old one stood.  Otherwise — a subject of another
+    # name (a renamed file; two artifacts declared as each other's replacements) or a block of several artifacts on
+    # either side — which new artifact takes the place of which replaced one is a written judgement: required, printed,
+    # and refusable by a policy (renamed_replacement, multi_artifact_block).
+    jd = cert.get("judgements") if isinstance(cert.get("judgements"), dict) else {}
+    has_j = isinstance(jd.get(CORRESPONDENCE), str) and bool(jd.get(CORRESPONDENCE).strip())
+    ren, multi = st["renamed"], st["multi_artifact"]
+    why = "; ".join(x for x in (f"{ren} of the parent configuration {'is' if len(ren) == 1 else 'are'} replaced under another name" if ren else "",
+                                f"the entry is a block of several artifacts ({len(subs)} subject{'s' if len(subs) != 1 else ''}, {len(reps)} replaced)" if multi else "") if x)
+    R.check(f"{P}.correspondence", not (ren or multi) or has_j,
+            "one subject, replacing at most one parent artifact, of the same name" if not (ren or multi) else
+            f"{why}; which new artifact takes the place of which replaced one is the written judgement {CORRESPONDENCE!r}" if has_j else
+            f"{why}; this requires the written judgement {CORRESPONDENCE!r}, which the certificate does not carry")
+    if ren:
+        still = [r for r in ren if r in dinv]
+        R.notice("renamed replacement", f"equivalence {e.get('id')}: {ren} of the parent configuration {'is' if len(ren) == 1 else 'are'} replaced by {subs}, "
+                 f"which do{'es' if len(subs) == 1 else ''} not carry {'its' if len(ren) == 1 else 'their'} name; that the running system now reaches {subs} where "
+                 f"it reached {ren} is not checked — the verifier identifies artifacts by name only. It is the written judgement {CORRESPONDENCE!r}"
+                 + (f". {still} still {'exists' if len(still) == 1 else 'exist'} in the derived configuration, as a different file: a system that reaches "
+                    f"{'it' if len(still) == 1 else 'them'} by name reaches that file, not {subs}" if still else ""))
+    if multi:
+        R.notice("multi-artifact block", f"equivalence {e.get('id')}: {subs} {'are' if len(subs) != 1 else 'is'} compared as one block"
+                 + (f" replacing {reps}" if reps else "") + "; the transcript states one result for the block. Which of these files the comparison exercised, "
+                 f"and that the running system uses each new file where it used the replaced ones, is not checked. It is the written judgement {CORRESPONDENCE!r}")
     okk = R.check(f"{P}.reference_kind", kind in REFERENCE_KINDS and kind in profile.get("reference_kinds", REFERENCE_KINDS),
                   f"{kind!r}; this profile accepts {list(profile.get('reference_kinds', REFERENCE_KINDS))}")
     ev = cert.get("evidence_files", {}); te = ev.get(e.get("transcript") or "\0", {})
-    tp = resolve_path(os.path.join(d, te.get("file") or "\0"))
+    tp = evidence_path(d, te.get("file"))
     if not R.check(f"{P}.transcript", bool(tp) and te.get("detached") is not True, f"transcript {e.get('transcript')!r} is a bound, present evidence file"): return st
     try: tr = load_json(tp)
     except Exception as ex:
@@ -467,7 +474,7 @@ def issue_root(claim, role_files, decision, basis, key, key_id, out, profile, in
     if missing: raise ValueError(f"root lacks configuration roles {missing}")
     root = {"certificate_version": ROOT_VERSION, "tool": f"recertkit {__version__}", "certificate_id": str(uuid.uuid4()),
             "issued_at": datetime.datetime.now(datetime.timezone.utc).isoformat(), "claim": claim, "decision": decision, "basis": basis,
-            "configuration": {r: {"file": os.path.basename(p), "sha256": sha_file(p)} for r, p in role_files.items()}}
+            "configuration": {r: {"file": os.path.basename(p), "sha256": sha_raw(p)} for r, p in role_files.items()}}
     if inventory:
         inv = parse_inventory(inventory)
         wrong = sorted(r for r, c in root["configuration"].items() if inv.get(c["file"]) != c["sha256"])

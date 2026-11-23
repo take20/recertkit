@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Palusomni Co., Ltd.
 """The policy reads what the engine VERIFIED, and never accepts a condition it could not evaluate
 (review of the second draft, findings R2 and R3)."""
 import hashlib, json, os

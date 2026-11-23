@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Palusomni Co., Ltd.
 """Build the gate-root example: a root certificate issued by the anytime-valid release gate, then a derived link.
 
     python examples/gate_root/make_example.py --gate /path/to/gate/cert/certify.py --keys /private/dir [--out examples/gate_root]

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Palusomni Co., Ltd.
 """Exhaustive declaration search.
 
 A counterexample-driven test suite shows that the declarations somebody thought of are refused.  This search asks the
