@@ -96,13 +96,17 @@ And for each comparison, **both sides are identified**:
 A comparison of a block with itself, or with anything that is not tied to the parent in one of these ways, is
 rejected by `reference_digest` even though the transcript is truthful and reports zero mismatches.
 
-**What these checks establish, and under which assumptions.** Take an entry with one subject `f` that replaces the
-parent's `f` (name-aligned, reference kind `parent_artifact`), bound to a transcript in the standard layout. If the
-record is valid, then: the transcript's subjects are exactly `{f}` with the digest of the derived inventory
-(`subject_scope`, `subject_digest`); its reference is exactly the parent's `f` by the digest of the parent inventory
-(`reference_block`, `reference_digest`); the whole declared domain was enumerated with zero mismatches. *If the
-transcript is truthful* — the tool ran the files it names and recorded what it found — the new file `f` therefore
-returns, on every enumerated input, what the parent's file `f` returned. That the enumerated inputs are all the
+**What these checks establish, and under which assumptions.** Take an entry checked by the built-in
+`exhaustive_enumeration` method, with one subject `f` that replaces the parent's `f` (name-aligned, reference kind
+`parent_artifact`), bound to a transcript in the standard layout. If the record is valid, then two things hold.
+By the engine's checks, which apply to every method: the transcript's subjects are exactly `{f}` with the digest of
+the derived inventory (`subject_scope`, `subject_digest`), and its reference is exactly the parent's `f` by the
+digest of the parent inventory (`reference_block`, `reference_digest`). By the method's checks: the transcript
+states that the whole declared domain was enumerated with zero mismatches (`domain_enumerated`, `zero_mismatches`).
+*If the transcript is truthful* — the tool ran the files it names and recorded what it found — the new file `f`
+therefore returns, on every enumerated input, what the parent's file `f` returned. A plugin method establishes
+equivalence by other means; the engine's identity and scope checks still apply to it, but what its transcript
+shows about behaviour is that method's own premise and part of the relying party's trusted base. That the enumerated inputs are all the
 inputs `f` can receive, and that `f` reads nothing outside itself, are the judgements `boundary` and
 `residual_path`. Nothing in this argument depends on a search having found no counterexample; the searches in
 `docs/assurance.md` test that the implementation does what this paragraph says. For any entry that is not

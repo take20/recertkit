@@ -102,8 +102,9 @@ recertkit verify-chain --root root.json --links derived_v1.json derived_v2.json 
 ## The checks in one paragraph
 
 Identity of both sides of every comparison is checked by the engine, not by the equivalence method: the transcript
-must record exactly the subjects of the entry — the changed artifacts of the *derived* inventory, by digest, and no
-further file, because a transcript states one result for the whole block it records — and its reference must be tied to the
+must record the subjects of the entry — the changed artifacts of the *derived* inventory, by digest; a transcript in
+the standard layout must record exactly these and no further file, because it states one result for the whole block
+it records — and its reference must be tied to the
 *parent* — exactly the parent artifacts the entry replaces (by digest), the reference the parent link was shown
 equivalent to, or a named specification whose relation to the parent is a written judgement (printed). Coverage is
 counted **per side**: a changed file of the derived configuration must be a subject of one comparison or be covered

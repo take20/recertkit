@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.3.1 — 2026-11-24
+
+Documentation only; no change to the checks, the certificate format or any stored example. The files under `src/`
+differ from 1.3.0 in the version string alone, `tests/` is unchanged, and `examples/` differs in one line (the
+version pinned in `examples/ci/release-gate.yml`). The searches and the probe recorded in `docs/assurance.md` were
+run on the 1.3.0 code and were not repeated.
+
+* `docs/concepts.md`, "What these checks establish": the argument now states its premise that the entry is checked
+  by the built-in `exhaustive_enumeration` method, and separates what the engine checks for every method (identity
+  and scope of both sides) from what that method checks (the whole declared domain enumerated, zero mismatches). A
+  plugin method establishes equivalence by other means, which are its own premise.
+* `README.md`: the sentence on subject scope says that the exact-scope requirement applies to transcripts in the
+  standard layout (as `docs/concepts.md`, `docs/checks.md` and `docs/assurance.md` already did).
+
 ## 1.3.0 — 2026-11-24
 
 A review of release 1.2.0 found a third way of declaring the swap of two kernels with transcripts whose numbers are

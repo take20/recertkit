@@ -52,8 +52,8 @@ checks and verified as a chain under `examples/quickstart/policy.json`.
 
 | engine | policy | declarations | valid records | accepted |
 |---|---|---|---|---|
-| this version (1.3.0) | supplied with this version | 221,184 | 36 | **0** |
-| this version (1.3.0) | the supplied policy without `enumeration_domains` | 221,184 | 36 | 4 |
+| 1.3.0 (unchanged in 1.3.1, which alters documentation only) | supplied with this version | 221,184 | 36 | **0** |
+| 1.3.0 (unchanged in 1.3.1) | the supplied policy without `enumeration_domains` | 221,184 | 36 | 4 |
 | a pre-release draft (the second) | supplied with that draft, which had no `enumeration_domains` | 221,184 | 642 | 21 |
 | this version, harmless control (kernel only) | supplied with this version | 3,456 | 5 | 2 |
 
