@@ -40,7 +40,7 @@ A JSON object. Paths in `evidence_files` are relative to the spec file.
 |---|---|
 | `id` | identifier (`[A-Za-z0-9_-]+`), unique in the certificate; appears in check names |
 | `method_code` | a method the profile accepts |
-| `subjects` | the changed artifacts of the **derived** configuration the compared block consists of; the transcript must record the digest of each. Being a subject discharges the derived-side coverage obligation of that artifact |
+| `subjects` | the changed artifacts of the **derived** configuration the compared block consists of; a transcript in the standard layout must record exactly these, each by digest, and no further subject. Being a subject discharges the derived-side coverage obligation of that artifact |
 | `replaces` | the changed artifacts of the **parent** configuration that the subjects replace (empty when the block is new). Being replaced discharges the parent-side obligation only — never the obligation of a same-named file of the derived configuration. An entry that is not one subject replacing at most one artifact of the same name requires the judgement `replacement_correspondence` (below) |
 | `reference` | `{"kind": "parent_artifact", "artifact": N}` or `{"kind": "parent_artifact", "artifacts": [N, …]}` — must name exactly the artifacts in `replaces`; `{"kind": "parent_link"}` — the parent link must have an entry whose subjects are exactly `replaces`; or `{"kind": "specification", "id": …, "judgement": …, "evidence": <optional evidence name>}` |
 | `transcript` | name of an evidence file (never detached) |

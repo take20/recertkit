@@ -37,7 +37,7 @@ a policy is only as strict as the members it states; unknown members are an erro
 | `reference_kinds` | list | accepted comparison references (`parent_artifact`, `parent_link`, `specification`) |
 | `reference_by_declaration` | `"forbid"`, `"allow"` | comparisons whose reference the verifier could not tie to the certificate by a transcript digest |
 | `binding_levels` | list | accepted root binding levels (`digest`, `identifiers-only`, `unbound`), as provided by the root |
-| `transcript_mapping` | `"forbid"`, `"allow"` | foreign transcript layouts read through issuer-declared pointers |
+| `transcript_mapping` | `"forbid"`, `"allow"` | foreign transcript layouts read through issuer-declared pointers. For such a transcript the verifier cannot see whether the comparison covered further files than the entry claims (`subject_scope` applies to the standard layout only); allowing the mapping accepts that too |
 | `renamed_replacement` | `"forbid"`, `"allow"` | equivalence entries that replace a parent artifact by a subject of another name (they rest on the judgement `replacement_correspondence`) |
 | `multi_artifact_block` | `"forbid"`, `"allow"` | equivalence entries with several subjects or several replaced artifacts (they rest on the same judgement: which file the comparison exercised is not visible to the verifier) |
 | `enumeration_domains` | `{artifact: N}` | every equivalence entry is an exhaustive enumeration, each of its subjects is listed, and its domain has exactly `N` inputs |

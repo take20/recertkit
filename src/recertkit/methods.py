@@ -25,6 +25,12 @@ The standard layout (``"schema": "recertkit-enumeration-1"``) is::
      "reference": {"artifacts": {"<name>": "<sha256>", ...}},  # a reference block of several artifacts
      "domain_size": N, "enumerated": N, "mismatches": 0}
 
+``subjects`` lists EVERY file of the block the comparison ran, and ``reference`` every file of the block it was
+compared with; the transcript states one result for these two blocks.  The engine therefore requires the subjects of
+an equivalence entry to be exactly the transcript's subjects (``equivalence.<id>.subject_scope``) and its reference to
+be exactly the transcript's reference: a result recorded for a block of two files is not a result about one of them.
+``reference`` has exactly one of the two forms; a transcript that carries both is not in the standard layout.
+
 A transcript in any other layout is mapped by JSON pointers declared in the entry (``pointers``).  The verifier then
 prints that the meaning of the pointed-at fields is the issuer's declaration.  Pointers may NOT be used on a transcript
 that declares the standard layout: its fields have a fixed meaning that a declaration must not be able to override.
@@ -54,13 +60,22 @@ def transcript_field(entry: dict, transcript, name: str, artifact: str | None = 
     if not isinstance(transcript, dict): return False, None
     if name == "reference":
         r = transcript.get("reference")
-        if isinstance(r, dict) and isinstance(r.get("artifacts"), dict) and r["artifacts"] and "sha256" not in r: return True, dict(r["artifacts"])
-        v = r.get("sha256") if isinstance(r, dict) else None
+        if not isinstance(r, dict) or ("artifacts" in r and "sha256" in r): return False, None      # exactly one of the two forms
+        if isinstance(r.get("artifacts"), dict) and r["artifacts"]: return True, dict(r["artifacts"])
+        v = r.get("sha256")
         return v is not None, v
     if name == "subjects":
         s = transcript.get("subjects"); v = s.get(artifact) if isinstance(s, dict) else None
         return v is not None, v
     return name in transcript, transcript.get(name)
+
+
+def transcript_subject_names(entry: dict, transcript):
+    """The names of ALL subjects a transcript records, or None when that cannot be known: a transcript in a foreign
+    layout is read only through the pointers the issuer declared, so whether it covers further files is not visible."""
+    if entry.get("pointers") or not isinstance(transcript, dict): return None
+    s = transcript.get("subjects")
+    return sorted(s) if isinstance(s, dict) and all(isinstance(k, str) for k in s) else None
 
 
 def _is_int(v):

@@ -1,5 +1,34 @@
 # Changelog
 
+## 1.3.0 — 2026-11-24
+
+A review of release 1.2.0 found a third way of declaring the swap of two kernels with transcripts whose numbers are
+all true. Each new kernel was declared as a single file replacing the parent file of its own name — a name-aligned
+entry, which needs no judgement — but was bound to the transcript of **another** comparison: the comparison of the
+other new kernel, in which the claimed file was listed as a further subject of the same block. 1.2.0 only required
+the claimed subject to be *among* the subjects a transcript records. It issued the certificate through the normal
+path and accepted it under the reviewer's policy and under the supplied policy, without the judgement
+`replacement_correspondence` and without a notice (correct predictions 180 → 72 of 200).
+
+* **Subject scope.** A transcript in the standard layout states one result for the block of all subjects it records.
+  An entry must claim that result for exactly those subjects: new record check `equivalence.<id>.subject_scope`. It
+  applies to every method and every reference kind. The correspondence judgement does not replace it.
+* A standard transcript whose `reference` carries both forms (`sha256` and `artifacts`) is no longer read as the
+  single digest; it fails `reference_digest`.
+* A transcript in a foreign layout (declared pointers) cannot be checked in this way. The *transcript mapping* notice
+  now says so, and `docs/policy.md` states that `transcript_mapping: "allow"` accepts it.
+* `tests/test_renamed_replacement.py` and the new `tests/swap_search.py` make what an entry claims and what was
+  compared independent of each other: 144 entries (claimed subjects × claimed replaced artifacts × the 16
+  transcripts the comparison tool writes for two kernels), every declaration of one or two entries, with and
+  without the judgement — 20,880 declarations for the swapped kernels and for an equivalent control. The earlier
+  search (272 declarations) fixed the compared file to the claimed one for single-file entries; the declaration
+  above was outside it.
+* `docs/concepts.md` states what the linkage checks establish for a name-aligned entry and under which assumptions.
+
+The certificate format is unchanged (`recertkit-3`). No stored example certificate is affected: every stored
+standard-layout transcript records exactly the subjects of its entry. A certificate issued by 1.2.0 remains a valid
+record under 1.3.0 unless a standard-layout transcript it binds records further subjects.
+
 ## 1.2.0 — 2026-11-23
 
 Release 1.1.0 refused the swap of two kernels only in the form in which a reviewer had declared it (each new file as

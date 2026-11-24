@@ -183,14 +183,15 @@ def test_block_of_two_artifacts_needs_the_correspondence_judgement(chain):
 def test_added_file_that_is_neither_subject_nor_judged_is_refused(chain):
     _, spec = _split(chain); spec["equivalence"][0]["subjects"] = ["kernel.py"]; json.dump(spec, open(chain.P("spec_split.json"), "w"))
     rc, rep = chain.issue("root.json", "inventory_v0.txt", "inventory_split.txt", "spec_split.json", "derived_split.json")
-    assert rc == 1 and rep["failed_checks"] == ["coverage.derived_side"]
+    # the transcript records both files of the block; claiming its result for kernel.py alone is also refused (1.3.0)
+    assert rc == 1 and rep["failed_checks"] == ["coverage.derived_side", "equivalence.kernel.subject_scope"]
 
 
 def test_added_file_named_as_subject_without_a_digest_in_the_transcript_is_refused(chain):
     cfg, spec = _split(chain)
     toy.enumerate_block(cfg["kernel.py"], chain.P("config_v0", "kernel.py"), chain.P("enumeration_split.json"))       # transcript records kernel.py only
     rc, rep = chain.issue("root.json", "inventory_v0.txt", "inventory_split.txt", "spec_split.json", "derived_split.json")
-    assert rc == 1 and rep["failed_checks"] == ["equivalence.kernel.subject_digest"]
+    assert rc == 1 and rep["failed_checks"] == ["equivalence.kernel.subject_digest", "equivalence.kernel.subject_scope"]
 
 
 MERGE_CORRESPONDENCE = "kernel_params.json was read only by kernel.py; the merged kernel.py is reached under its own name."

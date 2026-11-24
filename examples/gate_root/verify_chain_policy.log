@@ -59,6 +59,7 @@
 [OK] equivalence.kernel.transcript — transcript 'enumeration' is a bound, present evidence file
 [OK] equivalence.kernel.transcript_layout — standard layout recertkit-enumeration-1
 [OK] equivalence.kernel.subject_digest — the transcript's subject digests equal the derived inventory for ['kernel.py']
+[OK] equivalence.kernel.subject_scope — the transcript records exactly the subjects of this entry: ['kernel.py']
 [OK] equivalence.kernel.reference_block — the reference consists of exactly the parent artifacts this entry replaces: reference ['kernel.py'], replaces ['kernel.py']
 [OK] equivalence.kernel.reference_digest — the transcript's reference (3724a958b937836f) must be ['kernel.py'] of the PARENT inventory (3724a958b937836f)
 [OK] equivalence.kernel.reference_field — the certificate's reference.sha256 is exactly the digest the reference was verified against

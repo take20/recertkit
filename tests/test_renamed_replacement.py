@@ -1,26 +1,35 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright 2026 Palusomni Co., Ltd.
-"""Which new artifact takes the place of which replaced one (independent review of release 1.0.0, findings M1-a and M1-b).
+"""Which new artifact takes the place of which replaced one, and what a comparison record is a record OF.
 
-The verifier identifies artifacts by NAME.  It cannot see where the running system reaches them, nor which file of a
-block a comparison exercised.  The reviewer swapped the contents of two kernels, kernel_add.py and kernel_mul.py.
-system.py reaches the kernels by name, so it now multiplies where it added.  The swap can be declared in two ways with
-comparison transcripts whose numbers are all true:
+The verifier identifies artifacts by NAME.  It cannot see where the running system reaches them.  Two kernels,
+kernel_add.py and kernel_mul.py, have their contents swapped; system.py reaches them by name, so it now multiplies
+where it added (130 of 200 predictions change).  Each new file computes exactly what the OTHER parent file computed,
+so a comparison of each new file with the other parent file is true and reports zero mismatches.  Three ways of
+declaring the swap with transcripts whose numbers are all true were found by review, one per release:
 
-* per file, crosswise: each new file as the replacement of the OTHER parent file (1.0.0 issued and accepted this);
-* as one block: one entry whose subjects and replaced artifacts are both kernels (1.0.0 and 1.1.0 issued and accepted
-  this; 1.1.0 refused only the crosswise form).
+* 1.0.0 — per file, crosswise: each new file declared as the replacement of the other parent file;
+* 1.1.0 — as one block: one entry whose subjects and replaced artifacts are both kernels;
+* 1.2.0 — per file, under its own name, but bound to a transcript of ANOTHER comparison: the transcript records the
+  comparison of the other new file and lists the claimed file as a further subject of the same block (finding R8-1).
 
-Since 1.2.0 an equivalence entry is NAME-ALIGNED when it has one subject and replaces at most one parent artifact, of
-the same name.  Any other entry needs the written judgement ``replacement_correspondence`` (check
-``equivalence.<id>.correspondence``).  The condition is printed on every run as a ``renamed replacement`` and/or a
-``multi-artifact block`` notice, and the policy members ``renamed_replacement`` and ``multi_artifact_block`` refuse it.
+Two rules answer them.
 
-The last test signs EVERY declaration of the swap built from one or two entries — single-file entries and two-file
-block entries, each with every non-empty set of replaced kernels and every choice of the pair of files that was
-actually compared, with and without the judgement — and verifies each under the reviewer's policy and under the
-supplied quick-start policy.  Not in this space: transcripts whose numbers are false (the verifier does not re-run
-comparisons), and systems other than this one.
+NAME ALIGNMENT (1.1.0, 1.2.0): an entry with one subject that replaces at most one parent artifact, of the same name,
+needs nothing further; any other entry needs the written judgement ``replacement_correspondence``, is printed
+(``renamed replacement``, ``multi-artifact block``) and can be refused by a policy.
+
+SUBJECT SCOPE (1.3.0): a transcript in the standard layout states one result for the block of ALL subjects it
+records.  An entry must claim that result for exactly that block (``equivalence.<id>.subject_scope``); the reference
+side has been exact since 1.0.0.  With both rules, a name-aligned entry is valid only if the transcript records a
+comparison of that one file with the parent file of its name.
+
+The search at the end makes what an entry CLAIMS and what was actually COMPARED independent of each other: an entry is
+(claimed subjects, claimed replaced artifacts, a transcript), and the transcripts are all 16 that the package's own
+``toy.enumerate_block`` writes for the two kernels (which new file was run, which parent file it was compared with,
+whether the other new file is listed as a further subject, whether the other parent file is listed as a further
+reference file).  Not in this space: transcripts whose numbers are false (the verifier does not re-run comparisons),
+transcripts in a foreign layout, and systems other than this one.
 """
 import itertools, json, os, random
 import pytest
@@ -114,23 +123,27 @@ class World:
         if blocks: p["multi_artifact_block"] = blocks
         return p
 
-    def transcript(self, world, subjects, replaces, new, old):
+    def transcript(self, world, new, old, extra_subjects=(), extra_references=()):
         """A TRUE comparison of the new file ``new`` with the parent's file ``old`` on all 65,536 inputs, written by the
-        package's own toy.enumerate_block.  The transcript also records the digests of the other subjects and of the
-        other replaced parent files, as that function does for a block of several files."""
-        key = (world, tuple(subjects), tuple(replaces), new, old)
+        package's own toy.enumerate_block, unmodified.  ``extra_subjects`` / ``extra_references`` are further files the
+        tool is told the two blocks consist of; it records their digests.  Returns (file name, mismatches)."""
+        key = (world, new, old, tuple(extra_subjects), tuple(extra_references))
         if key not in self._t:
             name = f"t_{world}_{len(self._t):03d}.json"
             t = toy.enumerate_block(self.P(world, new), self.P("c0", old), self.P(name),
-                                    subject_files=[self.P(world, x) for x in subjects if x != new], reference_files=[self.P("c0", r) for r in replaces if r != old])
+                                    subject_files=[self.P(world, x) for x in extra_subjects], reference_files=[self.P("c0", r) for r in extra_references])
             self._t[key] = (name, t["mismatches"])
         return self._t[key]
 
     def spec(self, world, entries, judgement):
-        """``entries``: tuples (subjects, replaces, new, old) — ``new`` and ``old`` are the two files actually compared."""
+        """``entries``: tuples (subjects, replaces, new, old[, extra_subjects, extra_references]).  ``subjects`` and
+        ``replaces`` are what the entry CLAIMS; the rest is the transcript: ``new`` and ``old`` are the two files that
+        were actually compared.  In the 4-tuple form the transcript lists the other claimed files as the further files
+        of the two blocks (a transcript that follows the declaration); the 6-tuple form states them explicitly."""
         eq, ev = [], {}
-        for i, (S, Rp, new, old) in enumerate(entries, 1):
-            name, _ = self.transcript(world, S, Rp, new, old)
+        for i, (S, Rp, new, old, *extra) in enumerate(entries, 1):
+            xs, xr = extra if extra else (tuple(x for x in S if x != new), tuple(r for r in Rp if r != old))
+            name, _ = self.transcript(world, new, old, xs, xr)
             ref = {"kind": "parent_artifact", "artifact": Rp[0]} if len(Rp) == 1 else {"kind": "parent_artifact", "artifacts": list(Rp)}
             eq.append({"id": f"e{i}", "method_code": "exhaustive_enumeration", "subjects": list(S), "replaces": list(Rp), "reference": ref,
                        "transcript": f"t{i}", "domain_size": 65536, "domain": "all signed 8-bit operand pairs (a, b)"})
@@ -181,8 +194,8 @@ def _accuracy(world, v): return sum(r["correct"] for r in toy.evaluate(world.P(v
 
 
 def test_the_swap_is_harmful_and_the_two_comparisons_are_true(world):
-    assert [world.transcript("swap", *e)[1] for e in CROSS] == [0, 0]                       # each new file computes the OTHER old kernel's function
-    assert [world.transcript("swap", *e)[1] for e in IDENTITY] != [0, 0]                    # compared under its own name, it does not
+    assert [world.transcript("swap", new, old)[1] for _, _, new, old in CROSS] == [0, 0]     # each new file computes the OTHER old kernel's function
+    assert 0 not in [world.transcript("swap", new, old)[1] for _, _, new, old in IDENTITY]   # compared under its own name, it does not
     c0, sw = toy.evaluate(world.P("c0")), toy.evaluate(world.P("swap"))
     assert sum(a["pred"] != b["pred"] for a, b in zip(c0, sw)) > 0 and _accuracy(world, "swap") < _accuracy(world, "c0")
     assert toy.evaluate(world.P("ctrl")) == c0
@@ -231,7 +244,7 @@ def test_same_name_replacement_needs_no_judgement(world):
 def test_block_declaration_of_the_swap_is_refused_at_issue_and_when_signed_anyway(world):
     """1.1.0 issued this declaration and accepted it under the reviewer's policy and under the supplied policy, with no
     notice.  Both pairs of files are truly equivalent (0 mismatches each); the transcript states one result for the block."""
-    assert world.transcript("swap", *BLOCK[0])[1] == 0 and world.transcript("swap", (M,), (A,), M, A)[1] == 0
+    assert world.transcript("swap", A, M, (M,), (A,))[1] == 0 and world.transcript("swap", M, A)[1] == 0
     spec = world.spec("swap", BLOCK, judgement=False)
     rc, rep = world.issue("swap", spec)
     assert rc == 1 and rep["failed_checks"] == ["equivalence.e1.correspondence"] and not os.path.exists(world.P("derived.json"))
@@ -264,64 +277,194 @@ def test_block_declaration_of_the_harmless_control_is_treated_the_same(world):
     assert rc == 1 and rep["failed_checks"] == ["equivalence.e1.correspondence"]
 
 
-def _entries():
-    sets = ((A,), (M,), KERNELS)
-    for s_ in KERNELS:                                            # single-file entries
-        for Rp in sets:
-            for old in Rp: yield ((s_,), Rp, s_, old)
-    for Rp in sets:                                               # two-file block entries
-        for new in KERNELS:
-            for old in Rp: yield (KERNELS, Rp, new, old)
+# ---- finding R8-1 (review of release 1.2.0): a transcript of another comparison, with the claimed file as a further subject
+# e1 claims "new add replaces parent add"; its transcript is the comparison of new MUL with parent add (true: 0
+# mismatches), in which new add is listed as a further file of the block.  e2 is the mirror image.
+SCOPE = [((A,), (A,), M, A, (A,), ()), ((M,), (M,), A, M, (M,), ())]
+SCOPE_FAILS = ["equivalence.e1.subject_scope", "equivalence.e2.subject_scope"]
 
 
-def _declarations():
-    E = list(_entries())
+def test_scope_declaration_uses_true_transcripts_of_the_packages_own_tool(world):
+    for (S, Rp, new, old, xs, xr) in SCOPE:
+        name, mism = world.transcript("swap", new, old, xs, xr); t = load_json(world.P(name))
+        assert mism == 0 and t["enumerated"] == 65536 and sorted(t["subjects"]) == list(KERNELS) and S[0] in t["subjects"] and new != S[0]
+        inv = dict(reversed(l.split()) for l in open(world.P("inventory_swap.txt")).read().splitlines())
+        assert t["subjects"] == {k: inv[k] for k in KERNELS}                                    # every recorded digest is that of the real file
+
+
+def test_scope_declaration_is_refused_at_issue_and_when_signed_anyway(world):
+    """1.2.0 issued this declaration through the normal path and accepted it under the reviewer's policy and under the
+    supplied policy, with no judgement and no notice: both entries looked like single files replacing files of their
+    own names, and the engine only required the claimed subject to be AMONG the subjects the transcript records."""
+    spec = world.spec("swap", SCOPE, judgement=False)
+    rc, rep = world.issue("swap", spec)
+    assert rc == 1 and rep["failed_checks"] == SCOPE_FAILS and not os.path.exists(world.P("derived.json"))
+    world.forge("swap", spec)
+    for pol in ("reviewer", "supplied"):
+        rc, rep = world.verify(policy=pol)
+        assert rc == 1 and not rep["record_valid"] and rep["failed_checks"] == SCOPE_FAILS and rep["policy_verdict"] == "REJECTED"
+    assert rep["links"][0]["entries"]["e1"]["subject_scope"] is None
+
+
+def test_scope_declaration_is_not_rescued_by_the_correspondence_judgement(world):
+    """The judgement answers 'which file takes whose place'.  It does not make a result recorded for a block of two
+    files a result about one of them."""
+    rc, rep = world.issue("swap", world.spec("swap", SCOPE, judgement=True))
+    assert rc == 1 and rep["failed_checks"] == SCOPE_FAILS
+
+
+def test_transcript_that_does_not_record_the_claimed_subject_is_refused(world):
+    """The claimed file is missing from the transcript altogether (the transcript records the other new file only)."""
+    rc, rep = world.issue("swap", world.spec("swap", [((A,), (A,), M, A, (), ()), ((M,), (M,), A, M, (), ())], judgement=False))
+    assert rc == 1 and rep["failed_checks"] == ["equivalence.e1.subject_digest", "equivalence.e1.subject_scope", "equivalence.e2.subject_digest", "equivalence.e2.subject_scope"]
+
+
+def test_transcript_with_a_further_subject_is_refused_for_the_harmless_control_too(world):
+    """The rule is about the record, not about the change: a truthful same-name comparison of an equivalent kernel is
+    refused as well when its transcript lists a second file that the entry does not claim."""
+    rc, rep = world.issue("ctrl", world.spec("ctrl", [((A,), (A,), A, A, (M,), ()), ((M,), (M,), M, M)], judgement=False))
+    assert rc == 1 and rep["failed_checks"] == ["equivalence.e1.subject_scope"]
+    rc, rep = world.issue("ctrl", world.spec("ctrl", IDENTITY, judgement=False))                # ... and issued when the transcript records that file alone
+    assert rc == 0
+    rc, rep = world.verify("derived.json", policy="supplied")
+    e = rep["links"][0]["entries"]
+    assert rc == 0 and rep["policy_verdict"] == "ACCEPTED" and e["e1"]["subject_scope"] == e["e2"]["subject_scope"] == "exact"
+    assert toy.evaluate(world.P("ctrl")) == toy.evaluate(world.P("c0"))
+
+
+def test_transcript_reference_with_both_forms_is_not_in_the_standard_layout(world):
+    """``reference`` is a single digest or a block of named artifacts.  A transcript carrying both was read as the
+    single digest, the block ignored."""
+    spec = world.spec("ctrl", IDENTITY, judgement=False)
+    f = world.P(spec["evidence_files"]["t1"]); t = load_json(f); original = json.dumps(t)
+    t["reference"]["artifacts"] = {A: t["reference"]["sha256"], M: "0" * 64}; json.dump(t, open(world.P("t_bothforms.json"), "w"))
+    spec["evidence_files"]["t1"] = "t_bothforms.json"
+    rc, rep = world.issue("ctrl", spec)
+    assert rc == 1 and rep["failed_checks"] == ["equivalence.e1.reference_digest"] and json.dumps(load_json(f)) == original
+
+
+def test_scope_reduction_through_a_foreign_layout_is_printed_and_refused_by_the_release_policies(world):
+    """The boundary of the scope check.  A transcript in a foreign layout is read only through the pointers the issuer
+    declares, so the verifier cannot see that it records a second subject.  Here the tool's transcripts of finding
+    R8-1 are re-labelled as a foreign layout (the schema member is changed — the numbers are not) and each entry points
+    at 'its' file.  Such a record is valid; every run prints that the mapping, including the scope of the comparison, is
+    the issuer's declaration; the reviewer's policy and the supplied policy refuse it."""
+    spec = world.spec("swap", SCOPE, judgement=False)
+    for i, e in enumerate(spec["equivalence"], 1):
+        t = load_json(world.P(spec["evidence_files"][f"t{i}"])); t["schema"] = "lab-comparison-1"
+        json.dump(t, open(world.P(f"t_foreign_{i}.json"), "w")); spec["evidence_files"][f"t{i}"] = f"t_foreign_{i}.json"
+        e["pointers"] = {"subjects": {e["subjects"][0]: f"/subjects/{e['subjects'][0]}"}, "reference_sha256": "/reference/sha256", "enumerated": "/enumerated", "mismatches": "/mismatches"}
+    rc, rep = world.issue("swap", spec)
+    assert rc == 0, rep["failed_checks"]
+    rc, rep = world.verify("derived.json")
+    notes = [n["text"] for n in rep["not_checked"] if n["kind"] == "transcript mapping"]
+    assert rc == 0 and len(notes) == 2 and all("covered further files" in n for n in notes)
+    assert {e["subject_scope"] for e in rep["links"][0]["entries"].values()} == {"declared"}
+    for pol in ("reviewer", "supplied"):
+        rc, rep = world.verify("derived.json", policy=pol)
+        assert rc == 1 and rep["record_valid"] and rep["policy_verdict"] == "REJECTED" and "policy.transcript_mapping[derived.json]" in rep["policy"]["failed_checks"]
+
+
+# ---- the search: what an entry claims and what was compared vary independently
+SETS = ((A,), (M,), KERNELS)
+OTHER = {A: M, M: A}
+
+
+def entry_space():
+    """144 entries: claimed subjects (3) x claimed replaced artifacts (3) x the 16 transcripts toy.enumerate_block writes
+    for two kernels (new file run, parent file compared with, the other new file listed or not, the other parent file
+    listed or not)."""
+    out = []
+    for S in SETS:
+        for Rp in SETS:
+            for new in KERNELS:
+                for old in KERNELS:
+                    for xs in ((), (OTHER[new],)):
+                        for xr in ((), (OTHER[old],)): out.append((S, Rp, new, old, xs, xr))
+    return out
+
+
+def declaration_space():
+    """Every declaration of one or two entries, with and without the judgement: 2 x (144 + C(144, 2)) = 20,880."""
+    E = entry_space()
     for n in (1, 2):
         for combo in itertools.combinations(E, n):
             for judgement in (False, True): yield list(combo), judgement
 
 
-def _search(world, w):
-    rows = []
-    for entries, judgement in _declarations():
-        spec = world.spec(w, entries, judgement)
-        rc_issue, _ = world.issue(w, spec)
-        world.forge(w, spec)
-        _, plain = world.verify()
-        verdicts = {p: world.verify(policy=p)[1]["policy_verdict"] for p in ("reviewer", "supplied")}
-        unaligned = sorted(f"e{i}" for i, (S, Rp, new, old) in enumerate(entries, 1) if len(S) > 1 or len(Rp) > 1 or any(x not in S for x in Rp))
-        noticed = sorted({t["text"].split(":")[0].replace("equivalence ", "") for t in plain["not_checked"] if t["kind"] in ("renamed replacement", "multi-artifact block")})
-        rows.append({"entries": [[list(S), list(Rp), new, old] for S, Rp, new, old in entries], "judgement": judgement, "issued": rc_issue == 0, "record_valid": plain["record_valid"],
-                     "failed_checks": plain["failed_checks"], "unaligned_entries": unaligned, "noticed_entries": noticed,
-                     "accepted_reviewer_policy": verdicts["reviewer"] == "ACCEPTED", "accepted_supplied_policy": verdicts["supplied"] == "ACCEPTED"})
-    return rows
+FULL_SPACE = 20880
 
 
-SPACE = 272                                                       # 16 entries; C(16,1) + C(16,2) = 136 declarations; with and without the judgement
+def recorded(entry):
+    """(subjects, reference artifacts) the entry's transcript records."""
+    S, Rp, new, old, xs, xr = entry
+    return tuple(sorted({new, *xs})), tuple(sorted({old, *xr}))
 
 
-def test_every_declaration_of_the_swap_from_single_file_and_block_entries(world):
-    swap, ctrl = _search(world, "swap"), _search(world, "ctrl")
-    assert len(swap) == len(ctrl) == SPACE
-    # (1) without the judgement, no declaration of the harmful swap is issued or is a valid record
-    assert not [r for r in swap if not r["judgement"] and (r["issued"] or r["record_valid"])]
-    # (2) with it, every valid record has an entry that is not name-aligned, and prints a notice for every such entry
-    valid = [r for r in swap if r["record_valid"]]
-    assert valid and all(r["unaligned_entries"] and r["noticed_entries"] == r["unaligned_entries"] for r in valid)
-    # (3) none is accepted under the reviewer's policy or under the supplied policy
-    assert not [r for r in swap if r["accepted_reviewer_policy"] or r["accepted_supplied_policy"]]
-    # control: the same declarations for an equivalent change under the same names; exactly the name-aligned mapping is accepted
-    acc = [r for r in ctrl if r["accepted_supplied_policy"]]
-    assert [(r["entries"], r["judgement"]) for r in acc] == [([[list(S), list(Rp), new, old] for S, Rp, new, old in IDENTITY], False)]
+def aligned(entry):
+    S, Rp = entry[0], entry[1]
+    return len(S) == 1 and len(Rp) == 1 and S == Rp
+
+
+def evaluate(world, w, entries, judgement):
+    """Issue through the normal path; sign WITHOUT the issuer-side checks; verify under both policies."""
+    spec = world.spec(w, entries, judgement)
+    rc_issue, _ = world.issue(w, spec)
+    world.forge(w, spec)
+    _, rv = world.verify(policy="reviewer"); _, sv = world.verify(policy="supplied")
+    noticed = sorted({t["text"].split(":")[0].replace("equivalence ", "") for t in sv["not_checked"] if t["kind"] in ("renamed replacement", "multi-artifact block")})
+    return {"entries": [[list(x) if isinstance(x, tuple) else x for x in e] for e in entries], "judgement": judgement, "issued": rc_issue == 0,
+            "record_valid": sv["record_valid"], "failed_checks": sv["failed_checks"],
+            "unaligned_entries": sorted(f"e{i}" for i, e in enumerate(entries, 1) if not aligned(e)), "noticed_entries": noticed,
+            "scope_matches_record": all((tuple(sorted(e[0])), tuple(sorted(e[1]))) == recorded(e) for e in entries),
+            "accepted_reviewer_policy": rv["policy_verdict"] == "ACCEPTED", "accepted_supplied_policy": sv["policy_verdict"] == "ACCEPTED"}
+
+
+def check_rows(w, rows):
+    """The invariants, on any set of evaluated declarations of world ``w``; returns the list of violated ones."""
+    bad = []
+    valid = [r for r in rows if r["record_valid"]]
+    if [r for r in rows if r["issued"] != r["record_valid"]]: bad.append("the issuer-side checks and the verifier disagree")
+    if [r for r in valid if not r["scope_matches_record"]]: bad.append("a valid record claims a result for other files than its transcript records")
+    if [r for r in valid if r["noticed_entries"] != r["unaligned_entries"] or (r["unaligned_entries"] and not r["judgement"])]:
+        bad.append("an entry that is not name-aligned is valid without the judgement or without its notice")
+    if w == "swap":
+        if [r for r in rows if not r["judgement"] and (r["issued"] or r["record_valid"])]: bad.append("a declaration of the swap is valid without the judgement")
+        if [r for r in rows if r["accepted_reviewer_policy"] or r["accepted_supplied_policy"]]: bad.append("a declaration of the swap is accepted")
+    return bad
+
+
+IDENTITY_EXACT = [[[A], [A], A, A, [], []], [[M], [M], M, M, [], []]]
+
+
+def _entry_level_failures(row):
+    return [c for c in row["failed_checks"] if c.startswith("equivalence.e1.")]
+
+
+def test_search_every_single_entry_and_every_pair_of_viable_entries(world):
+    """The default run of the search.  All 288 single-entry declarations of each system are evaluated.  An entry with a
+    failed check of its own cannot be part of a valid record, so pairs are enumerated in full among the other
+    ('viable') entries, and a seeded sample of 200 pairs containing a non-viable entry confirms that they are invalid.
+    ``tests/swap_search.py`` evaluates all 20,880 declarations of each system without this shortcut."""
+    E = entry_space(); assert len(E) == 144 and len(set(E)) == 144
+    rng = random.Random(20261124); summary = {}
+    for w in ("swap", "ctrl"):
+        rows, viable = [], {False: [], True: []}
+        for e in E:
+            for j in (False, True):
+                r = evaluate(world, w, [e], j); rows.append(r)
+                if not _entry_level_failures(r): viable[j].append(e)
+        for j in (False, True):
+            for pair in itertools.combinations(viable[j], 2): rows.append(evaluate(world, w, list(pair), j))
+        nonviable = [e for e in E if e not in viable[True]]
+        sample = [evaluate(world, w, [rng.choice(nonviable), rng.choice(E)], rng.choice((False, True))) for _ in range(200)]
+        assert not [r for r in sample if r["record_valid"] or r["issued"]]
+        assert check_rows(w, rows + sample) == []
+        summary[w] = {"viable_entries_without_judgement": len(viable[False]), "viable_entries_with_judgement": len(viable[True]), "declarations_evaluated": len(rows) + len(sample),
+                      "valid_records": sum(r["record_valid"] for r in rows), "accepted_supplied_policy": [(r["entries"], r["judgement"]) for r in rows if r["accepted_supplied_policy"]],
+                      "accepted_reviewer_policy": sum(r["accepted_reviewer_policy"] for r in rows)}
+    assert summary["swap"]["viable_entries_without_judgement"] == 0 and summary["swap"]["accepted_supplied_policy"] == []
+    # control: exactly the declaration that pairs each file with the parent file of its name, each transcript recording that one comparison
+    assert summary["ctrl"]["accepted_supplied_policy"] == [(IDENTITY_EXACT, False)] and summary["ctrl"]["viable_entries_without_judgement"] == 2
     out = os.environ.get("RECERTKIT_SWAP_SEARCH_OUT")
-    if out:
-        summary = lambda rows: {"declarations": len(rows), "issued": sum(r["issued"] for r in rows), "valid_records": sum(r["record_valid"] for r in rows),
-                                "valid_without_judgement": sum(r["record_valid"] and not r["judgement"] for r in rows),
-                                "accepted_reviewer_policy": sum(r["accepted_reviewer_policy"] for r in rows), "accepted_supplied_policy": sum(r["accepted_supplied_policy"] for r in rows)}
-        json.dump({"what": "every declaration of the kernel swap built from one or two entries (single-file and two-file block entries)",
-                   "space": "entries: (a) one subject x non-empty set of replaced kernels x compared parent kernel; (b) both kernels as subjects x non-empty set of "
-                            "replaced kernels x compared new kernel x compared parent kernel; 1 or 2 entries; with and without the judgement "
-                            "'replacement_correspondence'; true comparison transcripts written by toy.enumerate_block",
-                   "accuracy": {v: _accuracy(world, v) for v in ("c0", "swap", "ctrl")},
-                   "predictions_changed": {v: sum(a["pred"] != b["pred"] for a, b in zip(toy.evaluate(world.P("c0")), toy.evaluate(world.P(v)))) for v in ("swap", "ctrl")},
-                   "swap": summary(swap), "control": summary(ctrl), "swap_rows": swap, "control_rows": ctrl}, open(out, "w"), indent=1)
+    if out: json.dump({"mode": "single entries in full; pairs of viable entries in full; 200 sampled pairs with a non-viable entry", "entries": len(E), **summary}, open(out, "w"), indent=1)

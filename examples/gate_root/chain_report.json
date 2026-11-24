@@ -294,6 +294,11 @@
    "detail": "the transcript's subject digests equal the derived inventory for ['kernel.py']"
   },
   {
+   "check": "equivalence.kernel.subject_scope",
+   "ok": true,
+   "detail": "the transcript records exactly the subjects of this entry: ['kernel.py']"
+  },
+  {
    "check": "equivalence.kernel.reference_block",
    "ok": true,
    "detail": "the reference consists of exactly the parent artifacts this entry replaces: reference ['kernel.py'], replaces ['kernel.py']"
@@ -401,7 +406,8 @@
      "mapped": false,
      "domain_size": 65536,
      "renamed": [],
-     "multi_artifact": false
+     "multi_artifact": false,
+     "subject_scope": "exact"
     }
    },
    "judgement_covered": [],

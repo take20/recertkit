@@ -71,6 +71,7 @@ what was not checked is printed, and an acceptance policy (`--policy`) decides w
 | `equivalence.*.transcript_json` | the transcript parses as JSON |
 | `equivalence.*.transcript_layout` | the transcript uses the standard layout and no pointers, or a foreign layout with a declared pointer mapping (then printed); pointers never re-map a standard transcript |
 | `equivalence.*.subject_digest` | the transcript is about the subject artifacts: its digests equal the derived inventory |
+| `equivalence.*.subject_scope` | a transcript in the standard layout records exactly the subjects of the entry — no further file: the transcript states one result for the block of all subjects it records, and that result may not be claimed for a part of the block (a mapped transcript in a foreign layout cannot be checked in this way; that is printed) |
 | `equivalence.*.reference_block` | reference 'parent_artifact': the reference consists of exactly the parent artifacts the entry replaces — no more, no fewer |
 | `equivalence.*.reference_digest` | the transcript's reference digest(s) equal: the replaced parent artifacts in the parent inventory; or the verified reference of the parent link; or a bound specification file |
 | `equivalence.*.reference_field` | the certificate's reference.sha256 is exactly the digest the reference was verified against, and is absent when no digest is verified |

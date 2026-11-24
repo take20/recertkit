@@ -733,7 +733,7 @@
   },
   {
    "kind": "transcript mapping",
-   "text": "equivalence pl_kernel: the transcript is in a foreign layout; which of its fields hold the subject digests, the number of inputs compared and the mismatch count is the issuer's declaration ({\"enumerated\": \"/bitstreams/V1/lane_exhaustive/values_enumerated\", \"mismatches\": \"/bitstreams/V1/lane_exhaustive/mismatches\", \"subjects\": {\"p5_v2tile.bit\": \"/bitstreams/V1/sha256\"}})"
+   "text": "equivalence pl_kernel: the transcript is in a foreign layout; which of its fields hold the subject digests, the number of inputs compared and the mismatch count is the issuer's declaration ({\"enumerated\": \"/bitstreams/V1/lane_exhaustive/values_enumerated\", \"mismatches\": \"/bitstreams/V1/lane_exhaustive/mismatches\", \"subjects\": {\"p5_v2tile.bit\": \"/bitstreams/V1/sha256\"}}). Whether the comparison it records covered further files than ['p5_v2tile.bit'] is not checked either"
   },
   {
    "kind": "reference by declaration",
@@ -825,7 +825,7 @@
   },
   {
    "kind": "transcript mapping",
-   "text": "equivalence pl_kernel: the transcript is in a foreign layout; which of its fields hold the subject digests, the number of inputs compared and the mismatch count is the issuer's declaration ({\"enumerated\": \"/bitstreams/V1p/lane_exhaustive/values_enumerated\", \"mismatches\": \"/bitstreams/V1p/lane_exhaustive/mismatches\", \"subjects\": {\"p5_v2tile_v1p.bit\": \"/bitstreams/V1p/sha256\"}})"
+   "text": "equivalence pl_kernel: the transcript is in a foreign layout; which of its fields hold the subject digests, the number of inputs compared and the mismatch count is the issuer's declaration ({\"enumerated\": \"/bitstreams/V1p/lane_exhaustive/values_enumerated\", \"mismatches\": \"/bitstreams/V1p/lane_exhaustive/mismatches\", \"subjects\": {\"p5_v2tile_v1p.bit\": \"/bitstreams/V1p/sha256\"}}). Whether the comparison it records covered further files than ['p5_v2tile_v1p.bit'] is not checked either"
   },
   {
    "kind": "reference by declaration",
@@ -905,7 +905,8 @@
      "mapped": true,
      "domain_size": 1073741824,
      "renamed": [],
-     "multi_artifact": false
+     "multi_artifact": false,
+     "subject_scope": "declared"
     }
    },
    "judgement_covered": [
@@ -979,7 +980,8 @@
      "renamed": [
       "p5_v2tile.bit"
      ],
-     "multi_artifact": false
+     "multi_artifact": false,
+     "subject_scope": "declared"
     }
    },
    "judgement_covered": [],

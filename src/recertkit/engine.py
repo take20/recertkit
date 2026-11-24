@@ -34,7 +34,7 @@ import datetime, hashlib, json, os, re, uuid
 from . import CERT_VERSION, __version__
 from .canon import dec, evidence_path, load_json, resolve_path, sha_file, sha_obj, sha_raw
 from .inventory import InventoryError, parse_inventory
-from .methods import STANDARD_SCHEMA, _is_int, transcript_field
+from .methods import STANDARD_SCHEMA, _is_int, transcript_field, transcript_subject_names
 from .policy import apply_policy
 from .profiles import REFERENCE_KINDS, profile_ref
 from .roots import RootError, read_root
@@ -289,7 +289,8 @@ def _equivalence_entry(R, e, cert, pv, d, pinv, dinv, decl, profile, registry, p
     kind = ref.get("kind")
     st = {"subjects": subs, "replaces": reps, "method": mc, "reference_kind": kind, "reference_binding": None, "reference_digest": None,
           "mapped": bool(e.get("pointers")), "domain_size": e.get("domain_size") if (mc == "exhaustive_enumeration" and _is_int(e.get("domain_size"))) else None,
-          "renamed": sorted(r for r in reps if r not in subs), "multi_artifact": len(subs) > 1 or len(reps) > 1}
+          "renamed": sorted(r for r in reps if r not in subs), "multi_artifact": len(subs) > 1 or len(reps) > 1,
+          "subject_scope": None}        # "exact": the transcript records exactly these subjects; "declared": a mapped transcript, scope not visible
     R.check(f"{P}.subjects", bool(subs) and subs == e.get("subjects") and len(set(subs)) == len(subs) and all(s in changed and s in dinv for s in subs),
             f"{subs} are distinct changed artifacts of the derived configuration")
     R.check(f"{P}.replaces", reps == (e.get("replaces") or []) and len(set(reps)) == len(reps) and all(r in changed and r in pinv for r in reps),
@@ -334,11 +335,25 @@ def _equivalence_entry(R, e, cert, pv, d, pinv, dinv, decl, profile, registry, p
             ("foreign layout mapped by declared pointers" if mapped and not standard else
              "pointers may not re-map a transcript that declares the standard layout" if mapped else f"neither the standard layout {STANDARD_SCHEMA} nor a declared pointer mapping"))
     if mapped:
+        st["subject_scope"] = "declared"
         R.notice("transcript mapping", f"equivalence {e.get('id')}: the transcript is in a foreign layout; which of its fields hold the subject digests, the number "
-                 f"of inputs compared and the mismatch count is the issuer's declaration ({json.dumps(e.get('pointers'), sort_keys=True)})")
+                 f"of inputs compared and the mismatch count is the issuer's declaration ({json.dumps(e.get('pointers'), sort_keys=True)}). Whether the "
+                 f"comparison it records covered further files than {subs} is not checked either")
     bad = [s for s in subs if transcript_field(e, tr, "subjects", s) != (True, dinv.get(s)) or dinv.get(s) is None]
     R.check(f"{P}.subject_digest", bool(subs) and not bad,
             f"the transcript's subject digests equal the derived inventory for {subs}" if subs and not bad else f"transcript digest missing or different from the derived inventory for {bad or subs}")
+    if standard and not mapped:
+        # A standard transcript states ONE result for the block of ALL subjects it records.  The entry must claim that
+        # result for exactly that block: claiming it for one file of a recorded block of two would let a comparison of
+        # another file stand in for the file named (review of release 1.2.0, finding R8-1).
+        recorded = transcript_subject_names(e, tr)
+        extra = sorted(set(recorded or []) - set(subs)); missing = sorted(set(subs) - set(recorded or []))
+        ok_scope = R.check(f"{P}.subject_scope", recorded is not None and bool(subs) and not extra and not missing,
+                           f"the transcript records exactly the subjects of this entry: {subs}" if recorded is not None and subs and not extra and not missing else
+                           f"the transcript records the subjects {recorded}, the entry claims its result for {subs}"
+                           + (f"; recorded but not claimed: {extra}" if extra else "") + (f"; claimed but not recorded: {missing}" if missing else ""))
+        if ok_scope: st["subject_scope"] = "exact"
+        elif recorded and len(recorded) > 1: st["multi_artifact"] = True      # the link state follows what the record covers, not only what the entry claims
     found, tref = transcript_field(e, tr, "reference")
     tdig = _ref_digest(tref) if found else None
     j = cert.get("judgements") if isinstance(cert.get("judgements"), dict) else {}

@@ -102,7 +102,8 @@ recertkit verify-chain --root root.json --links derived_v1.json derived_v2.json 
 ## The checks in one paragraph
 
 Identity of both sides of every comparison is checked by the engine, not by the equivalence method: the transcript
-must be about the changed artifacts of the *derived* inventory (by digest), and its reference must be tied to the
+must record exactly the subjects of the entry — the changed artifacts of the *derived* inventory, by digest, and no
+further file, because a transcript states one result for the whole block it records — and its reference must be tied to the
 *parent* — exactly the parent artifacts the entry replaces (by digest), the reference the parent link was shown
 equivalent to, or a named specification whose relation to the parent is a written judgement (printed). Coverage is
 counted **per side**: a changed file of the derived configuration must be a subject of one comparison or be covered
@@ -114,7 +115,7 @@ file, several files compared as one block — needs the written judgement `repla
 which a policy can refuse. The configuration is tied to the root at
 a declared level per role — `digest`, `identifiers-only` (frame) or `unbound` — and anything weaker than a digest is
 printed and requires a written judgement. The policy is evaluated on the state these checks established.
-`docs/checks.md` lists all 70 record checks and 16 policy checks.
+`docs/checks.md` lists all 71 record checks and 16 policy checks.
 
 ## Documentation
 
@@ -141,17 +142,19 @@ printed and requires a written judgement. The policy is evaluated on the state t
 ## Tests
 
 ```
-python -m pytest -q                         # 276 tests
+python -m pytest -q                         # 283 tests
 python tests/mutation_probe.py              # disables each check in turn; reports checks no test depends on (expected: none)
 python tests/declaration_search.py out.json # exhaustive search: can a harmful change be declared so that it is accepted? (expected: no; exit status 1 otherwise)
+python tests/swap_search.py out.json        # the same question for two kernels with swapped contents (expected: no; exit status 1 otherwise)
 ```
 
 The first two ask whether the checks that exist are exercised. The third asks the converse — whether the checks are
 *sufficient* on a bounded space: it signs every one of 221,184 ways of declaring one harmful change with truthful
 evidence files and verifies each under the supplied policy; none is accepted (see `docs/assurance.md`, which also
-states what this does not show). `tests/test_renamed_replacement.py` does the same for two kernels whose contents
-are swapped: it signs all 272 declarations built from single-file and two-file entries and verifies each; none is
-accepted.
+states what this does not show). `tests/swap_search.py` does the same for two kernels whose contents are swapped. Its entries vary independently
+what is claimed and what was actually compared: 144 entries (claimed subjects × claimed replaced files × the 16
+transcripts the comparison tool writes for two kernels), all 20,880 declarations of one or two entries; none is
+accepted. A shortened version runs in the test suite (`tests/test_renamed_replacement.py`).
 `tests/test_risk_exact.py` compares the numeric checks with exact rational arithmetic on random decimals longer than
 the default working precision.
 
@@ -161,7 +164,9 @@ the default working precision.
   plain notation, compared as exact values and never added): the transfer adds no sampling error. This does not mean a wrong judgement or a faulty tool carries no risk; those risks are outside the
   budget and are what the printed conditions and the policy are for.
 * **Transcripts are the issuer's record.** The verifier checks what a transcript states and what it is bound to. It
-  does not re-run the comparison.
+  does not re-run the comparison. For a transcript in a foreign layout, read through declared pointers, it also
+  cannot see which files the comparison covered; that is printed, and the policy member `transcript_mapping`
+  refuses such transcripts.
 * **One built-in equivalence method** (exhaustive enumeration). Others are plugins and become part of the relying
   party's trusted base.
 * **Judgements are prose.** The tool makes them explicit, signed and attributable; it cannot make them true. A

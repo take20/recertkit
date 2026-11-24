@@ -14,7 +14,7 @@ recertkit verify-chain --root gate_root_certificate.json --links derived_c1.json
 ```
 
 Expected: `CHAIN RECORD: VALID — conditional on 7 unchecked items`, `POLICY gate-root-release-1: ACCEPTED`.
-All 68 record checks and 15 policy checks pass. The seven unchecked items are two judgements, one trust assumption,
+All 69 record checks and 15 policy checks pass. The seven unchecked items are two judgements, one trust assumption,
 the transcript's provenance, the enumerated domain (65,536 inputs; that this is the kernel's whole input domain is
 the `boundary` judgement), the completeness of the inventory, and the root protocol (the gate's own evidence, which
 the gate's verifier checks).
