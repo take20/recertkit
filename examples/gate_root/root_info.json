@@ -17,5 +17,5 @@
   "level": "digest if this equals the SHA-256 of the frame file, identifiers-only if it is the hash of an identifier manifest"
  },
  "inventory_digest": "e3dfdc0a7464803aab206088c4e9285b9765998a1b8d6f2cb98bb87bf019acc0",
- "commitment_digest_sha256": "687d4e9a33508ace482a5f949d93a92c75652916f9a91b1846065cc4f61e8d97"
+ "commitment_digest_sha256": "55a586a1d8fc62efb58825224930eec034ad36a338786627f8fe484c90dc1b48"
 }

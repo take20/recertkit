@@ -30,8 +30,11 @@ verified. Use it when no certification tool provides a root, and for tests.
 
 ## `gate-2.0` — certificates of the anytime-valid release gate
 
-The release gate (described in the release-gate paper cited in the main README) issues certificates with
-`certificate_version` `"2.0"`. The adapter reads:
+The release gate (described in the release-gate paper cited in the main README) has issued certificates in more
+than one format. This adapter reads `certificate_version` `"2.0"`, which the public code archive of that paper
+issues through its entry point `cert/certify_v29_legacy.py`. The archive's default entry point, `cert/certify.py`,
+issues certificates of the gate's Protocol 3.1 (`certificate_version` `"3.1"`); **these are not read by this
+version of RecertKit**, and a root in that format is refused as an unknown root format. The adapter reads:
 
 | gate field | used as |
 |---|---|

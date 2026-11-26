@@ -9,7 +9,7 @@ what was not checked is printed, and an acceptance policy (`--policy`) decides w
 
 | check | meaning |
 |---|---|
-| `signature.certificate` | the derived certificate is signed by a key in the trust store, under the key id it names |
+| `signature.certificate` | the derived certificate is signed by a key in the trust store, under the key id it names; its signature block declares the algorithm (ed25519) and the canonical form (RFC 8785) that are implemented |
 | `signature.parent` | the parent certificate is signed by a key in the trust store (verify; issue when --trust is given) |
 | `signature.root` | verify-chain: the root certificate is signed by a key in the trust store |
 
@@ -22,7 +22,7 @@ what was not checked is printed, and an acceptance policy (`--policy`) decides w
 | `parent.digest` | the certificate names its parent file by SHA-256 |
 | `parent.id` | the certificate names its parent by certificate id |
 | `parent.readable` | a root adapter exists for the parent |
-| `parent.decision` | the parent is a certified root or a transfer certificate |
+| `parent.decision` | the parent is a root whose decision is 'certified', or a derived (transfer) certificate — the same rule in issue, verify and verify-chain |
 | `root.decision` | verify-chain: the root's decision is 'certified' |
 | `root.readable` | verify-chain: a root adapter exists for the root |
 

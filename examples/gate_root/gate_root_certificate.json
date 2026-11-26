@@ -1,15 +1,15 @@
 {
   "certificate_version": "2.0",
-  "certificate_id": "d4007830-7066-4cc3-9994-4a2fe2f8ecd1",
-  "issued_at": "2026-11-16T05:12:32.923488+00:00",
-  "protocol_commitment_id": "35108e4d-b63a-4ec7-9cd3-414cd651eabc",
-  "commitment_digest_sha256": "687d4e9a33508ace482a5f949d93a92c75652916f9a91b1846065cc4f61e8d97",
+  "certificate_id": "3bced020-a0c0-424c-9f41-c763f1e47d8f",
+  "issued_at": "2026-11-26T02:11:39.709304+00:00",
+  "protocol_commitment_id": "e955aec6-6ab1-4bcf-b1af-0390b9cad210",
+  "commitment_digest_sha256": "55a586a1d8fc62efb58825224930eec034ad36a338786627f8fe484c90dc1b48",
   "stage2_digest_sha256": null,
   "supersedes_certificate_id": null,
   "reference_configuration": {
     "configuration_id": "toy-reference",
     "engine": "toy-integer-classifier",
-    "engine_commit": "n/a",
+    "engine_commit": "2d10c981abc716bcbcb0bf3ef875e2a7465e5165",
     "backend": "python",
     "hardware_id": "any",
     "artifact_filename": "model.json",
@@ -18,7 +18,7 @@
   "candidate_configuration": {
     "configuration_id": "toy-c0-coarse-weights",
     "engine": "toy-integer-classifier",
-    "engine_commit": "n/a",
+    "engine_commit": "2d10c981abc716bcbcb0bf3ef875e2a7465e5165",
     "backend": "python",
     "hardware_id": "any",
     "artifact_filename": "model.json",
@@ -68,7 +68,7 @@
   "threat_model_note": "integrity+reproducibility of declared evidence under the precommitted design; NOT remote attestation of execution",
   "signature": {
     "algorithm": "ed25519",
-    "value": "0dab9340c606081bc950fd3f088e54f2271fa447e7e39e1e7b32c4a3c324e2a583afbf4ee6951a79327e0ef28bc4cd380b4ccdecfd212a59200efe1c4b9a9e09",
+    "value": "d0ac5511dd5ccd3160bb5ae58df6a435c531e867198cb0ddc58f0bb2671a1c643a5d37c4ca9720da3c1b7cd84f6a6346b94c130d709767223030549cb213d607",
     "public_key_id": "gate-example",
     "canonicalization": "rfc8785_jcs_sorted_utf8_decimal_strings"
   }

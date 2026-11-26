@@ -56,7 +56,7 @@
   {
    "check": "parent.decision",
    "ok": true,
-   "detail": "certified"
+   "detail": "root parent: certified"
   },
   {
    "check": "claim.invariance",
@@ -421,7 +421,7 @@
   {
    "check": "parent.decision",
    "ok": true,
-   "detail": "transfer"
+   "detail": "derived parent: transfer"
   },
   {
    "check": "claim.invariance",

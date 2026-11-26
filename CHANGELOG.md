@@ -1,5 +1,57 @@
 # Changelog
 
+## 1.4.0 — 2026-11-26
+
+Answers a review of 1.3.1 made for the authors before submission. The certificate format is unchanged
+(`recertkit-3`); certificates that verified under 1.3.1 verify under 1.4.0, with the exceptions listed under
+"Stricter input rules".
+
+**Fixed: a malformed policy could produce ACCEPTED.** `require_all_evidence` and `require_prospective` were tested
+by truthiness, and `null` was read as "member absent" for these two, `coverage_by_judgement` and
+`accepted_judgements`. A policy such as `{"name": "p", "require_all_evidence": 0}` therefore ended with
+`POLICY p: ACCEPTED` and no policy check (7 of 21 wrongly typed values tried on the FPGA example). The supplied
+policies were not affected, and the error is one a relying party makes in its own policy, not one an issuer can
+cause. Now every member has one JSON type and a closed set of values; a value of another type, `null`, a repeated
+member and a policy that states no condition are configuration errors (exit status 2, message `policy error
+(PolicyError)`), raised before anything is evaluated — also when a policy is passed to the engine as a Python
+object. The verdict line states how many policy checks were evaluated, and a verdict computed without any policy
+check is `NOT EVALUATED`, never `ACCEPTED`.
+
+**Changed: exit status 3.** `verify` and `verify-chain` now exit with status 3 when the record is valid but the
+policy could not be evaluated completely (`NOT EVALUATED`); status 1 remains for a refused issuance, an invalid
+record and a rejected policy. A release gate releases on status 0 only, as before.
+
+**Fixed: the gate-root example.** The root stored up to 1.3.1 did not pass the release gate's own certificate
+schema (`engine_commit` was `"n/a"`): it had been issued in an environment without `jsonschema`, in which the gate
+tool skips its schema check silently. It has been re-issued with the public gate archive's format-2.0 entry point
+(`cert/certify_v29_legacy.py`) under that archive's pinned requirements; the gate's verifier accepts it with all 49
+checks, `schema_valid` included, and the decision and stopping item are unchanged (certified at item 111 of 200).
+`make_example.py` refuses to run without `jsonschema` and derives nothing unless the gate's verifier accepts the
+root. The README of the example states that RecertKit reads gate certificates of format 2.0 and cannot use a
+Protocol 3.1 certificate as a root. The example's certificates, commitment, configuration objects and public key changed (new signing key,
+`engine_commit`); its records, frame, inventories and enumeration transcript did not.
+
+**Stricter input rules** (each could turn a previously processed input into an error):
+* a *root* must carry the decision `certified` on every path; `issue` and single-link `verify` also took the
+  string `transfer`, which `verify-chain` refused;
+* a JSON object that repeats a member name, and the non-JSON constants `NaN`, `Infinity` and `-Infinity`, are
+  refused in every input (certificates, declarations, transcripts, profiles, policies);
+* a signature block must declare the canonical form the tool implements (`canonicalization`), as it already had to
+  declare the algorithm; a block with another or no label fails the signature check;
+* array indices of JSON pointers follow RFC 6901 (no sign, no leading zero, inside the array);
+* a trusted key that is not an Ed25519 key is a usage error instead of a failed signature check.
+
+**Release-gate template.** `examples/ci/release-gate.yml` has a second step that checks the files about to be
+released against the inventory of the last certificate (`sha256sum --check`, and no further file). Without it the
+workflow shows that some configuration is covered by an acceptable chain, not that the released one is.
+
+**Documentation.** `docs/concepts.md`: what a transfer preserves (the profile's claim fields only; `claim_scope`
+has no effect on any check) and how inputs are read. `docs/policy.md`: malformed policies; allow-lists do not
+require. README: install note for Intel Macs.
+
+**Tests and searches.** 369 tests (283 in 1.3.1). The declaration search, the swap search and the
+check-disabling probe were re-run on this version's code; results in `docs/assurance.md`.
+
 ## 1.3.1 — 2026-11-24
 
 Documentation only; no change to the checks, the certificate format or any stored example. The files under `src/`

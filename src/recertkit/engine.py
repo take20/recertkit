@@ -35,7 +35,7 @@ from . import CERT_VERSION, __version__
 from .canon import dec, evidence_path, load_json, resolve_path, sha_file, sha_obj, sha_raw
 from .inventory import InventoryError, parse_inventory
 from .methods import STANDARD_SCHEMA, _is_int, transcript_field, transcript_subject_names
-from .policy import apply_policy
+from .policy import apply_policy, validate_policy
 from .profiles import REFERENCE_KINDS, profile_ref
 from .roots import RootError, read_root
 from .signing import sign
@@ -71,7 +71,8 @@ def _claim_checks(R, claim, profile, pv):
             x = dec(v)
             if x is None or not (0 < x < 1): bad.append(f)
     R.check("claim.constraints", not bad, "all fields satisfy the profile" if not bad else f"violated: {bad}")
-    R.check("parent.decision", pv.decision in ("certified", "transfer"), str(pv.decision))
+    # one rule everywhere (issue, verify, verify-chain): a root must be "certified"; a derived parent is a "transfer"
+    R.check("parent.decision", pv.decision == ("transfer" if pv.kind == "derived" else "certified"), f"{pv.kind} parent: {pv.decision}")
     same = isinstance(claim, dict) and all(f in pv.claim and str(pv.claim.get(f)) == str(claim.get(f)) for f in fields)
     R.check("claim.invariance", same, "every claim field equals the parent's")
 
@@ -578,6 +579,7 @@ def verify_link(R, cert_path, parent_path, store, profile, registry, evidence_di
     """Verify one link.  ``parent_state`` is the verified state of the parent link (``verify-chain``); when the parent is
     a derived certificate and no state is given, what the link inherits is reported as not verified in this run and a
     policy member that needs it is NOT EVALUATED — never silently satisfied."""
+    if policy is not None: validate_policy(policy)
     cert, parent = load_json(cert_path), load_json(parent_path)
     d = evidence_dir or os.path.dirname(os.path.abspath(cert_path))
     name = os.path.basename(cert_path)
@@ -599,6 +601,7 @@ def verify_link(R, cert_path, parent_path, store, profile, registry, evidence_di
 
 
 def verify_chain(R, root_path, links, store, profile, registry, evidence_dir=None, policy=None):
+    if policy is not None: validate_policy(policy)           # a malformed policy is an error before anything is evaluated
     root = load_json(root_path)
     R.section(f"root: {os.path.basename(root_path)}")
     ok, why = store.verify(root); R.check("signature.root", ok, why)

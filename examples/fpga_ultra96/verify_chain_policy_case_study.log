@@ -10,7 +10,7 @@
 [OK] parent.id
 [OK] claim.fields — exactly ['degradation_direction', 'margin', 'metric_definition', 'risk_level', 'sampling_regime']
 [OK] claim.constraints — all fields satisfy the profile
-[OK] parent.decision — certified
+[OK] parent.decision — root parent: certified
 [OK] claim.invariance — every claim field equals the parent's
 [OK] inventory.digest.parent — inventory_v0.txt
 [OK] inventory.unique.parent — 6 artifacts
@@ -120,7 +120,7 @@
 [OK] parent.id
 [OK] claim.fields — exactly ['degradation_direction', 'margin', 'metric_definition', 'risk_level', 'sampling_regime']
 [OK] claim.constraints — all fields satisfy the profile
-[OK] parent.decision — transfer
+[OK] parent.decision — derived parent: transfer
 [OK] claim.invariance — every claim field equals the parent's
 [OK] inventory.digest.parent — inventory_v1.txt
 [OK] inventory.unique.parent — 8 artifacts
@@ -202,5 +202,5 @@
 [POLICY OK] policy.accepted_assumptions[derived_v1p.json] — every one of the trust_assumptions is accepted by the policy (by NAME only, text not pinned: ['T1_hls_toolchain', 'T3_compositionality', 'T4_deployment_identity', 'inherited'])
 [POLICY OK] policy.root_adapters[derived_v1p.json] — root format 'gate-2.0'
 CHAIN RECORD: VALID — conditional on 46 unchecked items (2 coverage by judgement, 1 detached evidence, 2 enumeration domain, 1 frame boundary, 2 inventory completeness, 11 judgement, 2 reference by declaration, 1 reference by judgement, 1 renamed replacement, 3 residual rebuilt, 1 root protocol, 2 transcript mapping, 2 transcript provenance, 11 trust assumption, 1 unbound inventory, 3 unrecorded artifact)
-POLICY fpga-case-study-1: ACCEPTED
+POLICY fpga-case-study-1: ACCEPTED  (16 policy checks evaluated and satisfied)
 A VALID record is a CONDITIONAL statement: signatures, parent linkage, change coverage, evidence linkage and profile consistency were checked; the written judgements, trust assumptions and whatever established the root claim were not, and are printed. It is not a release decision; apply an acceptance policy for that.

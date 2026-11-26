@@ -33,8 +33,8 @@ class Report:
         """None without a policy; otherwise "ACCEPTED", "REJECTED" or "NOT EVALUATED"."""
         if self.policy_name is None: return None
         if not self.ok or any(r["ok"] is False for r in self.policy_records): return "REJECTED"
-        if any(r["ok"] is None for r in self.policy_records): return "NOT EVALUATED"
-        return "ACCEPTED"
+        if not self.policy_records or any(r["ok"] is None for r in self.policy_records): return "NOT EVALUATED"
+        return "ACCEPTED"                                     # at least one policy check, and every one evaluated and satisfied
 
     @property
     def accepted(self) -> bool:

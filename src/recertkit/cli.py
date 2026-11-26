@@ -2,9 +2,11 @@
 # Copyright 2026 Palusomni Co., Ltd.
 """Command line interface: ``recertkit <command>``.
 
-Exit status: 0 = issued, or record VALID and — when a policy is given — policy ACCEPTED; 1 = REFUSED, record INVALID,
-policy REJECTED or policy NOT EVALUATED; 2 = usage error.  Without ``--policy`` a valid record exits 0: that is a
-statement about the record, not a release decision.  A release gate must pass ``--policy`` to ``verify-chain``.
+Exit status: 0 = issued, or record VALID and — when a policy is given — policy ACCEPTED; 1 = REFUSED, record INVALID
+or policy REJECTED; 3 = record VALID but the policy could NOT BE EVALUATED completely; 2 = usage or configuration
+error, including a policy file that is not a well-formed policy (nothing is evaluated then).  Without ``--policy`` a
+valid record exits 0: that is a statement about the record, not a release decision.  A release gate must pass
+``--policy`` to ``verify-chain`` and release only on exit status 0.
 """
 from __future__ import annotations
 import argparse, collections, json, os, sys
@@ -13,7 +15,7 @@ from .canon import load_json
 from .engine import VERDICT_SEMANTICS, issue, issue_root, verify_chain, verify_link
 from .inventory import make_inventory
 from .methods import default_registry, load_plugins
-from .policy import load_policy
+from .policy import PolicyError, load_policy
 from .profiles import DEFAULT_PROFILE, load_profile, profile_ref
 from .report import Report
 from .roots import read_root
@@ -45,13 +47,14 @@ def _finish(R, args, label):
         pv = None; print("POLICY: none applied — record verification is not a release decision")
     else:
         pv = R.policy_verdict
-        why = {"ACCEPTED": "",
+        n = len(R.policy_records)
+        why = {"ACCEPTED": f"  ({n} policy check{'s' if n != 1 else ''} evaluated and satisfied)",
                "REJECTED": "  (record invalid)" if not R.ok else f"  (failed: {', '.join(R.policy_fails)})",
                "NOT EVALUATED": f"  (could not be evaluated, and is therefore not accepted: {', '.join(R.policy_not_evaluated)})"}[pv]
         print(f"POLICY {R.policy_name}: {pv}{why}")
     print(VERDICT_SEMANTICS)
     if getattr(args, "json_report", None): R.dump(args.json_report, verdict=verdict, policy_verdict=pv, semantics=VERDICT_SEMANTICS)
-    return 0 if R.accepted else 1
+    return 0 if R.accepted else (3 if R.ok and pv == "NOT EVALUATED" else 1)
 
 
 def main(argv=None) -> int:
@@ -62,6 +65,9 @@ def main(argv=None) -> int:
     ``RECERTKIT_DEBUG=1`` to see the traceback instead."""
     try:
         return _main(argv)
+    except PolicyError as ex:
+        print(f"recertkit: policy error (PolicyError): {ex}. The policy file is not a well-formed policy: nothing was evaluated and nothing is accepted.", file=sys.stderr)
+        return 2
     except (OSError, ValueError, KeyError) as ex:
         print(f"recertkit: error: {type(ex).__name__}: {ex}", file=sys.stderr)
         return 2

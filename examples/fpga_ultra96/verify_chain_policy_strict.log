@@ -10,7 +10,7 @@
 [OK] parent.id
 [OK] claim.fields — exactly ['degradation_direction', 'margin', 'metric_definition', 'risk_level', 'sampling_regime']
 [OK] claim.constraints — all fields satisfy the profile
-[OK] parent.decision — certified
+[OK] parent.decision — root parent: certified
 [OK] claim.invariance — every claim field equals the parent's
 [OK] inventory.digest.parent — inventory_v0.txt
 [OK] inventory.unique.parent — 6 artifacts
@@ -124,7 +124,7 @@
 [OK] parent.id
 [OK] claim.fields — exactly ['degradation_direction', 'margin', 'metric_definition', 'risk_level', 'sampling_regime']
 [OK] claim.constraints — all fields satisfy the profile
-[OK] parent.decision — transfer
+[OK] parent.decision — derived parent: transfer
 [OK] claim.invariance — every claim field equals the parent's
 [OK] inventory.digest.parent — inventory_v1.txt
 [OK] inventory.unique.parent — 8 artifacts

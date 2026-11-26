@@ -61,7 +61,7 @@ def test_policy_require_all_evidence_and_detached_files(chain):
     os.remove(note)
     rc, rep = chain.verify(extra=_policy(chain, require_all_evidence=True))
     assert rc == 1 and rep["record_valid"] and rep["policy"]["failed_checks"] == ["policy.require_all_evidence[derived_v1.json]"]
-    assert chain.verify(extra=_policy(chain, require_all_evidence=False))[0] == 0
+    assert chain.verify(extra=_policy(chain, require_all_evidence=False, unrecorded="forbid"))[0] == 0      # the condition is not stated; another one is
 
 
 def test_policy_on_unrecorded_and_rebuilt_artifacts_and_reference_by_name():
@@ -80,7 +80,7 @@ def test_policy_on_unrecorded_and_rebuilt_artifacts_and_reference_by_name():
 
 def test_invalid_record_is_never_accepted(chain):
     chain.mutate("derived_v1.json", lambda c: c["claim"].update({"margin": "0.100000"}))
-    rc, rep = chain.verify(extra=_policy(chain))
+    rc, rep = chain.verify(extra=_policy(chain, unrecorded="forbid"))
     assert rc == 1 and not rep["record_valid"] and rep["policy_verdict"] == "REJECTED" and not rep["accepted"]
 
 

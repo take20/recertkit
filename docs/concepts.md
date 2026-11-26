@@ -28,6 +28,37 @@ behind it; it reads roots through *adapters* (`docs/roots.md`).
 | `evidence_files` | name → file and SHA-256 (optionally `detached`: digest recorded, file not distributed) |
 | `risk_budget` | `delta_parent`, `alpha` (must be 0), `delta_derived` |
 
+## What a transfer preserves, and how inputs are read
+
+**The claim.** A derived certificate carries exactly the claim fields of the profile — in the built-in profile
+`metric_definition`, `degradation_direction`, `margin`, `risk_level`, `sampling_regime` — and each must equal the parent's value (`claim.fields`, `claim.constraints`,
+`claim.invariance`). Nothing else about the claim is preserved or checked:
+
+* Whatever else the root's own format says — further members of a gate certificate's estimand, its threat-model
+  note, its ledger — is not read by the root adapter (`docs/roots.md` lists the fields that are) and is neither
+  carried into a derived certificate nor compared. A relying party for whom such a restriction matters must read
+  the root.
+* `claim_scope` is the issuer's free-text annotation. It is signed, but no check reads it, it is not compared
+  between links, and no policy member refers to it.
+
+**Which parent is eligible.** One rule on every path (`issue`, `verify`, `verify-chain`): a root must carry the
+decision `certified`; a derived parent is a transfer (`parent.decision`, `root.decision`).
+
+**JSON.** Every JSON input — certificate, declaration, transcript, profile, policy — is rejected if an object
+repeats a member name, or if it contains `NaN`, `Infinity` or `-Infinity`, which are not JSON (exit status 2).
+Parsers disagree on such documents, so accepting them would let two programs read different content from the same
+signed bytes.
+
+**Signatures.** The signed bytes are the RFC 8785 canonical form of the certificate without its `signature`
+member. The signature block must declare exactly that: `algorithm` `ed25519` and `canonicalization`
+`rfc8785_jcs_sorted_utf8_decimal_strings`; a certificate that declares anything else is not verified under a
+guessed interpretation (the signature check fails). The key is the one the relying party's trust store holds under
+`signature.public_key_id` — never a key named by the certificate — and a trusted key that is not an Ed25519 key is
+a usage error.
+
+**Pointers.** Where a transcript in a foreign layout is mapped by issuer-declared pointers, these are RFC 6901
+JSON pointers; an array index is `0` or a number without sign or leading zero, inside the array.
+
 ## The four categories of the change declaration
 
 | category | meaning | what supports it |

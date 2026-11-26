@@ -68,8 +68,23 @@ def sha_obj(obj) -> str:
     return hashlib.sha256(canon(obj)).hexdigest()
 
 
+def _unique_members(pairs):
+    d = {}
+    for k, v in pairs:
+        if k in d: raise ValueError(f"duplicate member name {k!r} in a JSON object")
+        d[k] = v
+    return d
+
+
+def _no_constant(name):
+    raise ValueError(f"{name} is not a JSON value")
+
+
 def load_json(path: str):
-    with open_bytes(path) as f: return json.loads(f.read().decode("utf-8"))
+    """Read a JSON document (RFC 8259, UTF-8).  Rejected, because parsers disagree on them and two programs could
+    then read different content from the same signed bytes: an object with a repeated member name, and the
+    constants ``NaN``, ``Infinity`` and ``-Infinity``, which are not JSON."""
+    with open_bytes(path) as f: return json.loads(f.read().decode("utf-8"), object_pairs_hook=_unique_members, parse_constant=_no_constant)
 
 
 _PLAIN_DECIMAL = re.compile(r"-?[0-9]+(\.[0-9]+)?")
@@ -97,8 +112,8 @@ def pointer(doc, ptr: str):
     for tok in ptr[1:].split("/"):
         tok = tok.replace("~1", "/").replace("~0", "~")
         if isinstance(cur, list):
-            try: cur = cur[int(tok)]
-            except (ValueError, IndexError): raise KeyError(ptr)
+            if not re.fullmatch(r"0|[1-9][0-9]*", tok) or int(tok) >= len(cur): raise KeyError(ptr)   # RFC 6901: no sign, no leading zero, no "-"
+            cur = cur[int(tok)]
         elif isinstance(cur, dict):
             if tok not in cur: raise KeyError(ptr)
             cur = cur[tok]

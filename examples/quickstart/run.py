@@ -103,6 +103,10 @@ def run(work):
     res5 = toy.evaluate(P("config_v5"))
     print(f"(observation: C5 changes {sum(a['pred'] != b['pred'] for a, b in zip(res0, res5))} of {len(res0)} predictions; accuracy {acc0:.3f} -> {sum(r['correct'] for r in res5) / len(res5):.3f})")
     print(f"\nquick start finished; files are in {work}")
+    print("to repeat the relying party's verification (step 5) from a shell:")
+    print(f"  cd {os.path.relpath(work)}")
+    print("  recertkit verify-chain --root root.json --links derived_v1.json derived_v2.json --trust release=release.pub \\\n"
+          f"      --policy {os.path.relpath(os.path.join(HERE, 'policy.json'), work)}")
 
 
 if __name__ == "__main__":

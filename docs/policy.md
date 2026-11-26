@@ -11,7 +11,8 @@ verdict.
 |---|---|---|
 | `POLICY <name>: ACCEPTED` | the record is valid, and every condition of the policy was evaluated and is satisfied | 0 |
 | `POLICY <name>: REJECTED` | the record is invalid, or a condition is violated | 1 |
-| `POLICY <name>: NOT EVALUATED` | no condition is violated, but at least one could not be evaluated in this run | 1 |
+| `POLICY <name>: NOT EVALUATED` | no condition is violated, but at least one could not be evaluated in this run | 3 |
+| *(no verdict)* `recertkit: policy error (PolicyError): …` | the policy file is not a well-formed policy; nothing was evaluated | 2 |
 | `POLICY: none applied` | no `--policy` was given; a valid record exits 0, which is **not** a release decision | 0 if the record is valid |
 
 A condition is evaluated on the **link state the verifier established** (`docs/concepts.md`, "Link state"), not on
@@ -27,7 +28,22 @@ for a release decision.
 ## Members
 
 A policy is a JSON object. Every member except `name` is optional. **An absent member imposes no restriction**, so
-a policy is only as strict as the members it states; unknown members are an error.
+a policy is only as strict as the members it states.
+
+**A malformed policy is a configuration error, never a weaker policy.** Each member has one JSON type and a closed
+set of values (table below). The following end with exit status 2 before anything is evaluated: an unknown member;
+a value of another type (`0`, `1`, `"true"`, `""` or `[]` where `true`/`false` is required; a string where a list
+is required); `null` for any member — a condition is left unstated by omitting its member, not by setting it to
+`null`; a member that appears twice; and a policy that states no condition at all (every member absent, `false`,
+`"allow"` or `"*"`), because `ACCEPTED` always means that at least one stated condition was evaluated and
+satisfied. The same validation applies when a policy is passed to `verify_chain` / `verify_link` as a Python
+object. (Up to 1.3.1 `require_all_evidence` and `require_prospective` were tested by truthiness and `null` was
+read as "absent" for three members, so that such a policy produced `ACCEPTED` with no policy check; see
+`CHANGELOG.md`, 1.4.0.)
+
+**Allowing is not requiring.** `accepted_judgements`, `accepted_assumptions`, `reference_kinds`, `binding_levels`
+and `root_adapters` are allow-lists: they limit what a chain may rest on. They do not require a chain to carry a
+listed judgement or assumption; a chain that carries none of them satisfies the condition.
 
 | member | values | condition |
 |---|---|---|

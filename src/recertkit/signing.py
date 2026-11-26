@@ -4,7 +4,7 @@
 from __future__ import annotations
 import os
 from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey, Ed25519PublicKey
 from .canon import body_of
 
 SIGNATURE_LABEL = {"algorithm": "ed25519", "canonicalization": "rfc8785_jcs_sorted_utf8_decimal_strings"}
@@ -38,13 +38,17 @@ class TrustStore:
         self.keys = {}
         for e in entries or []:
             kid, path = e.split("=", 1) if "=" in e else (os.path.splitext(os.path.basename(e))[0], e)
-            self.keys[kid] = serialization.load_pem_public_key(open(path, "rb").read())
+            key = serialization.load_pem_public_key(open(path, "rb").read())
+            if not isinstance(key, Ed25519PublicKey): raise ValueError(f"trusted key {kid!r} is not an Ed25519 public key ({type(key).__name__}); only ed25519 signatures are supported")
+            self.keys[kid] = key
 
     def verify(self, cert: dict) -> tuple[bool, str]:
         sig = cert.get("signature") or {}
         kid = sig.get("public_key_id")
         if kid not in self.keys: return False, f"key id {kid!r} not in trust store {sorted(self.keys)}"
-        if sig.get("algorithm") != "ed25519": return False, f"unsupported algorithm {sig.get('algorithm')!r}"
+        if sig.get("algorithm") != SIGNATURE_LABEL["algorithm"]: return False, f"unsupported algorithm {sig.get('algorithm')!r}"
+        if sig.get("canonicalization") != SIGNATURE_LABEL["canonicalization"]:      # never verify under a canonical form other than the declared one
+            return False, f"unsupported canonicalization {sig.get('canonicalization')!r}"
         try:
             self.keys[kid].verify(bytes.fromhex(sig.get("value", "")), body_of(cert))
             return True, f"key {kid}"

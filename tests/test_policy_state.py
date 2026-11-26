@@ -103,17 +103,17 @@ def test_notices_and_policy_read_the_same_state(chain):
 def test_single_link_does_not_accept_a_root_condition_it_cannot_see(chain):
     pol = _policy(chain, QS_POLICY, root_adapters=["gate-2.0"])                 # the real root is a recertkit-root-1 attestation
     rc, rep = chain.verify(cert="derived_v2.json", parent="derived_v1.json", extra=pol)
-    assert rc == 1 and rep["record_valid"] and rep["policy_verdict"] == "NOT EVALUATED" and rep["policy"]["accepted"] is False and not rep["accepted"]
+    assert rc == 3 and rep["record_valid"] and rep["policy_verdict"] == "NOT EVALUATED" and rep["policy"]["accepted"] is False and not rep["accepted"]
     assert set(rep["policy"]["not_evaluated"]) == {"policy.chain[derived_v2.json]", "policy.root_adapters[derived_v2.json]", "policy.binding_levels[derived_v2.json]",
                                                    "policy.reference_by_declaration[derived_v2.json]"} and not rep["policy"]["failed_checks"]
     rc, rep = chain.verify_chain(extra=pol)
     assert rc == 1 and rep["policy_verdict"] == "REJECTED" and rep["policy"]["failed_checks"] == ["policy.root_adapters[derived_v1.json]", "policy.root_adapters[derived_v2.json]"]
 
 
-def test_single_later_link_is_never_accepted_even_by_an_empty_policy(chain, capsys):
-    rc, rep = chain.verify(cert="derived_v2.json", parent="derived_v1.json", extra=_policy(chain))
+def test_single_later_link_is_never_accepted_even_by_a_policy_the_link_satisfies(chain, capsys):
+    rc, rep = chain.verify(cert="derived_v2.json", parent="derived_v1.json", extra=_policy(chain, unrecorded="forbid"))
     out = capsys.readouterr().out
-    assert rc == 1 and rep["policy_verdict"] == "NOT EVALUATED" and rep["policy"]["not_evaluated"] == ["policy.chain[derived_v2.json]"]
+    assert rc == 3 and rep["policy_verdict"] == "NOT EVALUATED" and rep["policy"]["not_evaluated"] == ["policy.chain[derived_v2.json]"] and not rep["policy"]["failed_checks"]
     assert "POLICY test-policy: NOT EVALUATED" in out and "[POLICY NOT EVALUATED] policy.chain[derived_v2.json]" in out
     assert chain.verify(cert="derived_v2.json", parent="derived_v1.json")[0] == 0          # record verification of one link is still possible
 

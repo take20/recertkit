@@ -1,4 +1,4 @@
-stage-1 commitment 35108e4d-b63a-4ec7-9cd3-414cd651eabc -> gate_commitment.json
+stage-1 commitment e955aec6-6ab1-4bcf-b1af-0390b9cad210 -> gate_commitment.json
 NEXT: anchor sha256 of this file externally; after public randomness is LOCAL MODE: seed fixed in manifest (no backdating/seed-shopping protection).
 decision=certified regime=r2 n=111 log_wealth=3.044097 U_T=0.049393 -> gate_root_certificate.json
 [OK] param_epsilon_in_range
@@ -49,4 +49,5 @@ decision=certified regime=r2 n=111 log_wealth=3.044097 U_T=0.049393 -> gate_root
 [OK] wealth_replay
 [OK] derived_evidence_replay
 [OK] confidence_curve_replay
+[OK] schema_valid
 VERDICT: VALID

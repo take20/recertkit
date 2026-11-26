@@ -11,7 +11,7 @@ other one.  A certificate can therefore not loosen the rules it is checked again
 """
 from __future__ import annotations
 import copy, json
-from .canon import sha_obj
+from .canon import load_json, sha_obj
 
 DEFAULT_PROFILE = {
     "name": "recertkit-default-1",
@@ -65,7 +65,7 @@ def validate_profile(p: dict) -> dict:
 
 def load_profile(path: str | None) -> dict:
     """The built-in default profile, or the profile document at ``path``."""
-    p = copy.deepcopy(DEFAULT_PROFILE) if path is None else json.load(open(path, encoding="utf-8"))
+    p = copy.deepcopy(DEFAULT_PROFILE) if path is None else load_json(path)
     return validate_profile(p)
 
 

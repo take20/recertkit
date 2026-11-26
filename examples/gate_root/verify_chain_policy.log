@@ -6,11 +6,11 @@
 [OK] certificate.profile — issued under 'recertkit-default-1'; verifier applies 'recertkit-default-1'
 [OK] signature.certificate — key gate-example
 [OK] signature.parent — key gate-example
-[OK] parent.digest — 6abf5e1964f6c1e3
+[OK] parent.digest — 33461b0306baee28
 [OK] parent.id
 [OK] claim.fields — exactly ['degradation_direction', 'margin', 'metric_definition', 'risk_level', 'sampling_regime']
 [OK] claim.constraints — all fields satisfy the profile
-[OK] parent.decision — certified
+[OK] parent.decision — root parent: certified
 [OK] claim.invariance — every claim field equals the parent's
 [OK] inventory.digest.parent — inventory_c0.txt
 [OK] inventory.unique.parent — 4 artifacts
@@ -37,7 +37,7 @@
 [OK] roles.distinct — role artifacts have pairwise distinct digests
 [OK] root.inventory_level — declared 'digest'; this root provides 'digest'
 [OK] root.inventory_binding — the root binds the digest of the parent inventory
-[OK] root.commitment — commitment file digest == root.commitment_digest_sha256 (687d4e9a33508ace)
+[OK] root.commitment — commitment file digest == root.commitment_digest_sha256 (55a586a1d8fc62ef)
 [OK] root.frame_file — frame file present and equal to the parent inventory digest
 [OK] root.frame_ids — commitment.sampling_frame_hash recomputes from the frame's 200 item identifiers
 [OK] root.task_manifest — the root and its commitment bind the SHA-256 of the frame file
@@ -92,5 +92,5 @@
 [POLICY OK] policy.root_adapters[derived_c1.json] — root format 'gate-2.0'
 [POLICY OK] policy.require_prospective[derived_c1.json] — declared issuance_status: 'prospective'
 CHAIN RECORD: VALID — conditional on 7 unchecked items (1 enumeration domain, 1 inventory completeness, 2 judgement, 1 root protocol, 1 transcript provenance, 1 trust assumption)
-POLICY gate-root-release-1: ACCEPTED
+POLICY gate-root-release-1: ACCEPTED  (15 policy checks evaluated and satisfied)
 A VALID record is a CONDITIONAL statement: signatures, parent linkage, change coverage, evidence linkage and profile consistency were checked; the written judgements, trust assumptions and whatever established the root claim were not, and are printed. It is not a release decision; apply an acceptance policy for that.

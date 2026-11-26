@@ -1,0 +1,13 @@
+{
+ "gate_entry_point": "certify_v29_legacy.py",
+ "gate_entry_point_sha256": "020d4ad1a27ae2ff36803b6a151ae5f238615efc87e64e74913147a6ff4a9889",
+ "gate_certificate_schema_sha256": "2f5475218d6af89fcf7e6df18bba7fc0a359fdcdfa90dd978ee31b8af29ec024",
+ "gate_verifier_checks_ok": 49,
+ "gate_verifier_verdict": "VALID",
+ "schema_valid_reported_by_the_gate": true,
+ "python": "3.11.18",
+ "jsonschema": "4.26.0",
+ "cryptography": "48.0.1",
+ "engine_commit": "2d10c981abc716bcbcb0bf3ef875e2a7465e5165",
+ "toy_py_sha256": "a588c5922c58daa0af25a168da2ddebb7005e73e9dc7d452b485832fef3f99e6"
+}

@@ -53,6 +53,8 @@ equivalence argument is true.
 ```
 pip install .            # Python >= 3.10; depends on cryptography and rfc8785
 pip install ".[test]"    # plus pytest
+# Intel Mac only: recent releases of `cryptography` ship no wheel for Intel macOS, and pip then tries to compile it.
+# Add `--only-binary cryptography` to either command to install the last release that has one.
 ```
 
 ## Quick start (no hardware, a few seconds)
@@ -87,8 +89,11 @@ Exit status:
 | status | `issue` | `verify`, `verify-chain` without `--policy` | with `--policy` |
 |---|---|---|---|
 | `0` | issued | record VALID — **not** a release decision | record VALID and policy ACCEPTED |
-| `1` | refused, nothing signed | record INVALID | record INVALID, policy REJECTED, or policy NOT EVALUATED |
-| `2` | usage error | usage error | usage error (including a malformed policy) |
+| `1` | refused, nothing signed | record INVALID | record INVALID or policy REJECTED |
+| `3` | — | — | record VALID, but the policy could not be evaluated completely (NOT EVALUATED) |
+| `2` | usage error | usage error | usage or configuration error: a policy file that is not a well-formed policy (wrong type, `null`, duplicate member, no condition stated) — nothing is evaluated |
+
+A release gate releases on status `0` only.
 
 A release gate must therefore run `verify-chain` **with** `--policy`; exit status 0 without a policy only says that
 the record is internally consistent. `--json-report FILE` writes every check, both verdicts, the verified state of
@@ -143,7 +148,7 @@ printed and requires a written judgement. The policy is evaluated on the state t
 ## Tests
 
 ```
-python -m pytest -q                         # 283 tests
+python -m pytest -q                         # 369 tests
 python tests/mutation_probe.py              # disables each check in turn; reports checks no test depends on (expected: none)
 python tests/declaration_search.py out.json # exhaustive search: can a harmful change be declared so that it is accepted? (expected: no; exit status 1 otherwise)
 python tests/swap_search.py out.json        # the same question for two kernels with swapped contents (expected: no; exit status 1 otherwise)

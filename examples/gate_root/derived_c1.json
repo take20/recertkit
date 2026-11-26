@@ -1,15 +1,15 @@
 {
  "certificate_version": "recertkit-3",
- "tool": "recertkit 1.0.0",
+ "tool": "recertkit 1.4.0",
  "profile": {
   "name": "recertkit-default-1",
   "sha256": "4e89be1f32cc49144eaa776d7d51ae3b6d47792b3c422639aa77dca32cf2c114"
  },
- "certificate_id": "f335d730-b034-4d30-a4bb-bebb00e1615b",
- "issued_at": "2026-11-16T06:24:45.991283+00:00",
+ "certificate_id": "22751c36-0a9c-4165-ba91-fbde935a45f1",
+ "issued_at": "2026-11-26T02:11:40.183558+00:00",
  "parent": {
-  "certificate_id": "d4007830-7066-4cc3-9994-4a2fe2f8ecd1",
-  "certificate_sha256": "6abf5e1964f6c1e341e3dfabdf23c79bdff8e8f3fcc5a16fc8713f6affc6db5d",
+  "certificate_id": "3bced020-a0c0-424c-9f41-c763f1e47d8f",
+  "certificate_sha256": "33461b0306baee282f8be5a04afc2e877d74090ac782abced16817f036eabcc5",
   "kind": "root",
   "decision": "certified"
  },
@@ -104,7 +104,7 @@
  "issuance_status": "prospective",
  "signature": {
   "algorithm": "ed25519",
-  "value": "908942f00325152fdefe382d4514e6e203471083795974291bf562115a1dd753fc6a9e36c54e4e49eda5b467045095dfc7b232354cd69b619c1696d9fe7c990f",
+  "value": "a97c166b8c08e21e536f99137223a590245cd3be0cc5044666fb3e676f8b0c9a31f8c7b312753dccbf6c619ea5c49eff7bad339dc3514cdbcd2aa00fb6c27207",
   "public_key_id": "gate-example",
   "canonicalization": "rfc8785_jcs_sorted_utf8_decimal_strings"
  }

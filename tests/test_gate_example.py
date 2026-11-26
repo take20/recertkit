@@ -100,3 +100,31 @@ def test_gate_root_with_required_fields_only_is_usable_in_limited_mode(copy):
 def test_claim_must_equal_the_gate_commitment(copy):
     rc, rep = _reissue(copy, lambda s: s.update({"claim": {"metric_definition": "exact_match_accuracy", "degradation_direction": "reference_minus_candidate", "margin": "0.100000", "risk_level": "0.050000", "sampling_regime": "r2"}}))
     assert rc == 1 and {"root.commitment_params", "claim.invariance"} <= set(rep["failed_checks"])
+
+
+def test_stored_root_was_accepted_by_the_gates_own_verifier_including_its_schema():
+    """The gate tool skips its schema check silently when ``jsonschema`` is absent; the root stored up to 1.3.1 had
+    been issued that way and failed the gate's schema (``engine_commit`` was "n/a").  The stored record of the gate
+    run must show the schema check, and the two fields must have the form the gate's schema requires."""
+    import re
+    log = open(os.path.join(EX, "gate_tool_output.log")).read()
+    assert "[OK] schema_valid" in log and "[FAIL]" not in log and log.rstrip().endswith("VERDICT: VALID") and "decision=certified" in log
+    root = load_json(os.path.join(EX, "gate_root_certificate.json"))
+    for side in ("reference_configuration", "candidate_configuration"):
+        assert re.fullmatch(r"[0-9a-f]{7,40}", root[side]["engine_commit"]), root[side]["engine_commit"]
+    ident = load_json(os.path.join(EX, "gate_tool_identity.json"))
+    assert ident["gate_entry_point"] == "certify_v29_legacy.py" and ident["schema_valid_reported_by_the_gate"] is True
+    assert ident["gate_verifier_checks_ok"] == log.count("[OK] ") == 49 and ident["engine_commit"] == root["candidate_configuration"]["engine_commit"]
+    assert ident["jsonschema"] and len(ident["gate_entry_point_sha256"]) == 64 and len(ident["gate_certificate_schema_sha256"]) == 64
+
+
+def test_engine_commit_of_the_recipe_is_tied_to_the_toy_system_it_names():
+    """``engine_commit`` names a public commit of this repository; the recipe pins the digest of the toy system at that
+    commit and refuses to run if the file has changed, so the two constants can only be updated together."""
+    import re
+    src = open(os.path.join(EX, "make_example.py"), encoding="utf-8").read()
+    commit = re.search(r'^ENGINE_COMMIT = "([0-9a-f]{40})"$', src, re.M).group(1)
+    pinned = re.search(r'^TOY_SHA256_AT_ENGINE_COMMIT = "([0-9a-f]{64})"$', src, re.M).group(1)
+    toy_py = os.path.join(EX, "..", "quickstart", "toy.py")
+    ident = load_json(os.path.join(EX, "gate_tool_identity.json"))
+    assert sha_file(toy_py) == pinned == ident["toy_py_sha256"] and ident["engine_commit"] == commit

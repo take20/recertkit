@@ -1,6 +1,6 @@
 {
-  "protocol_commitment_id": "35108e4d-b63a-4ec7-9cd3-414cd651eabc",
-  "committed_at": "2026-11-16T05:12:32.640885+00:00",
+  "protocol_commitment_id": "e955aec6-6ab1-4bcf-b1af-0390b9cad210",
+  "committed_at": "2026-11-26T02:11:39.491971+00:00",
   "commitment_stage": 1,
   "sampling_frame_hash": "c4f416745e6384073c8e5c2c2f0a4a0bd03939de5c5349d128aaf278575e4cc5",
   "sampling_frame_item_ids": [
@@ -212,14 +212,14 @@
   "candidate_manifest": {
     "reference": {
       "configuration_id": "toy-reference",
-      "configuration_digest_sha256": "b20fb8f4d30d093b151c71a256556ee1e05ff256433d25bf7a1bf6b0d368439b"
+      "configuration_digest_sha256": "c593c0b5446dbdf82d77bf42cb8ab778caa0d4c9bf60dfcc6704b4708fd9f318"
     },
     "candidates": [
       {
         "configuration_id": "toy-c0-coarse-weights",
         "artifact": "model.json",
         "artifact_sha256": "7657e50c663e80fd1f297574c1056b4c7474e270574d7e9b5d6dd3b4bbd1b39b",
-        "configuration_digest_sha256": "3bc08f1b796fe8119b7c76cb4a002cc001215caacd3a806dfde87683812b421a"
+        "configuration_digest_sha256": "04e305b54b81cbebd71203e4608923d62ef211a10a3161225705650932542029"
       }
     ],
     "count": 1,
@@ -264,7 +264,7 @@
   "order_seed": 20261116,
   "signature": {
     "algorithm": "ed25519",
-    "value": "dd798e554538f4666f1da76918446139df92a769c8739b44c4341486041d3318e0f396d955512f0776bb2973092612271b506221368a67e400f35f8244fc8c03",
+    "value": "ac4312cf55adecfcfced9209f5100339088cecd4a187a391754762814bfd22b0ee508245bdd68200056e0d0186109dc706e2ea412cebce3db144dcfe7d8de309",
     "public_key_id": "gate-example",
     "canonicalization": "rfc8785_jcs_sorted_utf8_decimal_strings"
   }

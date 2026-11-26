@@ -36,7 +36,7 @@
   {
    "check": "parent.digest",
    "ok": true,
-   "detail": "6abf5e1964f6c1e3"
+   "detail": "33461b0306baee28"
   },
   {
    "check": "parent.id",
@@ -56,7 +56,7 @@
   {
    "check": "parent.decision",
    "ok": true,
-   "detail": "certified"
+   "detail": "root parent: certified"
   },
   {
    "check": "claim.invariance",
@@ -191,7 +191,7 @@
   {
    "check": "root.commitment",
    "ok": true,
-   "detail": "commitment file digest == root.commitment_digest_sha256 (687d4e9a33508ace)"
+   "detail": "commitment file digest == root.commitment_digest_sha256 (55a586a1d8fc62ef)"
   },
   {
    "check": "root.frame_file",
