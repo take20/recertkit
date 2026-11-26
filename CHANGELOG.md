@@ -1,5 +1,25 @@
 # Changelog
 
+## 1.4.1 — 2026-11-26
+
+Documentation only; no change to the checks, the certificate format, the tests or any stored example. The files
+under `src/` differ from 1.4.0 in the version string alone, `tests/` is unchanged, and `examples/` differs in two
+files (the version pinned in `examples/ci/release-gate.yml`, and `examples/gate_root/README.md`). The tests were
+run again on this version (369); the searches and the probe recorded in `docs/assurance.md` were run on the 1.4.0
+code and were not repeated.
+
+Corrections of statements in the documentation of 1.4.0:
+
+* `docs/concepts.md` gave the exit status of the verdict `NOT EVALUATED` as 1. It is 3 since 1.4.0, as `README.md`,
+  `docs/policy.md` and the command-line help state.
+* `examples/gate_root/README.md` said, in two notes written before 1.4.0, that the stored root is the one a
+  reviewer of an earlier draft had used and that it is byte-identical to the root of that draft. The root was
+  re-issued in 1.4.0; the notes now say which files changed and which did not.
+* The 1.4.0 entry below and `docs/assurance.md` named four policy members for which `null` had been read as
+  "member absent" up to 1.3.1. There were five: `accepted_assumptions` was missing from the list. `docs/policy.md`
+  said "three members" without naming them and now names all five. The same two places counted "7 of 21 wrongly
+  typed values"; 21 policies were tried, 16 of them were malformed, and 7 of those 16 were accepted.
+
 ## 1.4.0 — 2026-11-26
 
 Answers a review of 1.3.1 made for the authors before submission. The certificate format is unchanged
@@ -7,9 +27,9 @@ Answers a review of 1.3.1 made for the authors before submission. The certificat
 "Stricter input rules".
 
 **Fixed: a malformed policy could produce ACCEPTED.** `require_all_evidence` and `require_prospective` were tested
-by truthiness, and `null` was read as "member absent" for these two, `coverage_by_judgement` and
-`accepted_judgements`. A policy such as `{"name": "p", "require_all_evidence": 0}` therefore ended with
-`POLICY p: ACCEPTED` and no policy check (7 of 21 wrongly typed values tried on the FPGA example). The supplied
+by truthiness, and `null` was read as "member absent" for these two, `coverage_by_judgement`,
+`accepted_judgements` and `accepted_assumptions`. A policy such as `{"name": "p", "require_all_evidence": 0}` therefore ended with
+`POLICY p: ACCEPTED` and no policy check (7 of the 16 malformed policies among 21 tried on the FPGA example). The supplied
 policies were not affected, and the error is one a relying party makes in its own policy, not one an issuer can
 cause. Now every member has one JSON type and a closed set of values; a value of another type, `null`, a repeated
 member and a policy that states no condition are configuration errors (exit status 2, message `policy error

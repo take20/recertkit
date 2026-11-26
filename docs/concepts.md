@@ -165,7 +165,8 @@ so the two cannot disagree.
 `POLICY: ACCEPTED` — additionally, every condition of the relying party's acceptance policy was evaluated on the
 verified link state and is satisfied (`docs/policy.md`). Only this is a release decision. `REJECTED` — a condition
 is violated, or the record is invalid. `NOT EVALUATED` — no condition is violated, but at least one could not be
-evaluated in this run; this is not acceptance, and the exit status is 1. Without a policy the tool prints
+evaluated in this run; this is not acceptance, and the exit status is 3 (it was 1 up to version 1.3.1). Without a
+policy the tool prints
 `POLICY: none applied — record verification is not a release decision` and a valid record exits with status 0.
 
 ## What is never checked

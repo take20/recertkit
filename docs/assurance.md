@@ -52,8 +52,8 @@ checks and verified as a chain under `examples/quickstart/policy.json`.
 
 | engine | policy | declarations | valid records | accepted |
 |---|---|---|---|---|
-| this version (1.4.0) | supplied with this version | 221,184 | 36 | **0** |
-| this version (1.4.0) | the supplied policy without `enumeration_domains` | 221,184 | 36 | 4 |
+| 1.4.0 (unchanged in 1.4.1, which alters documentation only) | supplied with this version | 221,184 | 36 | **0** |
+| 1.4.0 (unchanged in 1.4.1) | the supplied policy without `enumeration_domains` | 221,184 | 36 | 4 |
 | a pre-release draft (the second) | supplied with that draft, which had no `enumeration_domains` | 221,184 | 642 | 21 |
 | this version, harmless control (kernel only) | supplied with this version | 3,456 | 5 | 2 |
 
@@ -133,8 +133,8 @@ under the reviewer's policy (as written in the review) and under the supplied qu
 
 | system | engine | declarations | valid records | valid without the judgement | accepted (reviewer's policy) | accepted (supplied policy) |
 |---|---|---|---|---|---|---|
-| swapped kernels (harmful) | this version (1.4.0) | 20,880 | 3 | 0 | **0** | **0** |
-| equivalent re-implementations under the same names (control) | this version (1.4.0) | 20,880 | 4 | 1 | 1 | 1 |
+| swapped kernels (harmful) | 1.4.0 (unchanged in 1.4.1) | 20,880 | 3 | 0 | **0** | **0** |
+| equivalent re-implementations under the same names (control) | 1.4.0 (unchanged in 1.4.1) | 20,880 | 4 | 1 | 1 | 1 |
 | swapped kernels, the same search run on the 1.2.0 engine | 1.2.0 | 20,880 | 8 | 1 | 1 | 1 |
 
 The last row is the search's own control: on the 1.2.0 engine it finds the declaration the reviewer found, and
@@ -178,7 +178,7 @@ search tests that the implementation does what that argument needs, in this spac
 | release 1.1.0 | authors, auditing the fix above | the same swap declared as one entry whose subjects and replaced artifacts are both kernels, with a true transcript: issued by the normal path, accepted under the reviewer's policy and the supplied policy, no notice | `equivalence.*.correspondence` extended to every entry that is not name-aligned; notice *multi-artifact block*; policy member `multi_artifact_block` (1.2.0) |
 | release 1.2.0 | internal reviewer | the same swap declared per file under each file's own name, each entry bound to the true transcript of the *other* file's comparison, in which the claimed file is listed as a further subject: issued by the normal path, accepted under the reviewer's policy and the supplied policy, no judgement, no notice | `equivalence.*.subject_scope`: a standard transcript's result is claimed for exactly the subjects it records (1.3.0) |
 | release 1.0.0 | independent reviewer | (not acceptance errors) a signed certificate could name an evidence file outside the evidence directory; malformed signed input ended in a traceback; `recertkit inventory` wrote an inventory with duplicate names; artifacts named `*.gz` were hashed after decompression | plain file names only; exit status 2; refusal; artifacts hashed as stored (1.2.0, `tests/test_robustness.py`) |
-| release 1.3.1 | coauthor-side reviewer | a policy file with a wrongly typed value produced `ACCEPTED` with no policy check: `require_all_evidence` or `require_prospective` set to `0`, `""` or `[]` (tested by truthiness), and `null` for these two, `coverage_by_judgement` and `accepted_judgements` (read as "absent"); 7 of 21 tried values. The error is the relying party's own, not an issuer's, and no supplied policy was affected | `validate_policy`: one JSON type and a closed value set per member, `null` and repeated members refused, a policy without any stated condition refused — exit status 2 before anything is evaluated; exit status 3 separates `NOT EVALUATED` from `REJECTED` (`tests/test_policy_types.py`) |
+| release 1.3.1 | coauthor-side reviewer | a policy file with a wrongly typed value produced `ACCEPTED` with no policy check: `require_all_evidence` or `require_prospective` set to `0`, `""` or `[]` (tested by truthiness), and `null` for these two, `coverage_by_judgement`, `accepted_judgements` and `accepted_assumptions` (read as "absent"); 7 of the 16 malformed policies among 21 tried on the FPGA example. The error is the relying party's own, not an issuer's, and no supplied policy was affected | `validate_policy`: one JSON type and a closed value set per member, `null` and repeated members refused, a policy without any stated condition refused — exit status 2 before anything is evaluated; exit status 3 separates `NOT EVALUATED` from `REJECTED` (`tests/test_policy_types.py`) |
 | release 1.3.1 | coauthor-side reviewer | (not an acceptance error of RecertKit) the stored gate root did not pass the gate's own schema — `engine_commit` was `"n/a"` — because it had been issued where the gate tool skips its schema check (`jsonschema` absent); the public gate archive refused to regenerate it | root re-issued with the public archive's format-2.0 entry point and pinned requirements; the gate's verifier accepts it including `schema_valid`; the recipe refuses to run without `jsonschema` (`examples/gate_root/README.md`) |
 | release 1.3.1 | authors, while revising | (input rules, found by reading the code after the review above asked for consistent rules) `issue` and single-link `verify` took a *root* whose decision was the string `transfer` as an eligible parent, while `verify-chain` required `certified`; a repeated member name in a JSON input was resolved silently (last value) and the non-JSON constants `NaN` and `Infinity` were read; array indices of JSON pointers accepted a sign, a leading zero and negative values; a trusted key that is not Ed25519 was reported as a bad signature; the `canonicalization` label of a signature block was not compared with the canonical form actually used | one eligibility rule on all paths; repeated member names and non-JSON constants refused; RFC 6901 indices; key type checked on loading; both labels of the signature block must be the ones implemented (`tests/test_input_rules.py`) |
 

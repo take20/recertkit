@@ -32,7 +32,7 @@ versions of the packages the run had installed.
 (<https://doi.org/10.21203/rs.3.rs-10959650/v1>, "Supplementary Files"; archive SHA-256 `75c47a8bab4a642b5f09b6894c1e2a2578066714213a611a0c2aadb341f6b9b9`
 when downloaded on 2026-11-26). The archive has two entry points. `cert/certify.py` issues certificates of the
 gate's current Protocol 3.1. `cert/certify_v29_legacy.py` issues certificates of format 2.0, which is the format
-RecertKit's root adapter `gate-2.0` reads. **This example uses the legacy entry point; RecertKit 1.4.0 cannot use
+RecertKit's root adapter `gate-2.0` reads. **This example uses the legacy entry point; RecertKit cannot use
 a Protocol 3.1 certificate as a root.** The stored root was issued on Python 3.11 with the three
 packages the gate tool imports, in the versions the archive's `requirements.txt` pins for the machine used
 (`cryptography` 48.0.1, `jsonschema` 4.26.0, `rfc8785` 0.1.4); the archive's other pinned packages serve its
@@ -73,10 +73,14 @@ the commitment digest differ from the stored files; the decision and the stoppin
   active, and is accepted by the gate's verifier. The statistical content is unchanged (same records, same order
   seed, certified at item 111).
 * A gate certificate without the two extension fields is usable in limited mode; see `docs/roots.md`.
-* This stored root, unchanged, and this policy were used by a reviewer of an earlier draft to show an acceptance
-  error: an equivalent kernel shipped with a `system.py` that always predicts class 0, with `system.py` merely added
-  to the artifacts the kernel comparison *replaces* (150 → 67 correct, 127 of 200 predictions changed). The draft
-  accepted it. It is now refused at issuance and rejected when force-signed
+* The root stored up to 1.3.1, unchanged, and this policy were used by a reviewer of an earlier draft to show an
+  acceptance error: an equivalent kernel shipped with a `system.py` that always predicts class 0, with `system.py`
+  merely added to the artifacts the kernel comparison *replaces* (150 → 67 correct, 127 of 200 predictions changed).
+  The draft accepted it. It is now refused at issuance and rejected when force-signed; the regression test makes
+  the same declaration against the root stored now
   (`tests/test_coverage_sides.py::test_replaces_only_coverage_on_the_real_gate_issued_root`).
-* The root and the gate's files are byte-identical to those of the earlier draft; only `derived_c1.json` was
-  re-issued, because the certificate format changed (`CHANGELOG.md`).
+* Up to 1.3.1 the root and the gate's files were byte-identical to those of that draft. In 1.4.0 the root, the
+  commitment, the two configuration objects given to the gate, the public key and the gate's log were re-issued
+  (correction above); the records, the frame, the three configurations, the inventories, the change declaration
+  and the enumeration transcript are unchanged. `derived_c1.json` is re-issued whenever the root or the
+  certificate format changes (`CHANGELOG.md`).

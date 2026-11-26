@@ -10,7 +10,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: {python-version: "3.12"}
-      - run: pip install git+https://github.com/take20/recertkit@v1.4.0
+      - run: pip install git+https://github.com/take20/recertkit@v1.4.1
       - name: verify the whole chain with the relying party's key and policy
         run: |
           recertkit verify-chain --root certs/root.json --links $(ls certs/derived_*.json | sort) \

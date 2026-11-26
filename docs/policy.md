@@ -37,9 +37,9 @@ is required); `null` for any member — a condition is left unstated by omitting
 `null`; a member that appears twice; and a policy that states no condition at all (every member absent, `false`,
 `"allow"` or `"*"`), because `ACCEPTED` always means that at least one stated condition was evaluated and
 satisfied. The same validation applies when a policy is passed to `verify_chain` / `verify_link` as a Python
-object. (Up to 1.3.1 `require_all_evidence` and `require_prospective` were tested by truthiness and `null` was
-read as "absent" for three members, so that such a policy produced `ACCEPTED` with no policy check; see
-`CHANGELOG.md`, 1.4.0.)
+object. (Up to 1.3.1 `require_all_evidence` and `require_prospective` were tested by truthiness, and `null` was
+read as "absent" for these two and for `coverage_by_judgement`, `accepted_judgements` and `accepted_assumptions`,
+so that such a policy produced `ACCEPTED` with no policy check; see `CHANGELOG.md`, 1.4.0.)
 
 **Allowing is not requiring.** `accepted_judgements`, `accepted_assumptions`, `reference_kinds`, `binding_levels`
 and `root_adapters` are allow-lists: they limit what a chain may rest on. They do not require a chain to carry a
